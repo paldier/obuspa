@@ -3563,12 +3563,21 @@ void LogStompErrSSL(const char *func_name, char *failure_string, int ret, int er
     char ssl_str[128] = {0};  // OpenSSL requires at least 120 bytes in this buffer
     char errno_str[128] = {0};
     long ssl_errno;
+#ifdef USE_MUSL
+    int str;
+#else
     char *str;
+#endif
 
     str = strerror_r(errno, errno_str, sizeof(errno_str));
     ssl_errno = ERR_get_error();
     ERR_error_string_n(ssl_errno, ssl_str, sizeof(ssl_str));
+#ifdef USE_MUSL
+    USP_LOG_Warning("%s: %s: SSL ret=%d, error=%d, errno=%d (%d), ssl err=%s",
+              func_name, failure_string, ret, err, errno, str, ssl_str);
+#else
     USP_LOG_Warning("%s: %s: SSL ret=%d, error=%d, errno=%d (%s), ssl err=%s", 
               func_name, failure_string, ret, err, errno, str, ssl_str);
+#endif
 }
 

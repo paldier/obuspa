@@ -298,7 +298,11 @@ int USP_SIGNAL_OperationComplete(int instance, int err_code, char *err_msg, kv_v
     if (bytes_sent != sizeof(msg))
     {
         char buf[USP_ERR_MAXLEN];
+#ifdef USE_MUSL
+        USP_LOG_Error("%s(%d): send failed : (err=%d) %d", __FUNCTION__, __LINE__, errno, strerror_r(errno, buf, sizeof(buf)) );
+#else
         USP_LOG_Error("%s(%d): send failed : (err=%d) %s", __FUNCTION__, __LINE__, errno, strerror_r(errno, buf, sizeof(buf)) );
+#endif
         return USP_ERR_INTERNAL_ERROR;
     }
 
@@ -347,7 +351,11 @@ int USP_SIGNAL_DataModelEvent(char *event_name, kv_vector_t *output_args)
     if (bytes_sent != sizeof(msg))
     {
         char buf[USP_ERR_MAXLEN];
+#ifdef USE_MUSL
+        USP_LOG_Error("%s(%d): send failed : (err=%d) %d", __FUNCTION__, __LINE__, errno, strerror_r(errno, buf, sizeof(buf)) );
+#else
         USP_LOG_Error("%s(%d): send failed : (err=%d) %s", __FUNCTION__, __LINE__, errno, strerror_r(errno, buf, sizeof(buf)) );
+#endif
         return USP_ERR_INTERNAL_ERROR;
     }
 
@@ -402,7 +410,11 @@ int USP_SIGNAL_OperationStatus(int instance, char *status)
     if (bytes_sent != sizeof(msg))
     {
         char buf[USP_ERR_MAXLEN];
+#ifdef USE_MUSL
+        USP_LOG_Error("%s(%d): send failed : (err=%d) %d", __FUNCTION__, __LINE__, errno, strerror_r(errno, buf, sizeof(buf)) );
+#else
         USP_LOG_Error("%s(%d): send failed : (err=%d) %s", __FUNCTION__, __LINE__, errno, strerror_r(errno, buf, sizeof(buf)) );
+#endif
         return USP_ERR_INTERNAL_ERROR;
     }
 
@@ -452,7 +464,11 @@ int USP_SIGNAL_ObjectAdded(char *path)
     if (bytes_sent != sizeof(msg))
     {
         char buf[USP_ERR_MAXLEN];
+#ifdef USE_MUSL
+        USP_LOG_Error("%s(%d): send failed : (err=%d) %d", __FUNCTION__, __LINE__, errno, strerror_r(errno, buf, sizeof(buf)) );
+#else
         USP_LOG_Error("%s(%d): send failed : (err=%d) %s", __FUNCTION__, __LINE__, errno, strerror_r(errno, buf, sizeof(buf)) );
+#endif
         return USP_ERR_INTERNAL_ERROR;
     }
 
@@ -502,7 +518,11 @@ int USP_SIGNAL_ObjectDeleted(char *path)
     if (bytes_sent != sizeof(msg))
     {
         char buf[USP_ERR_MAXLEN];
+#ifdef USE_MUSL
+        USP_LOG_Error("%s(%d): send failed : (err=%d) %d", __FUNCTION__, __LINE__, errno, strerror_r(errno, buf, sizeof(buf)) );
+#else
         USP_LOG_Error("%s(%d): send failed : (err=%d) %s", __FUNCTION__, __LINE__, errno, strerror_r(errno, buf, sizeof(buf)) );
+#endif
         return USP_ERR_INTERNAL_ERROR;
     }
 
@@ -556,7 +576,11 @@ void DM_EXEC_PostUspRecord(unsigned char *pbuf, int pbuf_len, ctrust_role_t role
     if (bytes_sent != sizeof(msg))
     {
         char buf[USP_ERR_MAXLEN];
+#ifdef USE_MUSL
+        USP_LOG_Error("%s(%d): send failed : (err=%d) %d", __FUNCTION__, __LINE__, errno, strerror_r(errno, buf, sizeof(buf)) );
+#else
         USP_LOG_Error("%s(%d): send failed : (err=%d) %s", __FUNCTION__, __LINE__, errno, strerror_r(errno, buf, sizeof(buf)) );
+#endif
         return;
     }
 }
@@ -604,7 +628,11 @@ void DM_EXEC_PostStompHandshakeComplete(int stomp_instance, ctrust_role_t role, 
     if (bytes_sent != sizeof(msg))
     {
         char buf[USP_ERR_MAXLEN];
+#ifdef USE_MUSL
+        USP_LOG_Error("%s(%d): send failed : (err=%d) %d", __FUNCTION__, __LINE__, errno, strerror_r(errno, buf, sizeof(buf)) );
+#else
         USP_LOG_Error("%s(%d): send failed : (err=%d) %s", __FUNCTION__, __LINE__, errno, strerror_r(errno, buf, sizeof(buf)) );
+#endif
         return;
     }
 }
@@ -642,7 +670,11 @@ void DM_EXEC_PostMtpThreadExited(void)
     if (bytes_sent != sizeof(msg))
     {
         char buf[USP_ERR_MAXLEN];
+#ifdef USE_MUSL
+        USP_LOG_Error("%s(%d): send failed : (err=%d) %d", __FUNCTION__, __LINE__, errno, strerror_r(errno, buf, sizeof(buf)) );
+#else
         USP_LOG_Error("%s(%d): send failed : (err=%d) %s", __FUNCTION__, __LINE__, errno, strerror_r(errno, buf, sizeof(buf)) );
+#endif
         return;
     }
 }
@@ -687,7 +719,11 @@ int DM_EXEC_NotifyBdcTransferResult(int profile_id, bool transfer_result)
     if (bytes_sent != sizeof(msg))
     {
         char buf[USP_ERR_MAXLEN];
+#ifdef USE_MUSL
+        USP_LOG_Error("%s(%d): send failed : (err=%d) %d", __FUNCTION__, __LINE__, errno, strerror_r(errno, buf, sizeof(buf)) );
+#else
         USP_LOG_Error("%s(%d): send failed : (err=%d) %s", __FUNCTION__, __LINE__, errno, strerror_r(errno, buf, sizeof(buf)) );
+#endif
         return USP_ERR_INTERNAL_ERROR;
     }
 

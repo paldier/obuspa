@@ -909,7 +909,11 @@ int CopyFactoryResetDatabase(char *reset_file, char *db_file)
     src = fopen(reset_file, "r");
     if (src == NULL)
     {
+#ifdef USE_MUSL
+        USP_LOG_Error("%s: Failed to open factory reset database %s for reading: %d", __FUNCTION__, reset_file, strerror_r(errno, buf, sizeof(buf)) );
+#else
         USP_LOG_Error("%s: Failed to open factory reset database %s for reading: %s", __FUNCTION__, reset_file, strerror_r(errno, buf, sizeof(buf)) );
+#endif
         err = USP_ERR_INTERNAL_ERROR;
         goto exit;
     }
@@ -918,7 +922,11 @@ int CopyFactoryResetDatabase(char *reset_file, char *db_file)
     dest = fopen(db_file, "w");
     if (src == NULL)
     {
+#ifdef USE_MUSL
+        USP_LOG_Error("%s: Failed to open destination database %s for writing: %d", __FUNCTION__, db_file, strerror_r(errno, buf, sizeof(buf)) );
+#else
         USP_LOG_Error("%s: Failed to open destination database %s for writing: %s", __FUNCTION__, db_file, strerror_r(errno, buf, sizeof(buf)) );
+#endif
         err = USP_ERR_INTERNAL_ERROR;
         goto exit;
     }

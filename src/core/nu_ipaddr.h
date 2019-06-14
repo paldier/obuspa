@@ -44,7 +44,11 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+#ifdef USE_MUSL
+#include <errno.h>
+#else
 #include <sys/errno.h>
+#endif
 #include <stdio.h>
 #include <stdbool.h>
 #include <netinet/in.h>

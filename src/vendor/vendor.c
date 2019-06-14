@@ -47,6 +47,7 @@
 #include "vendor_defs.h"
 #include "vendor_api.h"
 #include "usp_api.h"
+#include "vendor_iopsys.h"
 
 /*********************************************************************//**
 **
@@ -62,6 +63,17 @@
 int VENDOR_Init(void)
 {
 
+    int err = USP_ERR_OK;
+
+    err = iopsys_dm_Init();
+    // Exit if any errors occurred
+    if (err != USP_ERR_OK)
+    {
+        USP_LOG_Error("[%s:%d] Internal Error",__func__, __LINE__);
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
     return USP_ERR_OK;
 }
 

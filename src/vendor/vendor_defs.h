@@ -87,7 +87,7 @@
 
 //-----------------------------------------------------------------------------------------
 // Uncomment the following to remove code and features from the standard build
-//#define REMOVE_DEVICE_INFO               // Removes DeviceInfo from the core data model. It must instead be provided by the vendor.
+#define REMOVE_DEVICE_INFO               // Removes DeviceInfo from the core data model. It must instead be provided by the vendor.
 //#define REMOVE_SELF_TEST_DIAG_EXAMPLE    // Removes Self Test diagnostics example code
 
 //#define DONT_SORT_GET_INSTANCES          // Disables the sorting of data model paths returned in a GetInstancesResponse. Useful for slow devices supporting large data models.
@@ -101,7 +101,7 @@
 // Comment out the following define if you want to let the Linux routing tables decide which network interface to use for USP connections
 // Letting the Linux routing tables decide is better for devices that can connect to the STOMP server through either
 // WiFi or ethernet, and either of these interfaces could be down at any one time
-#define CONNECT_ONLY_OVER_WAN_INTERFACE
+//#define CONNECT_ONLY_OVER_WAN_INTERFACE
 
 //-----------------------------------------------------------------------------------------
 // OUI (Organization Unique Identifier) to use for this CPE. This code will be unique to the manufacturer

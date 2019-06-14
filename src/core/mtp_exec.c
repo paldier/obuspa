@@ -123,7 +123,11 @@ void MTP_EXEC_Wakeup(void)
     if (bytes_sent != sizeof(msg))
     {
         char buf[USP_ERR_MAXLEN];
+#ifdef USE_MUSL
+        USP_LOG_Error("%s(%d): send failed : (err=%d) %d", __FUNCTION__, __LINE__, errno, strerror_r(errno, buf, sizeof(buf)) );
+#else
         USP_LOG_Error("%s(%d): send failed : (err=%d) %s", __FUNCTION__, __LINE__, errno, strerror_r(errno, buf, sizeof(buf)) );
+#endif
         return;
     }
 }

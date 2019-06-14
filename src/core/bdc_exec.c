@@ -206,7 +206,11 @@ int BDC_EXEC_PostReportToSend(int profile_id, char *full_url, char *query_string
     if (bytes_sent != sizeof(msg))
     {
         char buf[USP_ERR_MAXLEN];
+#ifdef USE_MUSL
+        USP_LOG_Error("%s(%d): send failed : (err=%d) %d", __FUNCTION__, __LINE__, errno, strerror_r(errno, buf, sizeof(buf)) );
+#else
         USP_LOG_Error("%s(%d): send failed : (err=%d) %s", __FUNCTION__, __LINE__, errno, strerror_r(errno, buf, sizeof(buf)) );
+#endif
 
         // Free all buffers whose ownership has passed to BDC exec
         FreeBdcExecMsgContents(&msg);

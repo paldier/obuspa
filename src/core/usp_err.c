@@ -190,7 +190,11 @@ void USP_ERR_SetMessage_Errno(const char *func, int line, const char *failed_fun
 {
     char buf[USP_ERR_MAXLEN];
 
+#ifdef USE_MUSL
+    USP_ERR_SetMessage("%s(%d): %s failed : (err=%d) %d", func, line, failed_func, err, strerror_r(err, buf, sizeof(buf)) );
+#else
     USP_ERR_SetMessage("%s(%d): %s failed : (err=%d) %s", func, line, failed_func, err, strerror_r(err, buf, sizeof(buf)) );
+#endif
 }
 
 /*********************************************************************//**

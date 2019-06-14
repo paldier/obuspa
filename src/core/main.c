@@ -180,7 +180,11 @@ int main(int argc, char *argv[])
 
             case 'e':
                 // Enable callstack printing when an error occurs
+#ifdef USE_MUSL
+                enable_callstack_debug = false;
+#else
                 enable_callstack_debug = true;
+#endif
                 break;
 
             case 'p':

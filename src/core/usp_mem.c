@@ -49,7 +49,9 @@
 #include <unistd.h>
 #include <dlfcn.h>
 
+#ifndef USE_MUSL
 #include <execinfo.h>
+#endif
 
 #include "common_defs.h"
 #include "cli.h"
@@ -400,12 +402,16 @@ void USP_MEM_StartCollection(void)
     USP_ASSERT(minfo != NULL);
 
     // From now on, all current allocations will be logged in the minfo array
+#ifdef USE_MUSL
+    collect_memory_info = false;
+#else
     collect_memory_info = true;
 
 
     // Store initial static memory usage after data model has been registered
     baseline_memory_usage = mallinfo().uordblks;
     USP_LOG_Info("Baseline Memory usage: %d", baseline_memory_usage);
+#endif
 
     // The sync timer vector is reallocated by BulkDataCollection after collection has been started,
     // so needs to be in the meminfo array (otherwise we assert that a realloc has occured before an alloc)
@@ -447,7 +453,9 @@ void USP_MEM_StopCollection(void)
 **************************************************************************/
 void USP_MEM_PrintSummary(void)
 {
+#ifndef USE_MUSL
     USP_LOG_Info("Memory in use: %d", (int) mallinfo().uordblks);
+#endif
 }
 
 /*********************************************************************//**
@@ -463,6 +471,9 @@ void USP_MEM_PrintSummary(void)
 **************************************************************************/
 void USP_MEM_Print(void)
 {
+#ifdef USE_MUSL
+	USP_LOG_Info("USP mem print is not available in musl");
+#else
     int i;
     minfo_t *mi;
     int count = 0;
@@ -505,6 +516,7 @@ void USP_MEM_Print(void)
 
     USP_LOG_Info("%d memory allocations", count);
     OS_UTILS_UnlockMutex(&mem_access_mutex);
+#endif
 }
 
 /*********************************************************************//**
@@ -552,9 +564,12 @@ void USP_MEM_PrintLeakReport(void)
 **************************************************************************/
 int USP_MEM_PrintAll(void)
 {
+    int count = 0;
+#ifdef USE_MUSL
+	USP_LOG_Info("USP mem print is not available in musl");
+#else
     int i;
     minfo_t *mi;
-    int count = 0;
 
     USP_LOG_Info("Memory in use: %d (%s line %d)", (int) mallinfo().uordblks, __FUNCTION__, __LINE__);
     USP_LOG_Info("Baseline Memory usage: %d", baseline_memory_usage);
@@ -582,7 +597,7 @@ int USP_MEM_PrintAll(void)
 
     USP_LOG_Info("%d memory allocations", count);
     OS_UTILS_UnlockMutex(&mem_access_mutex);
-
+#endif
     return count;
 }
 
@@ -690,6 +705,7 @@ minfo_t *FindMemInfoByPtr(void *ptr)
 **************************************************************************/
 void GetCallers(char **callers, int num_callers)
 {
+#ifndef USE_MUSL
     int i;
     int stack_end = 0;
     #define MAX_CALLSTACK  30
@@ -729,5 +745,6 @@ void GetCallers(char **callers, int num_callers)
     {
         callers[i] = NULL;
     }
+#endif
 }
 

@@ -48,7 +48,9 @@
 #include <unistd.h>
 #include <dlfcn.h>
 
+#ifndef USE_MUSL
 #include <execinfo.h>
+#endif
 
 #include "common_defs.h"
 #include "cli.h"
@@ -140,6 +142,7 @@ int USP_LOG_SetFile(char *file)
 **************************************************************************/
 void USP_LOG_Callstack(void)
 {
+#ifndef USE_MUSL
     #define MAX_CALLSTACK  30
     void *callstack[MAX_CALLSTACK];
     int stack_size; 
@@ -168,6 +171,9 @@ void USP_LOG_Callstack(void)
             USP_LOG_Info(" %*sUnable to dladdr(%p)", indent, "", callstack[i]);
         }
     }
+#else
+	USP_LOG_Info("Callstack dump is not available in musl");
+#endif
 }
 
 /*********************************************************************//**
