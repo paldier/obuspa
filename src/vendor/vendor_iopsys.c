@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include <libubus.h>
 #include <libubox/blobmsg_json.h>
@@ -118,19 +119,18 @@ static void receive_call_result_status(struct ubus_request *req, int type, struc
 	if(json_str)
 		free(json_str);
 }
-/*********************************************************************//**
-**
-** uspd_get_value
-**
-** Gets the value of req->path
-**
-** \param   req - pointer to structure identifying the path
-** \param   buf - pointer to buffer into which to return the value of the parameter (as a textual string)
-** \param   len - length of buffer in which to return the value of the parameter
-**
-** \return  USP_ERR_OK if successful
-**
-**************************************************************************/
+
+static void receive_data_print(struct ubus_request *req, int type, struct blob_attr *msg)
+{
+	char *str;
+	if (!msg)
+		return;
+
+	str = blobmsg_format_json_indent(msg, true, -1);
+	USP_LOG_Info("%s", str);
+	free(str);
+}
+
 int uspd_get(char *path, char *json_buff)
 {
 	uint32_t id;
@@ -190,6 +190,19 @@ int json_get_value_index(char *json_buff,char *node, char *buff, uint8_t index)
 	return USP_ERR_OK;
 }
 
+/*********************************************************************//**
+**
+** uspd_get_value
+**
+** Gets the value of req->path
+**
+** \param   req - pointer to structure identifying the path
+** \param   buf - pointer to buffer into which to return the value of the parameter (as a textual string)
+** \param   len - length of buffer in which to return the value of the parameter
+**
+** \return  USP_ERR_OK if successful
+**
+**************************************************************************/
 int uspd_get_value(dm_req_t *req, char *buf, int len)
 {
 	char json_buff[MAX_DM_VALUE_LEN] = {'\0'};
@@ -206,6 +219,53 @@ int uspd_get_value(dm_req_t *req, char *buf, int len)
 	return USP_ERR_OK;
 }
 
+int uspd_operate_sync(dm_req_t *req, char *command_key, kv_vector_t *input_args, kv_vector_t *output_args)
+{
+	uint32_t id;
+	struct ubus_context *ctx = ubus_connect(NULL);
+	struct blob_buf b = { };
+	kv_pair_t *kv;
+	char path[MAX_DM_PATH] = {'\0'}, action[MAX_DM_PATH] = {'\0'};
+	char *last_delim = strrchr(req->path, '.');
+
+	memset(&b, 0, sizeof(struct blob_buf));
+	blob_buf_init(&b, 0);
+	KV_VECTOR_Init(output_args);
+
+	strcpy(action, last_delim+1);
+	strncpy(path, req->path, abs(last_delim - req->path)+1);
+	USP_LOG_Info("path |%s| action|%s|",path, action);
+
+	if(input_args->num_entries) {
+		void *table = blobmsg_open_table(&b, "input");
+		for(int i=0; i<input_args->num_entries; ++i) {
+			kv = &input_args->vector[i];
+			USP_LOG_Info("[%s:%d] INPUT key |%s| value|%s|",__func__, __LINE__, kv->key, kv->value);
+			blobmsg_add_string(&b, kv->key, kv->value);
+		}
+		blobmsg_close_table(&b, table);
+	}
+
+	if (!ctx) {
+		USP_LOG_Error("[%s:%d] ubus_connect failed",__func__, __LINE__);
+		return USP_ERR_INTERNAL_ERROR;
+	}
+
+	if (ubus_lookup_id(ctx, USP_UBUS, &id)) {
+		USP_LOG_Error("[%s:%d] %s not present",__func__, __LINE__, USP_UBUS);
+		return USP_ERR_INTERNAL_ERROR;
+	}
+
+	blobmsg_add_string(&b, "path", path);
+	blobmsg_add_string(&b, "action", action);
+
+	/* invoke a method on a specific object */
+	if (ubus_invoke(ctx, id, "operate", b.head, receive_data_print, NULL, 2000)) {
+		USP_LOG_Error("[%s:%d] ubus call failed for |%s|",__func__, __LINE__, path);
+		return USP_ERR_INTERNAL_ERROR;
+	}
+	return USP_ERR_OK;
+}
 int process_dm_aliases(char *path)
 {
 	int err = USP_ERR_OK;
@@ -610,6 +670,9 @@ int vendor_UPA_init(void)
 int vendor_WiFi_init(void)
 {
 	int err = USP_ERR_OK;
+#define WIFI_ROOT "Device.WiFi"
+	//err |= USP_REGISTER_SyncOperation(WIFI_ROOT ".NeighboringWiFiDiagnostic()", uspd_operate_sync);
+	err |= USP_REGISTER_SyncOperation(WIFI_ROOT ".Reset()", uspd_operate_sync);
 #define DEVICE_WIFI_AP_ROOT "Device.WiFi.AccessPoint"
 	err |= USP_REGISTER_DBParam_Alias(DEVICE_WIFI_AP_ROOT ".{i}.Alias", NULL);
 	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_WIFI_AP_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
@@ -629,6 +692,7 @@ int vendor_WiFi_init(void)
 	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_WIFI_AP_ROOT ".{i}.X_IOPSYS_EU_IEEE80211r.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
 	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_WIFI_AP_ROOT ".{i}.WMMEnable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
 	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_WIFI_AP_ROOT ".{i}.Security.ModesSupported", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_SyncOperation(DEVICE_WIFI_AP_ROOT ".{i}.Security.Reset()", uspd_operate_sync);
 	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_WIFI_AP_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
 
 #define DEVICE_AP_AD_ROOT DEVICE_WIFI_AP_ROOT".{i}.AssociatedDevice"
@@ -751,6 +815,8 @@ int vendor_Bridging_init(void)
 int vendor_PPP_init(void)
 {
 	int err = USP_ERR_OK;
+#define DEVICE_PPP_INT "Device.PPP.Interface"
+	err |= USP_REGISTER_SyncOperation(DEVICE_PPP_INT ".{i}.Reset()", uspd_operate_sync);
 	// Exit if any errors occurred
 	if (err != USP_ERR_OK)
 	{
@@ -917,12 +983,12 @@ int vendor_IP_init(void)
 #define DEVICE_IP_INT_ROOT "Device.IP.Interface"
 	err |= USP_REGISTER_Param_NumEntries("Device.IP.InterfaceNumberOfEntries", DEVICE_IP_INT_ROOT ".{i}");
 	err |= USP_REGISTER_DBParam_Alias(DEVICE_IP_INT_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_SyncOperation(DEVICE_IP_INT_ROOT ".{i}.Reset()", uspd_operate_sync);
 	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_IP_INT_ROOT ".{i}.LastChange", uspd_get_value, DM_UINT);
 	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_IP_INT_ROOT ".{i}.Loopback", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
 	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_IP_INT_ROOT ".{i}.LowerLayers", uspd_get_value, uspd_set_value, NULL, DM_STRING);
 	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_IP_INT_ROOT ".{i}.MaxMTUSize", uspd_get_value, uspd_set_value, NULL, DM_UINT);
 	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_IP_INT_ROOT ".{i}.Name", uspd_get_value, DM_STRING);
-	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_IP_INT_ROOT ".{i}.Reset", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
 	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_IP_INT_ROOT ".{i}.Router", uspd_get_value, uspd_set_value, NULL, DM_STRING);
 	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_IP_INT_ROOT ".{i}.Stats.BytesReceived", uspd_get_value, DM_UINT);
 	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_IP_INT_ROOT ".{i}.Stats.BytesSent", uspd_get_value, DM_UINT);
@@ -1270,6 +1336,7 @@ int vendor_DHCPv4_init(void)
 	int err = USP_ERR_OK;
 
 #define DEVICE_DHCPv4_CLIENT_ROOT "Device.DHCPv4.Client"
+	err |= USP_REGISTER_SyncOperation(DEVICE_DHCPv4_CLIENT_ROOT ".{i}.Reset()", uspd_operate_sync);
 	err |= USP_REGISTER_Param_NumEntries("Device.DHCPv4.ClientNumberOfEntries", DEVICE_DHCPv4_CLIENT_ROOT ".{i}");
 	err |= USP_REGISTER_DBParam_Alias(DEVICE_DHCPv4_CLIENT_ROOT ".{i}.Alias", NULL);
 	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_DHCPv4_CLIENT_ROOT ".{i}.DHCPServer", uspd_get_value, DM_STRING);
@@ -1346,6 +1413,7 @@ int vendor_DHCPv6_init(void)
 {
 	int err = USP_ERR_OK;
 #define DEVICE_DHCPv6_CLIENT_ROOT "Device.DHCPv6.Client"
+	err |= USP_REGISTER_SyncOperation(DEVICE_DHCPv6_CLIENT_ROOT ".{i}.Reset()", uspd_operate_sync);
 	err |= USP_REGISTER_Param_NumEntries("Device.DHCPv6.ClientNumberOfEntries", DEVICE_DHCPv6_CLIENT_ROOT ".{i}");
 	err |= USP_REGISTER_DBParam_Alias(DEVICE_DHCPv6_CLIENT_ROOT ".{i}.Alias", NULL);
 	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_DHCPv6_CLIENT_ROOT ".{i}.DDID", uspd_get_value, DM_STRING);
