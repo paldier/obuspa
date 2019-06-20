@@ -51,7 +51,7 @@
 #define MAX_DM_VALUE_LEN (4096)     // Maximum number of characters in a data model parameter value
 #define MAX_DM_SHORT_VALUE_LEN (MAX_DM_PATH) // Maximum number of characters in an (expected to be) short data model parameter value
 #define MAX_PATH_SEGMENTS (32)      // Maximum number of segments (eg "Device, "LocalAgent") in a path. Does not include instance numbers.
-#define MAX_COMPOUND_KEY_PARAMS 4   // Maximum number of parameters in a compound unique key
+#define MAX_COMPOUND_KEY_PARAMS 6   // Maximum number of parameters in a compound unique key
 #define MAX_CONTROLLERS 5           // Maximum number of controllers which may be present in the DB (Device.LocalAgent.Controller.{i})
 #define MAX_CONTROLLER_MTPS 3       // Maximum number of MTPs that a controller may have in the DB (Device.LocalAgent.Controller.{i}.MTP.{i})
 #define MAX_AGENT_MTPS (MAX_CONTROLLERS)  // Maximum number of MTPs that an agent may have in the DB (Device.LocalAgent.MTP.{i})
