@@ -31,8 +31,10 @@
 #define VENDOR_IOPSYS_H
 #include "usp_log.h"
 
+#define USP_UBUS "usp.raw"
 int iopsys_dm_Init(void);
 int uspd_operate_sync(dm_req_t *req, char *command_key, kv_vector_t *input_args, kv_vector_t *output_args);
+int vendor_operate_async_init(void);
 
 #endif // VENDOR_IOPSYS_H
 

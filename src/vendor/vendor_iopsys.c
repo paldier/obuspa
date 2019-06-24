@@ -38,7 +38,6 @@
 #include "json.h"
 #include "vendor_iopsys.h"
 
-#define USP_UBUS "usp.raw"
 extern bool is_running_cli_local_command;
 
 char *dm_alias_list[] =
@@ -152,7 +151,7 @@ int uspd_get(char *path, char *json_buff)
 	memset(&b, 0, sizeof(struct blob_buf));
 	blob_buf_init(&b, 0);
 	blobmsg_add_string(&b, "path", path);
-	if (ubus_invoke(ctx, id, "get", b.head, receive_call_result_data, json_buff, 3000)) {
+	if (ubus_invoke(ctx, id, "get", b.head, receive_call_result_data, json_buff, 5000)) {
 		USP_LOG_Error("[%s:%d] ubus call failed for |%s|",__func__, __LINE__, path);
 		return USP_ERR_INTERNAL_ERROR;
 	}
@@ -745,17 +744,6 @@ int vendor_WiFi_init(void)
 	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_AP_AD_ROOT ".{i}.Stats.RetryCount", uspd_get_value, DM_UINT);
 	char *unique_keys_ad[] = { "MACAddress" };
 	err |= USP_REGISTER_Object_UniqueKey(DEVICE_AP_AD_ROOT ".{i}", unique_keys_ad, NUM_ELEM(unique_keys_ad));
-
-#define DEVICE_NWIFI_ROOT "Device.WiFi.NeighboringWiFiDiagnostic"
-	err |= USP_REGISTER_Object(DEVICE_NWIFI_ROOT ".Result.{i}", NULL, NULL, NULL, NULL, NULL, NULL);
-	err |= USP_REGISTER_Param_NumEntries(DEVICE_NWIFI_ROOT ".ResultNumberOfEntries", DEVICE_NWIFI_ROOT ".Result.{i}");
-	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_NWIFI_ROOT ".DiagnosticsState", uspd_get_value, uspd_set_value, NULL, DM_STRING);
-	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_NWIFI_ROOT ".Result.{i}.BSSID", uspd_get_value, DM_STRING);
-	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_NWIFI_ROOT ".Result.{i}.Channel", uspd_get_value, DM_UINT);
-	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_NWIFI_ROOT ".Result.{i}.Noise", uspd_get_value, DM_INT);
-	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_NWIFI_ROOT ".Result.{i}.OperatingFrequencyBand", uspd_get_value, DM_STRING);
-	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_NWIFI_ROOT ".Result.{i}.SSID", uspd_get_value, DM_STRING);
-	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_NWIFI_ROOT ".Result.{i}.SignalStrength", uspd_get_value, DM_INT);
 
 #define DEVICE_WIFI_RADIO_ROOT "Device.WiFi.Radio"
 	err |= USP_REGISTER_DBParam_Alias(DEVICE_WIFI_RADIO_ROOT ".{i}.Alias", NULL);
@@ -2003,6 +1991,7 @@ int iopsys_dm_Init(void)
 	err |= vendor_SoftwareModules_init();
 	err |= vendor_ProxiedDevice_init();
 
+	err |= vendor_operate_async_init();
 	// Seed data model with instance numbers from the uspd
 	if (is_running_cli_local_command == false)
 	{
