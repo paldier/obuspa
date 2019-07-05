@@ -4,6 +4,7 @@
  * Copyright (C) 2019 iopsys Software Solutions AB. All rights reserved.
  *
  * Author: vivek.dutta@iopsys.eu
+ * Author: y.yashvardhan@iopsys.eu
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -494,7 +495,7 @@ int vendor_Time_init(void)
 	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_TIME_ROOT ".NTPServer3", uspd_get_value, uspd_set_value, NULL, DM_STRING);
 	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_TIME_ROOT ".NTPServer4", uspd_get_value, uspd_set_value, NULL, DM_STRING);
 	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_TIME_ROOT ".NTPServer5", uspd_get_value, uspd_set_value, NULL, DM_STRING);
-	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_TIME_ROOT ".CurrentLocalTime", uspd_get_value, DM_DATETIME);
+	// err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_TIME_ROOT ".CurrentLocalTime", uspd_get_value, DM_DATETIME); Already registered
 	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_TIME_ROOT ".LocalTimeZone", uspd_get_value, uspd_set_value, NULL, DM_STRING);
 	// Exit if any errors occurred
 	if (err != USP_ERR_OK)
@@ -1092,7 +1093,7 @@ int vendor_WiFi_init(void)
 	err |= USP_REGISTER_VendorParam_ReadOnly(WIFI_EP_ROOT ".{i}.WPS.Version", uspd_get_value, DM_STRING);
 	err |= USP_REGISTER_VendorParam_ReadWrite(WIFI_EP_ROOT ".{i}.WPS.PIN", uspd_get_value, uspd_set_value, NULL, DM_UINT);
 
-	err |= USP_REGISTER_Param_NumEntries(WIFI_EP_ROOT ".{i}.ProfileNumberOfEntries", WIFI_EP_ROOT ".{i}.Port.{i}");
+	err |= USP_REGISTER_Param_NumEntries(WIFI_EP_ROOT ".{i}.ProfileNumberOfEntries", WIFI_EP_ROOT ".{i}.Profile.{i}");
 	err |= USP_REGISTER_DBParam_Alias(WIFI_EP_ROOT ".{i}.Profile.{i}.Alias", NULL);
 
 	err |= USP_REGISTER_VendorParam_ReadWrite(WIFI_EP_ROOT ".{i}.Profile.{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
@@ -1205,7 +1206,7 @@ int vendor_Bridging_init(void)
 	err |= USP_REGISTER_VendorParam_ReadWrite(BRIDGING_BRIDGE_ROOT ".{i}.VLANPort.{i}.Untagged", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
 
 #define BRIDGING_FILTER_ROOT "Device.Bridging.Filter"
-	err |= USP_REGISTER_Param_NumEntries(DEVICE_BRIDGING_ROOT ".FilterNumberOfEntries", BRIDGING_BRIDGE_ROOT ".{i}");
+	err |= USP_REGISTER_Param_NumEntries(DEVICE_BRIDGING_ROOT ".FilterNumberOfEntries", BRIDGING_FILTER_ROOT ".{i}");
 	err |= USP_REGISTER_DBParam_Alias(BRIDGING_FILTER_ROOT ".{i}.Alias", NULL);
 	err |= USP_REGISTER_VendorParam_ReadWrite(BRIDGING_FILTER_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
 	err |= USP_REGISTER_VendorParam_ReadOnly(BRIDGING_FILTER_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
@@ -1252,11 +1253,11 @@ int vendor_Bridging_init(void)
 	err |= USP_REGISTER_Object_UniqueKey(BRIDGING_BRIDGE_ROOT ".{i}", unique_keys_bridge, NUM_ELEM(unique_keys_bridge));
 	char *unique_keys_bridge_port[] = { "Name" };
 	err |= USP_REGISTER_Object_UniqueKey(BRIDGING_BRIDGE_ROOT ".{i}.Port.{i}", unique_keys_bridge_port, NUM_ELEM(unique_keys_bridge_port));
-	char *unique_keys_bridge_vlan[] = { "Name" };
+	char *unique_keys_bridge_vlan[] = { "VLANID" };
 	err |= USP_REGISTER_Object_UniqueKey(BRIDGING_BRIDGE_ROOT ".{i}.VLAN.{i}", unique_keys_bridge_vlan, NUM_ELEM(unique_keys_bridge_vlan));
-	char *unique_keys_bridge_vlan_port[] = { "Port" };
+	char *unique_keys_bridge_vlan_port[] = { "VLAN", "Port" };
 	err |= USP_REGISTER_Object_UniqueKey(BRIDGING_BRIDGE_ROOT ".{i}.VLANPort.{i}", unique_keys_bridge_vlan_port, NUM_ELEM(unique_keys_bridge_vlan_port));
-	char *unique_keys_bridging_filter[] = { "Bridge" };
+	char *unique_keys_bridging_filter[] = { "Alias" };
 	err |= USP_REGISTER_Object_UniqueKey(BRIDGING_FILTER_ROOT ".{i}", unique_keys_bridging_filter, NUM_ELEM(unique_keys_bridging_filter));
 	char *unique_keys_bridging_provider[] = { "Alias" };
 	err |= USP_REGISTER_Object_UniqueKey(BRIDGING_PROVIDER_ROOT ".{i}", unique_keys_bridging_provider, NUM_ELEM(unique_keys_bridging_provider));
@@ -1272,12 +1273,62 @@ int vendor_Bridging_init(void)
 int vendor_PPP_init(void)
 {
 	int err = USP_ERR_OK;
-#define DEVICE_PPP_INT "Device.PPP.Interface"
-	/*
-	char *unique_keys_interface[] = { "Name" };
-	err |= USP_REGISTER_Object_UniqueKey(DEVICE_PPP_INT ".{i}", unique_keys_interface, NUM_ELEM(unique_keys_interface));
-	*/
-	err |= USP_REGISTER_SyncOperation(DEVICE_PPP_INT ".{i}.Reset()", uspd_operate_sync);
+#define DEVICE_PPP_ROOT "Device.PPP"
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_PPP_ROOT ".SupportedNCPs", uspd_get_value, DM_STRING);
+#define PPP_INT_ROOT "Device.PPP.Interface"
+	err |= USP_REGISTER_Param_NumEntries(DEVICE_PPP_ROOT ".InterfaceNumberOfEntries", PPP_INT_ROOT ".{i}");
+	err |= USP_REGISTER_DBParam_Alias(PPP_INT_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(PPP_INT_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(PPP_INT_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(PPP_INT_ROOT ".{i}.Name", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(PPP_INT_ROOT ".{i}.LastChange", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(PPP_INT_ROOT ".{i}.LowerLayers", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(PPP_INT_ROOT ".{i}.ConnectionStatus", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(PPP_INT_ROOT ".{i}.LastConnectionError", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(PPP_INT_ROOT ".{i}.AutoDisconnectTime", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(PPP_INT_ROOT ".{i}.IdleDisconnectTime", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(PPP_INT_ROOT ".{i}.WarnDisconnectDelay", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(PPP_INT_ROOT ".{i}.Username", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(PPP_INT_ROOT ".{i}.Password", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(PPP_INT_ROOT ".{i}.EncryptionProtocol", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(PPP_INT_ROOT ".{i}.CompressionProtocol", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(PPP_INT_ROOT ".{i}.AuthenticationProtocol", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(PPP_INT_ROOT ".{i}.MaxMRUSize", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(PPP_INT_ROOT ".{i}.CurrentMRUSize", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(PPP_INT_ROOT ".{i}.ConnectionTrigger", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(PPP_INT_ROOT ".{i}.LCPEcho", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(PPP_INT_ROOT ".{i}.LCPEchoRetry", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(PPP_INT_ROOT ".{i}.IPCPEnable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(PPP_INT_ROOT ".{i}.IPv6CPEnable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(PPP_INT_ROOT ".{i}.PPPoE.SessionID", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(PPP_INT_ROOT ".{i}.PPPoE.ACName", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(PPP_INT_ROOT ".{i}.PPPoE.ServiceName", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(PPP_INT_ROOT ".{i}.IPCP.LocalIPAddress", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(PPP_INT_ROOT ".{i}.IPCP.RemoteIPAddress", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(PPP_INT_ROOT ".{i}.IPCP.DNSServers", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(PPP_INT_ROOT ".{i}.IPCP.PassthroughEnable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(PPP_INT_ROOT ".{i}.IPCP.PassthroughDHCPPool", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(PPP_INT_ROOT ".{i}.IPv6CP.LocalInterfaceIdentifier", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(PPP_INT_ROOT ".{i}.IPv6CP.RemoteInterfaceIdentifier", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(PPP_INT_ROOT ".{i}.Stats.BytesSent", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(PPP_INT_ROOT ".{i}.Stats.BytesReceived", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(PPP_INT_ROOT ".{i}.Stats.PacketsSent", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(PPP_INT_ROOT ".{i}.Stats.PacketsReceived", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(PPP_INT_ROOT ".{i}.Stats.ErrorsSent", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(PPP_INT_ROOT ".{i}.Stats.ErrorsReceived", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(PPP_INT_ROOT ".{i}.Stats.UnicastPacketsSent", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(PPP_INT_ROOT ".{i}.Stats.UnicastPacketsReceived", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(PPP_INT_ROOT ".{i}.Stats.DiscardPacketsSent", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(PPP_INT_ROOT ".{i}.Stats.DiscardPacketsReceived", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(PPP_INT_ROOT ".{i}.Stats.MulticastPacketsSent", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(PPP_INT_ROOT ".{i}.Stats.MulticastPacketsReceived", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(PPP_INT_ROOT ".{i}.Stats.BroadcastPacketsSent", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(PPP_INT_ROOT ".{i}.Stats.BroadcastPacketsReceived", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(PPP_INT_ROOT ".{i}.Stats.UnknownProtoPacketsReceived", uspd_get_value, DM_UINT);
+	char *unique_keys_ppp_interface[] = { "Name" };
+	err |= USP_REGISTER_Object_UniqueKey(PPP_INT_ROOT ".{i}", unique_keys_ppp_interface, NUM_ELEM(unique_keys_ppp_interface));
+	err |= USP_REGISTER_SyncOperation(PPP_INT_ROOT ".{i}.Reset()", uspd_operate_sync);
+
 	// Exit if any errors occurred
 	if (err != USP_ERR_OK)
 	{
@@ -1383,7 +1434,7 @@ int vendor_IP_init(void)
 	err |= USP_REGISTER_VendorParam_ReadWrite(IP_INT_IPv6Prefix_ROOT ".{i}.ValidLifetime", uspd_get_value, uspd_set_value, NULL, DM_DATETIME);
 
 	char *unique_keys_ipv6prefix[] = { "Prefix" };
-	err |= USP_REGISTER_Object_UniqueKey(IP_INT_IPv6_ROOT ".{i}", unique_keys_ipv6prefix, NUM_ELEM(unique_keys_ipv6prefix));
+	err |= USP_REGISTER_Object_UniqueKey(IP_INT_IPv6Prefix_ROOT ".{i}", unique_keys_ipv6prefix, NUM_ELEM(unique_keys_ipv6prefix));
 
 #define IP_ACTIVEPORT_ROOT "Device.IP.ActivePort"
 	err |= USP_REGISTER_Param_NumEntries(DEVICE_IP_ROOT ".ActivePortNumberOfEntries", IP_ACTIVEPORT_ROOT ".{i}");
@@ -1532,7 +1583,7 @@ int vendor_IP_init(void)
 	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_IP_DIAG_UDIAG_ROOT ".Interface", uspd_get_value, uspd_set_value, NULL, DM_STRING);
 	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_IP_DIAG_UDIAG_ROOT ".NumberOfConnections", uspd_get_value, uspd_set_value, NULL, DM_UINT);
 
-	err |= USP_REGISTER_Param_NumEntries(DEVICE_IP_DIAG_UDIAG_ROOT ".PerConnectionResultNumberOfEntries", DEVICE_IP_DIAG_UDIAG_ROOT ".PerConnectionResult.{i}");
+	/*err |= USP_REGISTER_Param_NumEntries(DEVICE_IP_DIAG_UDIAG_ROOT ".PerConnectionResultNumberOfEntries", DEVICE_IP_DIAG_UDIAG_ROOT ".PerConnectionResult.{i}");
 
 	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_IP_DIAG_UDIAG_ROOT ".PeriodOfFullLoading", uspd_get_value, DM_UINT);
 	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_IP_DIAG_UDIAG_ROOT ".ProtocolVersion", uspd_get_value, uspd_set_value, NULL, DM_STRING);
@@ -1548,10 +1599,6 @@ int vendor_IP_init(void)
 	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_IP_DIAG_UDIAG_ROOT ".TotalBytesSentUnderFullLoading", uspd_get_value, DM_UINT);
 	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_IP_DIAG_UDIAG_ROOT ".UploadTransports", uspd_get_value, DM_STRING);
 	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_IP_DIAG_UDIAG_ROOT ".UploadURL", uspd_get_value, uspd_set_value, NULL, DM_STRING);
-
-	/*
-	char *unique_keys_ipv6[] = { "IPAddress" };
-	err |= USP_REGISTER_Object_UniqueKey(DEVICE_IP_INT_IPv6_ROOT ".{i}", unique_keys_ipv6, NUM_ELEM(unique_keys_ipv6));
 	*/
 
 	// Exit if any errors occurred
@@ -1651,45 +1698,59 @@ int vendor_CaptivePortal_init(void)
 int vendor_Routing_init(void)
 {
 	int err = USP_ERR_OK;
-	err |= USP_REGISTER_VendorParam_ReadOnly("Device.Routing.RouteInformation.Enable", uspd_get_value, DM_BOOL);
-	err |= USP_REGISTER_Param_NumEntries("Device.Routing.RouteInformation.InterfaceSettingNumberOfEntries", "Device.Routing.RouteInformation.InterfaceSetting.{i}");
 
-#define DEVICE_ROUTING_ROUTER_ROOT "Device.Routing.Router"
-	err |= USP_REGISTER_Param_NumEntries("Device.Routing.RouterNumberOfEntries", DEVICE_ROUTING_ROUTER_ROOT ".{i}");
-	err |= USP_REGISTER_DBParam_Alias(DEVICE_ROUTING_ROUTER_ROOT ".{i}.Alias", NULL);
-	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_ROUTING_ROUTER_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
-	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_ROUTING_ROUTER_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
+#define ROUTING_ROUTER_ROOT "Device.Routing.Router"
+	err |= USP_REGISTER_Param_NumEntries("Device.Routing.RouterNumberOfEntries", ROUTING_ROUTER_ROOT ".{i}");
+	err |= USP_REGISTER_DBParam_Alias(ROUTING_ROUTER_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(ROUTING_ROUTER_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(ROUTING_ROUTER_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
+	char *unique_keys_router[] = { "Alias" };
+	err |= USP_REGISTER_Object_UniqueKey(ROUTING_ROUTER_ROOT ".{i}", unique_keys_router, NUM_ELEM(unique_keys_router));
 
-#define DEVICE_RR_IPv4FORW_ROOT "Device.Routing.Router.{i}.IPv4Forwarding"
-	err |= USP_REGISTER_Param_NumEntries(DEVICE_ROUTING_ROUTER_ROOT".{i}.IPv4ForwardingNumberOfEntries", DEVICE_RR_IPv4FORW_ROOT ".{i}");
-	err |= USP_REGISTER_DBParam_Alias(DEVICE_RR_IPv4FORW_ROOT ".{i}.Alias", NULL);
-	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_RR_IPv4FORW_ROOT ".{i}.DestIPAddress", uspd_get_value, DM_STRING);
-	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_RR_IPv4FORW_ROOT ".{i}.DestSubnetMask", uspd_get_value, DM_STRING);
-	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_RR_IPv4FORW_ROOT ".{i}.Enable", uspd_get_value, DM_BOOL);
-	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_RR_IPv4FORW_ROOT ".{i}.ForwardingMetric", uspd_get_value, DM_INT);
-	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_RR_IPv4FORW_ROOT ".{i}.ForwardingPolicy", uspd_get_value, DM_INT);
-	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_RR_IPv4FORW_ROOT ".{i}.GatewayIPAddress", uspd_get_value, DM_STRING);
-	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_RR_IPv4FORW_ROOT ".{i}.Interface", uspd_get_value, DM_STRING);
-	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_RR_IPv4FORW_ROOT ".{i}.Origin", uspd_get_value, DM_STRING);
-	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_RR_IPv4FORW_ROOT ".{i}.StaticRoute", uspd_get_value, DM_BOOL);
-	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_RR_IPv4FORW_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
+#define ROUTING_ROUTER_IPv4FORW_ROOT "Device.Routing.Router.{i}.IPv4Forwarding"
+	err |= USP_REGISTER_Param_NumEntries(ROUTING_ROUTER_ROOT ".{i}.IPv4ForwardingNumberOfEntries", ROUTING_ROUTER_IPv4FORW_ROOT ".{i}");
+	err |= USP_REGISTER_DBParam_Alias(ROUTING_ROUTER_IPv4FORW_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(ROUTING_ROUTER_IPv4FORW_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(ROUTING_ROUTER_IPv4FORW_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(ROUTING_ROUTER_IPv4FORW_ROOT ".{i}.StaticRoute", uspd_get_value, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(ROUTING_ROUTER_IPv4FORW_ROOT ".{i}.DestIPAddress", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(ROUTING_ROUTER_IPv4FORW_ROOT ".{i}.DestSubnetMask", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(ROUTING_ROUTER_IPv4FORW_ROOT ".{i}.ForwardingPolicy", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(ROUTING_ROUTER_IPv4FORW_ROOT ".{i}.GatewayIPAddress", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(ROUTING_ROUTER_IPv4FORW_ROOT ".{i}.Interface", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(ROUTING_ROUTER_IPv4FORW_ROOT ".{i}.Origin", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(ROUTING_ROUTER_IPv4FORW_ROOT ".{i}.ForwardingMetric", uspd_get_value, uspd_set_value, NULL, DM_INT);
 	char *unique_keys_forw[] = { "DestIPAddress", "DestSubnetMask", "ForwardingPolicy", "GatewayIPAddress", "Interface", "ForwardingMetric" };
-	err |= USP_REGISTER_Object_UniqueKey(DEVICE_RR_IPv4FORW_ROOT ".{i}", unique_keys_forw, NUM_ELEM(unique_keys_forw));
+	err |= USP_REGISTER_Object_UniqueKey(ROUTING_ROUTER_IPv4FORW_ROOT ".{i}", unique_keys_forw, NUM_ELEM(unique_keys_forw));
 
-#define DEVICE_RR_IPv6FORW_ROOT "Device.Routing.Router.{i}.IPv6Forwarding"
-	err |= USP_REGISTER_Param_NumEntries(DEVICE_ROUTING_ROUTER_ROOT".{i}.IPv6ForwardingNumberOfEntries", DEVICE_RR_IPv6FORW_ROOT ".{i}");
-	err |= USP_REGISTER_DBParam_Alias(DEVICE_RR_IPv6FORW_ROOT ".{i}.Alias", NULL);
-	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_RR_IPv6FORW_ROOT ".{i}.DestIPPrefix", uspd_get_value, DM_STRING);
-	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_RR_IPv6FORW_ROOT ".{i}.Enable", uspd_get_value, DM_BOOL);
-	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_RR_IPv6FORW_ROOT ".{i}.ExpirationTime", uspd_get_value, DM_DATETIME);
-	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_RR_IPv6FORW_ROOT ".{i}.ForwardingMetric", uspd_get_value, DM_INT);
-	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_RR_IPv6FORW_ROOT ".{i}.ForwardingPolicy", uspd_get_value, DM_INT);
-	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_RR_IPv6FORW_ROOT ".{i}.Interface", uspd_get_value, DM_STRING);
-	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_RR_IPv6FORW_ROOT ".{i}.NextHop", uspd_get_value, DM_STRING);
-	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_RR_IPv6FORW_ROOT ".{i}.Origin", uspd_get_value, DM_STRING);
-	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_RR_IPv6FORW_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
+#define ROUTING_ROUTER_IPv6FORW_ROOT "Device.Routing.Router.{i}.IPv6Forwarding"
+	err |= USP_REGISTER_Param_NumEntries(ROUTING_ROUTER_ROOT ".{i}.IPv6ForwardingNumberOfEntries", ROUTING_ROUTER_IPv6FORW_ROOT ".{i}");
+	err |= USP_REGISTER_DBParam_Alias(ROUTING_ROUTER_IPv6FORW_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(ROUTING_ROUTER_IPv6FORW_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(ROUTING_ROUTER_IPv6FORW_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(ROUTING_ROUTER_IPv6FORW_ROOT ".{i}.DestIPPrefix", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(ROUTING_ROUTER_IPv6FORW_ROOT ".{i}.ForwardingPolicy", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(ROUTING_ROUTER_IPv6FORW_ROOT ".{i}.NextHop", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(ROUTING_ROUTER_IPv6FORW_ROOT ".{i}.Interface", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(ROUTING_ROUTER_IPv6FORW_ROOT ".{i}.Origin", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(ROUTING_ROUTER_IPv6FORW_ROOT ".{i}.ForwardingMetric", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(ROUTING_ROUTER_IPv6FORW_ROOT ".{i}.ExpirationTime", uspd_get_value, DM_DATETIME);
 	char *unique_keys_forw6[] = { "DestIPPrefix", "ForwardingPolicy", "NextHop", "Interface", "ForwardingMetric" };
-	err |= USP_REGISTER_Object_UniqueKey(DEVICE_RR_IPv6FORW_ROOT ".{i}", unique_keys_forw6, NUM_ELEM(unique_keys_forw6));
+	err |= USP_REGISTER_Object_UniqueKey(ROUTING_ROUTER_IPv6FORW_ROOT ".{i}", unique_keys_forw6, NUM_ELEM(unique_keys_forw6));
+
+#define ROUTING_ROUTEINFO_ROOT "Device.Routing.RouteInformation"
+	err |= USP_REGISTER_VendorParam_ReadOnly(ROUTING_ROUTEINFO_ROOT ".Enable", uspd_get_value, DM_BOOL);
+#define ROUTING_ROUTEINFO_IS_ROOT ROUTING_ROUTEINFO_ROOT ".InterfaceSetting"
+	err |= USP_REGISTER_Param_NumEntries(ROUTING_ROUTEINFO_ROOT ".InterfaceSettingNumberOfEntries", ROUTING_ROUTEINFO_IS_ROOT ".{i}");
+	err |= USP_REGISTER_DBParam_Alias(ROUTING_ROUTEINFO_IS_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(ROUTING_ROUTEINFO_IS_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(ROUTING_ROUTEINFO_IS_ROOT ".{i}.Interface", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(ROUTING_ROUTEINFO_IS_ROOT ".{i}.SourceRouter", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(ROUTING_ROUTEINFO_IS_ROOT ".{i}.PreferredRouteFlag", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(ROUTING_ROUTEINFO_IS_ROOT ".{i}.Prefix", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(ROUTING_ROUTEINFO_IS_ROOT ".{i}.RouteLifetime", uspd_get_value, DM_DATETIME);
+	char *unique_keys_rinfo[] = { "Interface" };
+	err |= USP_REGISTER_Object_UniqueKey(ROUTING_ROUTEINFO_IS_ROOT ".{i}", unique_keys_rinfo, NUM_ELEM(unique_keys_rinfo));
 	// Exit if any errors occurred
 	if (err != USP_ERR_OK)
 	{
@@ -1816,7 +1877,7 @@ int vendor_Hosts_init(void)
 	err |= USP_REGISTER_Object_UniqueKey(HOSTS_HOST_IPV4_ROOT ".{i}", unique_keys_hosts_host_ipv4, NUM_ELEM(unique_keys_hosts_host_ipv4));
 
 #define HOSTS_HOST_IPV6_ROOT "Device.Hosts.Host.{i}.IPv6Address"
-	err |= USP_REGISTER_Param_NumEntries(HOSTS_HOST_ROOT ".{i}.IPv4AddressNumberOfEntries", HOSTS_HOST_IPV6_ROOT ".{i}");
+	err |= USP_REGISTER_Param_NumEntries(HOSTS_HOST_ROOT ".{i}.IPv6AddressNumberOfEntries", HOSTS_HOST_IPV6_ROOT ".{i}");
 	err |= USP_REGISTER_VendorParam_ReadOnly(HOSTS_HOST_IPV6_ROOT ".{i}.IPAddress", uspd_get_value, DM_STRING);
 	char *unique_keys_hosts_host_ipv6[] = { "IPAddress" };
 	err |= USP_REGISTER_Object_UniqueKey(HOSTS_HOST_IPV6_ROOT ".{i}", unique_keys_hosts_host_ipv6, NUM_ELEM(unique_keys_hosts_host_ipv6));
@@ -1843,10 +1904,10 @@ int vendor_DNS_init(void)
 #define DNS_CLIENT_SERVER_ROOT "Device.DNS.Client.Server"
 	err |= USP_REGISTER_Param_NumEntries(DEVICE_DNS_ROOT ".Client.ServerNumberOfEntries", DNS_CLIENT_SERVER_ROOT ".{i}");
 	err |= USP_REGISTER_DBParam_Alias(DNS_CLIENT_SERVER_ROOT ".{i}.Alias", NULL);
-	err |= USP_REGISTER_VendorParam_ReadWrite(DNS_CLIENT_SERVER_ROOT "{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DNS_CLIENT_SERVER_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
 	err |= USP_REGISTER_VendorParam_ReadOnly(DNS_CLIENT_SERVER_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
-	err |= USP_REGISTER_VendorParam_ReadWrite(DNS_CLIENT_SERVER_ROOT "{i}.DNSServer", uspd_get_value, uspd_set_value, NULL, DM_STRING);
-	err |= USP_REGISTER_VendorParam_ReadWrite(DNS_CLIENT_SERVER_ROOT "{i}.Interface", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DNS_CLIENT_SERVER_ROOT ".{i}.DNSServer", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DNS_CLIENT_SERVER_ROOT ".{i}.Interface", uspd_get_value, uspd_set_value, NULL, DM_STRING);
 	err |= USP_REGISTER_VendorParam_ReadOnly(DNS_CLIENT_SERVER_ROOT ".{i}.Type", uspd_get_value, DM_STRING);
 	char *unique_keys_dns_client_server[] = { "DNSServer" };
 	err |= USP_REGISTER_Object_UniqueKey(DNS_CLIENT_SERVER_ROOT ".{i}", unique_keys_dns_client_server, NUM_ELEM(unique_keys_dns_client_server));
@@ -1858,10 +1919,10 @@ int vendor_DNS_init(void)
 #define DNS_RELAY_FW_ROOT DNS_RELAY_ROOT ".Forwarding"
 	err |= USP_REGISTER_Param_NumEntries(DNS_RELAY_ROOT ".ForwardNumberOfEntries", DNS_RELAY_FW_ROOT ".{i}");
 	err |= USP_REGISTER_DBParam_Alias(DNS_RELAY_FW_ROOT ".{i}.Alias", NULL);
-	err |= USP_REGISTER_VendorParam_ReadWrite(DNS_RELAY_FW_ROOT "{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DNS_RELAY_FW_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
 	err |= USP_REGISTER_VendorParam_ReadOnly(DNS_RELAY_FW_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
-	err |= USP_REGISTER_VendorParam_ReadWrite(DNS_RELAY_FW_ROOT "{i}.DNSServer", uspd_get_value, uspd_set_value, NULL, DM_STRING);
-	err |= USP_REGISTER_VendorParam_ReadWrite(DNS_RELAY_FW_ROOT "{i}.Interface", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DNS_RELAY_FW_ROOT ".{i}.DNSServer", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DNS_RELAY_FW_ROOT ".{i}.Interface", uspd_get_value, uspd_set_value, NULL, DM_STRING);
 	err |= USP_REGISTER_VendorParam_ReadOnly(DNS_RELAY_FW_ROOT ".{i}.Type", uspd_get_value, DM_STRING);
 	char *unique_keys_dns_relay_fw_server[] = { "DNSServer" };
 	err |= USP_REGISTER_Object_UniqueKey(DNS_RELAY_FW_ROOT ".{i}", unique_keys_dns_relay_fw_server, NUM_ELEM(unique_keys_dns_relay_fw_server));
@@ -1875,7 +1936,7 @@ int vendor_DNS_init(void)
 	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_DNS_DIAGn_ROOT ".Timeout", uspd_get_value, uspd_set_value, NULL, DM_UINT);
 
 	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_DNS_DIAGn_ROOT ".SuccessCount", uspd_get_value, DM_UINT);
-	err |= USP_REGISTER_Param_NumEntries(DEVICE_DNS_DIAGn_ROOT".ResultNumberOfEntries", DEVICE_DNS_DIAGn_ROOT".Result.{i}");
+	// err |= USP_REGISTER_Param_NumEntries(DEVICE_DNS_DIAGn_ROOT ".ResultNumberOfEntries", DEVICE_DNS_DIAGn_ROOT".Result.{i}");
 
 
 #define DNS_SD_ROOT "Device.DNS.SD"
@@ -1885,27 +1946,27 @@ int vendor_DNS_init(void)
 #define DNS_SD_SERVICE_ROOT DNS_SD_ROOT ".Service"
 	err |= USP_REGISTER_Param_NumEntries(DNS_SD_ROOT ".ServiceNumberOfEntries", DNS_SD_SERVICE_ROOT ".{i}");
 	err |= USP_REGISTER_VendorParam_ReadOnly(DNS_SD_SERVICE_ROOT ".{i}.InstanceName", uspd_get_value, DM_STRING);
-	err |= USP_REGISTER_VendorParam_ReadOnly(DNS_SD_SERVICE_ROOT "{i}.ApplicationProtocol", uspd_get_value, DM_STRING);
-	err |= USP_REGISTER_VendorParam_ReadOnly(DNS_SD_SERVICE_ROOT "{i}.TransportProtocol", uspd_get_value, DM_STRING);
-	err |= USP_REGISTER_VendorParam_ReadOnly(DNS_SD_SERVICE_ROOT "{i}.Domain", uspd_get_value, DM_STRING);
-	err |= USP_REGISTER_VendorParam_ReadOnly(DNS_SD_SERVICE_ROOT "{i}.Port", uspd_get_value, DM_UINT);
-	err |= USP_REGISTER_VendorParam_ReadOnly(DNS_SD_SERVICE_ROOT "{i}.Target", uspd_get_value, DM_STRING);
-	err |= USP_REGISTER_VendorParam_ReadOnly(DNS_SD_SERVICE_ROOT "{i}.LastUpdate", uspd_get_value, DM_DATETIME);
-	err |= USP_REGISTER_VendorParam_ReadOnly(DNS_SD_SERVICE_ROOT "{i}.Status", uspd_get_value, DM_STRING);
-	err |= USP_REGISTER_VendorParam_ReadOnly(DNS_SD_SERVICE_ROOT "{i}.Host", uspd_get_value, DM_STRING);
-	err |= USP_REGISTER_VendorParam_ReadOnly(DNS_SD_SERVICE_ROOT "{i}.TimeToLive", uspd_get_value, DM_UINT);
-	err |= USP_REGISTER_VendorParam_ReadOnly(DNS_SD_SERVICE_ROOT "{i}.Priority", uspd_get_value, DM_UINT);
-	err |= USP_REGISTER_VendorParam_ReadOnly(DNS_SD_SERVICE_ROOT "{i}.Weight", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DNS_SD_SERVICE_ROOT ".{i}.ApplicationProtocol", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DNS_SD_SERVICE_ROOT ".{i}.TransportProtocol", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DNS_SD_SERVICE_ROOT ".{i}.Domain", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DNS_SD_SERVICE_ROOT ".{i}.Port", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DNS_SD_SERVICE_ROOT ".{i}.Target", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DNS_SD_SERVICE_ROOT ".{i}.LastUpdate", uspd_get_value, DM_DATETIME);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DNS_SD_SERVICE_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DNS_SD_SERVICE_ROOT ".{i}.Host", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DNS_SD_SERVICE_ROOT ".{i}.TimeToLive", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DNS_SD_SERVICE_ROOT ".{i}.Priority", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DNS_SD_SERVICE_ROOT ".{i}.Weight", uspd_get_value, DM_UINT);
 	char *unique_keys_dns_sd_service[] = { "InstanceName" };
 	err |= USP_REGISTER_Object_UniqueKey(DNS_SD_SERVICE_ROOT ".{i}", unique_keys_dns_sd_service, NUM_ELEM(unique_keys_dns_sd_service));
 
 
 #define DNS_SD_SERVICE_TR_ROOT DNS_SD_SERVICE_ROOT ".{i}.TextRecord"
 	err |= USP_REGISTER_Param_NumEntries(DNS_SD_SERVICE_ROOT ".{i}.TextRecordNumberOfEntries", DNS_SD_SERVICE_TR_ROOT ".{i}");
-	err |= USP_REGISTER_VendorParam_ReadOnly(DNS_SD_SERVICE_ROOT "{i}.Key", uspd_get_value, DM_STRING);
-	err |= USP_REGISTER_VendorParam_ReadOnly(DNS_SD_SERVICE_ROOT "{i}.Value", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DNS_SD_SERVICE_TR_ROOT ".{i}.Key", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DNS_SD_SERVICE_TR_ROOT ".{i}.Value", uspd_get_value, DM_STRING);
 	char *unique_keys_dns_sd_service_tr[] = { "Key" };
-	err |= USP_REGISTER_Object_UniqueKey(DNS_SD_SERVICE_ROOT ".{i}", unique_keys_dns_sd_service_tr, NUM_ELEM(unique_keys_dns_sd_service_tr));
+	err |= USP_REGISTER_Object_UniqueKey(DNS_SD_SERVICE_TR_ROOT ".{i}", unique_keys_dns_sd_service_tr, NUM_ELEM(unique_keys_dns_sd_service_tr));
 
 	// Exit if any errors occurred
 	if (err != USP_ERR_OK)
@@ -1920,10 +1981,32 @@ int vendor_DNS_init(void)
 int vendor_NAT_init(void)
 {
 	int err = USP_ERR_OK;
-#define DEVICE_NAT_INT_ROOT "Device.NAT.InterfaceSetting"
-	err |= USP_REGISTER_DBParam_Alias(DEVICE_NAT_INT_ROOT ".{i}.Alias", NULL);
-	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_NAT_INT_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
-	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_NAT_INT_ROOT ".{i}.Interface", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+#define NAT_INT_ROOT "Device.NAT.InterfaceSetting"
+	err |= USP_REGISTER_Param_NumEntries("Device.NAT.InterfaceSettingNumberOfEntries", NAT_INT_ROOT ".{i}");
+	err |= USP_REGISTER_DBParam_Alias(NAT_INT_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(NAT_INT_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(NAT_INT_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(NAT_INT_ROOT ".{i}.Interface", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	char *unique_keys_nat_int[] = { "Interface" };
+	err |= USP_REGISTER_Object_UniqueKey(NAT_INT_ROOT ".{i}", unique_keys_nat_int, NUM_ELEM(unique_keys_nat_int));
+
+#define NAT_PORTMAP_ROOT "Device.NAT.PortMapping"
+	err |= USP_REGISTER_Param_NumEntries("Device.NAT.PortMappingNumberOfEntries", NAT_PORTMAP_ROOT ".{i}");
+	err |= USP_REGISTER_DBParam_Alias(NAT_PORTMAP_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(NAT_PORTMAP_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(NAT_PORTMAP_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(NAT_PORTMAP_ROOT ".{i}.Interface", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(NAT_PORTMAP_ROOT ".{i}.AllInterfaces", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(NAT_PORTMAP_ROOT ".{i}.LeaseDuration", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(NAT_PORTMAP_ROOT ".{i}.RemoteHost", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(NAT_PORTMAP_ROOT ".{i}.ExternalPort", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(NAT_PORTMAP_ROOT ".{i}.ExternalPortEndRange", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(NAT_PORTMAP_ROOT ".{i}.InternalPort", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(NAT_PORTMAP_ROOT ".{i}.Protocol", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(NAT_PORTMAP_ROOT ".{i}.InternalClient", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(NAT_PORTMAP_ROOT ".{i}.Description", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	char *unique_keys_nat_pm[] = { "RemoteHost", "ExternalPort", "Protocol" };
+	err |= USP_REGISTER_Object_UniqueKey(NAT_PORTMAP_ROOT ".{i}", unique_keys_nat_pm, NUM_ELEM(unique_keys_nat_pm));
 	// Exit if any errors occurred
 	if (err != USP_ERR_OK)
 	{
@@ -1972,7 +2055,7 @@ int vendor_DHCPv4_init(void)
 	err |= USP_REGISTER_Object_UniqueKey(DHCPv4_CLIENT_ROOT ".{i}", unique_keys_dhcp_client, NUM_ELEM(unique_keys_dhcp_client));
 
 #define DHCPv4_CLIENT_SENTOP_ROOT "Device.DHCPv4.Client.{i}.SentOption"
-	err |= USP_REGISTER_Param_NumEntries(DHCPv4_CLIENT_ROOT".{i}.SentOptionNumberOfEntries", DHCPv4_CLIENT_SENTOP_ROOT ".{i}");
+	err |= USP_REGISTER_Param_NumEntries(DHCPv4_CLIENT_ROOT ".{i}.SentOptionNumberOfEntries", DHCPv4_CLIENT_SENTOP_ROOT ".{i}");
 	err |= USP_REGISTER_DBParam_Alias(DHCPv4_CLIENT_SENTOP_ROOT ".{i}.Alias", NULL);
 	err |= USP_REGISTER_VendorParam_ReadWrite(DHCPv4_CLIENT_SENTOP_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
 	err |= USP_REGISTER_VendorParam_ReadWrite(DHCPv4_CLIENT_SENTOP_ROOT ".{i}.Tag", uspd_get_value, uspd_set_value, NULL, DM_UINT);
@@ -1981,7 +2064,7 @@ int vendor_DHCPv4_init(void)
 	err |= USP_REGISTER_Object_UniqueKey(DHCPv4_CLIENT_SENTOP_ROOT ".{i}", unique_keys_sent, NUM_ELEM(unique_keys_sent));
 
 #define DHCPv4_CLIENT_REQ_ROOT "Device.DHCPv4.Client.{i}.ReqOption"
-	err |= USP_REGISTER_Param_NumEntries(DHCPv4_CLIENT_ROOT".{i}.ReqOptionNumberOfEntries", DHCPv4_CLIENT_REQ_ROOT ".{i}");
+	err |= USP_REGISTER_Param_NumEntries(DHCPv4_CLIENT_ROOT ".{i}.ReqOptionNumberOfEntries", DHCPv4_CLIENT_REQ_ROOT ".{i}");
 	err |= USP_REGISTER_DBParam_Alias(DHCPv4_CLIENT_REQ_ROOT ".{i}.Alias", NULL);
 	err |= USP_REGISTER_VendorParam_ReadWrite(DHCPv4_CLIENT_REQ_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
 	err |= USP_REGISTER_VendorParam_ReadWrite(DHCPv4_CLIENT_REQ_ROOT ".{i}.Order", uspd_get_value, uspd_set_value, NULL, DM_UINT);
@@ -1992,9 +2075,9 @@ int vendor_DHCPv4_init(void)
 	err |= USP_REGISTER_Object_UniqueKey(DHCPv4_CLIENT_REQ_ROOT ".{i}", unique_keys_req, NUM_ELEM(unique_keys_req));
 
 #define DHCPV4_RELAY_ROOT "Device.DHCPv4.Relay"
-#define RELAY_FWD_ROOT "Device.DHCPv4.Relay.Forwarding"
 	err |= USP_REGISTER_VendorParam_ReadWrite(DHCPV4_RELAY_ROOT ".Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
 	err |= USP_REGISTER_VendorParam_ReadOnly(DHCPV4_RELAY_ROOT ".Status", uspd_get_value, DM_STRING);
+#define RELAY_FWD_ROOT "Device.DHCPv4.Relay.Forwarding"
 
 	err |= USP_REGISTER_Param_NumEntries(DHCPV4_RELAY_ROOT ".ForwardingNumberOfEntries", "Device.DHCPv4.Relay.Forwarding.{i}");
 	err |= USP_REGISTER_DBParam_Alias(RELAY_FWD_ROOT ".{i}.Alias", NULL);
@@ -2014,12 +2097,12 @@ int vendor_DHCPv4_init(void)
 	err |= USP_REGISTER_VendorParam_ReadWrite(RELAY_FWD_ROOT ".{i}.ChaddrExclude", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
 	err |= USP_REGISTER_VendorParam_ReadWrite(RELAY_FWD_ROOT ".{i}.LocallyServed", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
 	err |= USP_REGISTER_VendorParam_ReadWrite(RELAY_FWD_ROOT ".{i}.DHCPServerIPAddress", uspd_get_value, uspd_set_value, NULL, DM_STRING);
-
-	err |= USP_REGISTER_VendorParam_ReadWrite("Device.DHCPv4.Server.Enable", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	char *unique_keys_relay_fw[] = { "Alias" };
+	err |= USP_REGISTER_Object_UniqueKey(RELAY_FWD_ROOT ".{i}", unique_keys_relay_fw, NUM_ELEM(unique_keys_relay_fw));
 
 #define DHCPv4_SERVER_ROOT "Device.DHCPv4.Server"
-#define DHCPv4_SERVER_POOL "Device.DHCPv4.Server.Pool"
 	err |= USP_REGISTER_VendorParam_ReadWrite(DHCPv4_SERVER_ROOT ".Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+#define DHCPv4_SERVER_POOL "Device.DHCPv4.Server.Pool"
 	err |= USP_REGISTER_Param_NumEntries(DHCPv4_SERVER_ROOT ".PoolNumberOfEntries", DHCPv4_SERVER_POOL ".{i}");
 	err |= USP_REGISTER_DBParam_Alias(DHCPv4_SERVER_POOL ".{i}.Alias", NULL);
 	err |= USP_REGISTER_VendorParam_ReadWrite(DHCPv4_SERVER_POOL ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
@@ -2044,6 +2127,8 @@ int vendor_DHCPv4_init(void)
 	err |= USP_REGISTER_VendorParam_ReadWrite(DHCPv4_SERVER_POOL ".{i}.IPRouters", uspd_get_value, uspd_set_value, NULL, DM_STRING);
 	err |= USP_REGISTER_VendorParam_ReadWrite(DHCPv4_SERVER_POOL ".{i}.LeaseTime", uspd_get_value, uspd_set_value, NULL, DM_INT);
 	err |= USP_REGISTER_VendorParam_ReadWrite(DHCPv4_SERVER_POOL ".{i}.X_IOPSYS_EU_DHCPServerConfigurable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	char *unique_keys_v4_srv_pool[] = { "Alias" };
+	err |= USP_REGISTER_Object_UniqueKey(DHCPv4_SERVER_POOL ".{i}", unique_keys_v4_srv_pool, NUM_ELEM(unique_keys_v4_srv_pool));
 
 #define DHCPv4_SERVER_POOL_STATIC "Device.DHCPv4.Server.Pool.{i}.StaticAddress"
 	err |= USP_REGISTER_Param_NumEntries(DHCPv4_SERVER_POOL ".{i}.StaticAddressNumberOfEntries", DHCPv4_SERVER_POOL_STATIC ".{i}");
@@ -2119,9 +2204,6 @@ int vendor_DHCPv6_init(void)
 	err |= USP_REGISTER_VendorParam_ReadWrite(DHCPv6_CLIENT_ROOT ".{i}.Renew", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
 	char *unique_keys_dhcpv6_client[] = { "Interface" };
 	err |= USP_REGISTER_Object_UniqueKey(DHCPv6_CLIENT_ROOT ".{i}", unique_keys_dhcpv6_client, NUM_ELEM(unique_keys_dhcpv6_client));
-
-	err |= USP_REGISTER_Param_NumEntries(DHCPv6_CLIENT_ROOT".{i}.ReceivedOptionNumberOfEntries", DHCPv6_CLIENT_ROOT ".{i}.ReceivedOption.{i}");
-	err |= USP_REGISTER_Param_NumEntries(DHCPv6_CLIENT_ROOT".{i}.SentOptionNumberOfEntries", DHCPv6_CLIENT_ROOT ".{i}.SentOption.{i}");
 
 #define DHCPv6_CLIENT_SERVER_ROOT "Device.DHCPv6.Client.{i}.Server"
 	err |= USP_REGISTER_Param_NumEntries(DHCPv6_CLIENT_ROOT".{i}.ServerNumberOfEntries", DHCPv6_CLIENT_SERVER_ROOT ".{i}");
@@ -2254,19 +2336,19 @@ int vendor_IEEE8021x_init(void)
 int vendor_Users_init(void)
 {
 	int err = USP_ERR_OK;
-#define DEVICE_USERS_ROOT "Device.Users.User"
+#define USERS_USER_ROOT "Device.Users.User"
 	// Register parameters implemented by this component
-	err |= USP_REGISTER_Object(DEVICE_USERS_ROOT ".{i}", NULL, NULL, NULL, NULL, NULL, NULL);
-	err |= USP_REGISTER_DBParam_Alias(DEVICE_USERS_ROOT ".{i}.Alias", NULL);
-	err |= USP_REGISTER_Param_NumEntries("Device.Users.UserNumberOfEntries", DEVICE_USERS_ROOT ".{i}");
-	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_USERS_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
-	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_USERS_ROOT ".{i}.Language", uspd_get_value, uspd_set_value, NULL, DM_STRING);
-	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_USERS_ROOT ".{i}.Password", uspd_get_value, uspd_set_value, NULL, DM_STRING);
-	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_USERS_ROOT ".{i}.RemoteAccessCapable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
-	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_USERS_ROOT ".{i}.Username", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_Object(USERS_USER_ROOT ".{i}", NULL, NULL, NULL, NULL, NULL, NULL);
+	err |= USP_REGISTER_DBParam_Alias(USERS_USER_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_Param_NumEntries("Device.Users.UserNumberOfEntries", USERS_USER_ROOT ".{i}");
+	err |= USP_REGISTER_VendorParam_ReadWrite(USERS_USER_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(USERS_USER_ROOT ".{i}.RemoteAccessCapable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(USERS_USER_ROOT ".{i}.Username", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(USERS_USER_ROOT ".{i}.Password", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(USERS_USER_ROOT ".{i}.Language", uspd_get_value, uspd_set_value, NULL, DM_STRING);
 
-	char *unique_keys[] = { "Username" };
-	err |= USP_REGISTER_Object_UniqueKey(DEVICE_USERS_ROOT ".{i}", unique_keys, NUM_ELEM(unique_keys));
+	char *unique_keys_user[] = { "Username" };
+	err |= USP_REGISTER_Object_UniqueKey(USERS_USER_ROOT ".{i}", unique_keys_user, NUM_ELEM(unique_keys_user));
 
 	// Exit if any errors occurred
 	if (err != USP_ERR_OK)
