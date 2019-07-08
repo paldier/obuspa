@@ -1763,6 +1763,21 @@ int vendor_Routing_init(void)
 int vendor_NeighborDiscovery_init(void)
 {
 	int err = USP_ERR_OK;
+#define DEVICE_ND_ROOT "Device.NeighborDiscovery"
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_ND_ROOT ".Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+#define ND_IS_ROOT DEVICE_ND_ROOT ".InterfaceSetting"
+	err |= USP_REGISTER_Param_NumEntries(DEVICE_ND_ROOT ".InterfaceSettingNumberOfEntries", ND_IS_ROOT".{i}");
+	err |= USP_REGISTER_DBParam_Alias(ND_IS_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(ND_IS_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(ND_IS_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(ND_IS_ROOT ".{i}.Interface", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(ND_IS_ROOT ".{i}.RetransTimer", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(ND_IS_ROOT ".{i}.RtrSolicitationInterval", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(ND_IS_ROOT ".{i}.MaxRtrSolicitations", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(ND_IS_ROOT ".{i}.NUDEnable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(ND_IS_ROOT ".{i}.RSEnable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	char *unique_keys_nd[] = { "Interface" };
+	err |= USP_REGISTER_Object_UniqueKey(ND_IS_ROOT ".{i}", unique_keys_nd, NUM_ELEM(unique_keys_nd));
 	// Exit if any errors occurred
 	if (err != USP_ERR_OK)
 	{
@@ -1776,6 +1791,39 @@ int vendor_RouterAdvertisement_init(void)
 {
 	int err = USP_ERR_OK;
 	// Exit if any errors occurred
+#define DEVICE_ROUTER_AD_ROOT "Device.RouterAdvertisement"
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_ROUTER_AD_ROOT ".Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+#define ROUTER_AD_IS_ROOT DEVICE_ROUTER_AD_ROOT ".InterfaceSetting"
+	err |= USP_REGISTER_Param_NumEntries(DEVICE_ROUTER_AD_ROOT ".InterfaceSettingNumberOfEntries", ROUTER_AD_IS_ROOT".{i}");
+	err |= USP_REGISTER_DBParam_Alias(ROUTER_AD_IS_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(ROUTER_AD_IS_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(ROUTER_AD_IS_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(ROUTER_AD_IS_ROOT ".{i}.Interface", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(ROUTER_AD_IS_ROOT ".{i}.ManualPrefixes", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(ROUTER_AD_IS_ROOT ".{i}.Prefixes", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(ROUTER_AD_IS_ROOT ".{i}.MaxRtrAdvInterval", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(ROUTER_AD_IS_ROOT ".{i}.MinRtrAdvInterval", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(ROUTER_AD_IS_ROOT ".{i}.AdvDefaultLifetime", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(ROUTER_AD_IS_ROOT ".{i}.AdvManagedFlag", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(ROUTER_AD_IS_ROOT ".{i}.AdvOtherConfigFlag", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(ROUTER_AD_IS_ROOT ".{i}.AdvMobileAgentFlag", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(ROUTER_AD_IS_ROOT ".{i}.AdvPreferredRouterFlag", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(ROUTER_AD_IS_ROOT ".{i}.AdvNDProxyFlag", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(ROUTER_AD_IS_ROOT ".{i}.AdvLinkMTU", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(ROUTER_AD_IS_ROOT ".{i}.AdvReachableTime", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(ROUTER_AD_IS_ROOT ".{i}.AdvRetransTimer", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(ROUTER_AD_IS_ROOT ".{i}.AdvCurHopLimit", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	char *unique_keys_ra_is[] = { "Interface" };
+	err |= USP_REGISTER_Object_UniqueKey(ROUTER_AD_IS_ROOT ".{i}", unique_keys_ra_is, NUM_ELEM(unique_keys_ra_is));
+
+#define ROUTER_AD_IS_OPTION_ROOT ROUTER_AD_IS_ROOT ".{i}.Option"
+	err |= USP_REGISTER_Param_NumEntries(ROUTER_AD_IS_ROOT ".{i}.OptionNumberOfEntries", ROUTER_AD_IS_OPTION_ROOT".{i}");
+	err |= USP_REGISTER_DBParam_Alias(ROUTER_AD_IS_OPTION_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(ROUTER_AD_IS_OPTION_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(ROUTER_AD_IS_OPTION_ROOT ".{i}.Tag", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(ROUTER_AD_IS_OPTION_ROOT ".{i}.Value", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	char *unique_keys_ra_is_op[] = { "Tag" };
+	err |= USP_REGISTER_Object_UniqueKey(ROUTER_AD_IS_OPTION_ROOT ".{i}", unique_keys_ra_is_op, NUM_ELEM(unique_keys_ra_is_op));
 	if (err != USP_ERR_OK)
 	{
 	  return USP_ERR_INTERNAL_ERROR;
@@ -1788,6 +1836,22 @@ int vendor_RouterAdvertisement_init(void)
 int vendor_IPv6rd_init(void)
 {
 	int err = USP_ERR_OK;
+#define DEVICE_IPV6RD_ROOT "Device.IPv6rd"
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_IPV6RD_ROOT ".Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+#define IPV6RD_IS_ROOT DEVICE_IPV6RD_ROOT ".InterfaceSetting"
+	err |= USP_REGISTER_Param_NumEntries(DEVICE_IPV6RD_ROOT ".InterfaceSettingNumberOfEntries", IPV6RD_IS_ROOT".{i}");
+	err |= USP_REGISTER_DBParam_Alias(IPV6RD_IS_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPV6RD_IS_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPV6RD_IS_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPV6RD_IS_ROOT ".{i}.BorderRelayIPv4Addresses", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPV6RD_IS_ROOT ".{i}.AllTrafficToBorderRelay", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPV6RD_IS_ROOT ".{i}.SPIPv6Prefix", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPV6RD_IS_ROOT ".{i}.IPv4MaskLength", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPV6RD_IS_ROOT ".{i}.AddressSource", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPV6RD_IS_ROOT ".{i}.TunnelInterface", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPV6RD_IS_ROOT ".{i}.TunneledInterface", uspd_get_value, DM_STRING);
+	char *unique_keys_ipv6rd_is[] = { "Alias" };
+	err |= USP_REGISTER_Object_UniqueKey(IPV6RD_IS_ROOT ".{i}", unique_keys_ipv6rd_is, NUM_ELEM(unique_keys_ipv6rd_is));
 	// Exit if any errors occurred
 	if (err != USP_ERR_OK)
 	{
@@ -1814,6 +1878,212 @@ int vendor_DSLite_init(void)
 int vendor_QoS_init(void)
 {
 	int err = USP_ERR_OK;
+#define DEVICE_QOS_ROOT "Device.QoS"
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_QOS_ROOT ".MaxClassificationEntries", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_QOS_ROOT ".MaxAppEntries", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_QOS_ROOT ".MaxFlowEntries", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_QOS_ROOT ".MaxPolicerEntries", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_QOS_ROOT ".MaxQueueEntries", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_QOS_ROOT ".MaxShaperEntries", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_QOS_ROOT ".DefaultForwardingPolicy", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_QOS_ROOT ".DefaultTrafficClass", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_QOS_ROOT ".DefaultPolicer", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_QOS_ROOT ".DefaultQueue", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_QOS_ROOT ".DefaultDSCPMark", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_QOS_ROOT ".DefaultEthernetPriorityMark", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_QOS_ROOT ".DefaultInnerEthernetPriorityMark", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_QOS_ROOT ".AvailableAppList", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+#define QOS_CLASSIFICATION_ROOT "Device.QoS.Classification"
+	err |= USP_REGISTER_Param_NumEntries(DEVICE_QOS_ROOT ".ClassificationNumberOfEntries", QOS_CLASSIFICATION_ROOT".{i}");
+	err |= USP_REGISTER_DBParam_Alias(QOS_CLASSIFICATION_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(QOS_CLASSIFICATION_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.Order", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.DHCPType", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.Interface", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.AllInterfaces", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.DestIP", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.DestMask", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.DestIPExclude", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.SourceIP", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.SourceMask", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.SourceIPExclude", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.Protocol", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.ProtocolExclude", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.DestPort", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.DestPortRangeMax", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.DestPortExclude", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.SourcePort", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.SourcePortRangeMax", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.SourcePortExclude", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.SourceMACAddress", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.SourceMACMask", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.SourceMACExclude", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.DestMACAddress", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.DestMACMask", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.DestMACExclude", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.Ethertype", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.EthertypeExclude", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.SSAP", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.SSAPExclude", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.DSAP", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.DSAPExclude", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.LLCControl", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.LLCControlExclude", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.SNAPOUI", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.SNAPOUIExclude", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.SourceVendorClassID", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.SourceVendorClassIDv6", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.SourceVendorClassIDExclude", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.SourceVendorClassIDMode", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.DestVendorClassID", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.DestVendorClassIDv6", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.DestVendorClassIDExclude", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.DestVendorClassIDMode", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.SourceClientID", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.SourceClientIDExclude", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.DestClientID", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.DestClientIDExclude", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.SourceUserClassID", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.SourceUserClassIDExclude", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.DestUserClassID", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.DestUserClassIDExclude", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.SourceVendorSpecificInfo", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.SourceVendorSpecificInfoExclude", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.SourceVendorSpecificInfoEnterprise", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.SourceVendorSpecificInfoSubOption", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.DestVendorSpecificInfo", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.DestVendorSpecificInfoExclude", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.DestVendorSpecificInfoEnterprise", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.DestVendorSpecificInfoSubOption", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.TCPACK", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.TCPACKExclude", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.IPLengthMin", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.IPLengthMax", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.IPLengthExclude", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.DSCPCheck", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.DSCPExclude", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.DSCPMark", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.EthernetPriorityCheck", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.EthernetPriorityExclude", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.EthernetPriorityMark", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.InnerEthernetPriorityCheck", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.InnerEthernetPriorityExclude", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.InnerEthernetPriorityMark", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.EthernetDEICheck", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.EthernetDEIExclude", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.VLANIDCheck", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.VLANIDExclude", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.OutOfBandInfo", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.ForwardingPolicy", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.TrafficClass", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.Policer", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_CLASSIFICATION_ROOT ".{i}.App", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	char *unique_keys_qos_class[] = { "Alias" };
+	err |= USP_REGISTER_Object_UniqueKey(QOS_CLASSIFICATION_ROOT ".{i}", unique_keys_qos_class, NUM_ELEM(unique_keys_qos_class));
+
+#define QOS_APP_ROOT "Device.QoS.App"
+	err |= USP_REGISTER_Param_NumEntries(DEVICE_QOS_ROOT ".AppNumberOfEntries", QOS_APP_ROOT".{i}");
+	err |= USP_REGISTER_DBParam_Alias(QOS_APP_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_APP_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(QOS_APP_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_APP_ROOT ".{i}.ProtocolIdentifier", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_APP_ROOT ".{i}.Name", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_APP_ROOT ".{i}.DefaultForwardingPolicy", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_APP_ROOT ".{i}.DefaultTrafficClass", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_APP_ROOT ".{i}.DefaultPolicer", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_APP_ROOT ".{i}.DefaultDSCPMark", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_APP_ROOT ".{i}.DefaultEthernetPriorityMark", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_APP_ROOT ".{i}.DefaultInnerEthernetPriorityMark", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	char *unique_keys_qos_app[] = { "Alias" };
+	err |= USP_REGISTER_Object_UniqueKey(QOS_APP_ROOT ".{i}", unique_keys_qos_app, NUM_ELEM(unique_keys_qos_app));
+#define QOS_FLOW_ROOT "Device.QoS.Flow"
+	err |= USP_REGISTER_Param_NumEntries(DEVICE_QOS_ROOT ".FlowNumberOfEntries", QOS_FLOW_ROOT".{i}");
+	err |= USP_REGISTER_DBParam_Alias(QOS_FLOW_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_FLOW_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(QOS_FLOW_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_FLOW_ROOT ".{i}.Type", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_FLOW_ROOT ".{i}.TypeParameters", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_FLOW_ROOT ".{i}.Name", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_FLOW_ROOT ".{i}.App", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_FLOW_ROOT ".{i}.ForwardingPolicy", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_FLOW_ROOT ".{i}.TrafficClass", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_FLOW_ROOT ".{i}.Policer", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_FLOW_ROOT ".{i}.DSCPMark", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_FLOW_ROOT ".{i}.EthernetPriorityMark", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_FLOW_ROOT ".{i}.InnerEthernetPriorityMark", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	char *unique_keys_qos_flow[] = { "Alias" };
+	err |= USP_REGISTER_Object_UniqueKey(QOS_FLOW_ROOT ".{i}", unique_keys_qos_flow, NUM_ELEM(unique_keys_qos_flow));
+#define QOS_POLICER_ROOT "Device.QoS.Policer"
+	err |= USP_REGISTER_Param_NumEntries(DEVICE_QOS_ROOT ".PolicerNumberOfEntries", QOS_POLICER_ROOT".{i}");
+	err |= USP_REGISTER_DBParam_Alias(QOS_POLICER_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_POLICER_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(QOS_POLICER_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_POLICER_ROOT ".{i}.CommittedRate", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_POLICER_ROOT ".{i}.CommittedBurstSize", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_POLICER_ROOT ".{i}.ExcessBurstSize", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_POLICER_ROOT ".{i}.PeakRate", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_POLICER_ROOT ".{i}.PeakBurstSize", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_POLICER_ROOT ".{i}.MeterType", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_POLICER_ROOT ".{i}.PossibleMeterType", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_POLICER_ROOT ".{i}.ConformingAction", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_POLICER_ROOT ".{i}.PartialConformingAction", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_POLICER_ROOT ".{i}.NonConformingAction", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_POLICER_ROOT ".{i}.TotalCountedPackets", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_POLICER_ROOT ".{i}.TotalCountedBytes", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_POLICER_ROOT ".{i}.ConformingCountedPackets", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_POLICER_ROOT ".{i}.ConformingCountedBytes", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_POLICER_ROOT ".{i}.PartiallyConformingCountedPackets", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_POLICER_ROOT ".{i}.PartiallyConformingCountedBytes", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_POLICER_ROOT ".{i}.NonConformingCountedPackets", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_POLICER_ROOT ".{i}.NonConformingCountedBytes", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	char *unique_keys_qos_policer[] = { "Alias" };
+	err |= USP_REGISTER_Object_UniqueKey(QOS_POLICER_ROOT ".{i}", unique_keys_qos_policer, NUM_ELEM(unique_keys_qos_policer));
+#define QOS_QUEUE_ROOT "Device.QoS.Queue"
+	err |= USP_REGISTER_Param_NumEntries(DEVICE_QOS_ROOT ".QueueNumberOfEntries", QOS_QUEUE_ROOT".{i}");
+	err |= USP_REGISTER_DBParam_Alias(QOS_QUEUE_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_QUEUE_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(QOS_QUEUE_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_QUEUE_ROOT ".{i}.TrafficClasses", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_QUEUE_ROOT ".{i}.Interface", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_QUEUE_ROOT ".{i}.AllInterfaces", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(QOS_QUEUE_ROOT ".{i}.HardwareAssisted", uspd_get_value, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(QOS_QUEUE_ROOT ".{i}.BufferLength", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_QUEUE_ROOT ".{i}.Weight", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_QUEUE_ROOT ".{i}.Precedence", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_QUEUE_ROOT ".{i}.REDThreshold", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_QUEUE_ROOT ".{i}.REDPercentage", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_QUEUE_ROOT ".{i}.DropAlgorithm", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_QUEUE_ROOT ".{i}.SchedulerAlgorithm", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_QUEUE_ROOT ".{i}.ShapingRate", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_QUEUE_ROOT ".{i}.ShapingBurstSize", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	char *unique_keys_qos_queue[] = { "Alias" };
+	err |= USP_REGISTER_Object_UniqueKey(QOS_QUEUE_ROOT ".{i}", unique_keys_qos_queue, NUM_ELEM(unique_keys_qos_queue));
+#define QOS_QUEUESTATS_ROOT "Device.QoS.QueueStats"
+	err |= USP_REGISTER_Param_NumEntries(DEVICE_QOS_ROOT ".QueueStatsNumberOfEntries", QOS_QUEUESTATS_ROOT".{i}");
+	err |= USP_REGISTER_DBParam_Alias(QOS_QUEUESTATS_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_QUEUESTATS_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(QOS_QUEUESTATS_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_QUEUESTATS_ROOT ".{i}.Queue", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_QUEUESTATS_ROOT ".{i}.Interface", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_QUEUESTATS_ROOT ".{i}.OutputPackets", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_QUEUESTATS_ROOT ".{i}.OutputBytes", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_QUEUESTATS_ROOT ".{i}.DroppedPackets", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_QUEUESTATS_ROOT ".{i}.DroppedBytes", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_QUEUESTATS_ROOT ".{i}.QueueOccupancyPackets", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_QUEUESTATS_ROOT ".{i}.QueueOccupancyPercentage", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	char *unique_keys_qos_queuestats[] = { "Alias" };
+	err |= USP_REGISTER_Object_UniqueKey(QOS_QUEUESTATS_ROOT ".{i}", unique_keys_qos_queuestats, NUM_ELEM(unique_keys_qos_queuestats));
+#define QOS_SHAPER_ROOT "Device.QoS.Shaper"
+	err |= USP_REGISTER_Param_NumEntries(DEVICE_QOS_ROOT ".ShaperNumberOfEntries", QOS_SHAPER_ROOT".{i}");
+	err |= USP_REGISTER_DBParam_Alias(QOS_SHAPER_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_SHAPER_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(QOS_SHAPER_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_SHAPER_ROOT ".{i}.Interface", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_SHAPER_ROOT ".{i}.ShapingRate", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(QOS_SHAPER_ROOT ".{i}.ShapingBurstSize", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	char *unique_keys_qos_shaper[] = { "Interface" };
+	err |= USP_REGISTER_Object_UniqueKey(QOS_SHAPER_ROOT ".{i}", unique_keys_qos_shaper, NUM_ELEM(unique_keys_qos_shaper));
 	// Exit if any errors occurred
 	if (err != USP_ERR_OK)
 	{
