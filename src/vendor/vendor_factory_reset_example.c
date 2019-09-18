@@ -89,6 +89,25 @@ static const kv_pair_t factory_reset_parameters[] =
     { "Device.STOMP.Connection.1.ServerRetryIntervalMultiplier", "2000" },
     { "Device.STOMP.Connection.1.ServerRetryMaxInterval", "30720" },
     { "Internal.Reboot.Cause", "LocalFactoryReset" },
+
+    // Provide a Boot event
+    { "Device.LocalAgent.Subscription.1.Alias", "cpe-1" },
+    { "Device.LocalAgent.Subscription.1.Recipient", "Device.LocalAgent.Controller.1" },
+    { "Device.LocalAgent.Subscription.1.ID", "default-boot-event-ACS" },
+    { "Device.LocalAgent.Subscription.1.CreationDate", "1970-01-01T00:00:00Z" },
+    { "Device.LocalAgent.Subscription.1.NotifType", "Event" },
+    { "Device.LocalAgent.Subscription.1.ReferenceList", "Device.Boot!" },
+    { "Device.LocalAgent.Subscription.1.Persistent", "true" },
+    { "Device.LocalAgent.Subscription.1.TimeToLive", "0" },
+    { "Device.LocalAgent.Subscription.1.NotifRetry", "true" },
+    { "Device.LocalAgent.Subscription.1.NotifExpiration", "0" },
+    { "Device.LocalAgent.Subscription.1.Enable", "true" },
+
+    { "Device.LocalAgent.Controller.1.BootParameter.1.ParameterName", "Device.DeviceInfo.SoftwareVersion" },
+    { "Device.LocalAgent.Controller.1.BootParameter.1.Enable", "true" },
+    { "Device.LocalAgent.Controller.1.BootParameter.2.ParameterName", "Device.LocalAgent.SoftwareVersion" },
+    { "Device.LocalAgent.Controller.1.BootParameter.2.Enable", "true" },
+
 };
 
 /*********************************************************************//**

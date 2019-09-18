@@ -42,12 +42,52 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <glob.h>
 
 #include "usp_err_codes.h"
 #include "vendor_defs.h"
 #include "vendor_api.h"
 #include "usp_api.h"
 #include "vendor_iopsys.h"
+
+#define ROOT_CERT_PATTERN "/etc/obuspa/*.der"
+
+static glob_t cert_paths;
+
+//-----------------------------------------------------------------------------
+// Vendor hook called back to obtain the trust store certificates
+const trust_store_t *GetMyTrustStore(int *num_trusted_certs)
+{
+
+    int num_certs = cert_paths.gl_pathc;
+    int cert_index = 0;
+    char **p;
+    trust_store_t *usp_agent_trust_store = (trust_store_t *)malloc(num_certs*sizeof(trust_store_t));
+    for(p=cert_paths.gl_pathv; *p != NULL; ++p) {
+        FILE *fp;
+        fp = fopen(*p, "rb");
+
+        if(!fp)
+            return NULL;
+
+        fseek(fp, 0, SEEK_END);
+        int size = ftell(fp);
+        rewind(fp);
+
+        unsigned char *eco_agent_root_der = (unsigned char *)malloc((size+1)*sizeof(char));
+
+        for( int i =0; i<size; ++i) {
+            fread(&eco_agent_root_der[i], size * sizeof(char) , 1, fp);
+        }
+
+        usp_agent_trust_store[cert_index].cert_data = eco_agent_root_der ;
+        usp_agent_trust_store[cert_index].cert_len = size ;
+        usp_agent_trust_store[cert_index].role = kCTrustRole_FullAccess;
+        cert_index++;
+    }
+    *num_trusted_certs = num_certs;
+    return usp_agent_trust_store;
+}
 
 /*********************************************************************//**
 **
@@ -73,6 +113,12 @@ int VENDOR_Init(void)
         return USP_ERR_INTERNAL_ERROR;
     }
 
+    // Hook trust store if certificate present in path
+    if ( 0 == glob(ROOT_CERT_PATTERN, 0, NULL, &cert_paths)) {
+        vendor_hook_cb_t   my_core_vendor_hooks = {0};
+        my_core_vendor_hooks.get_trust_store_cb  = GetMyTrustStore;
+        USP_REGISTER_CoreVendorHooks(&my_core_vendor_hooks);
+    }
     // If the code gets here, then registration was successful
     return USP_ERR_OK;
 }
