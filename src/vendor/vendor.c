@@ -50,7 +50,7 @@
 #include "usp_api.h"
 #include "vendor_iopsys.h"
 
-#define ROOT_CERT_PATTERN "/etc/obuspa/*.der"
+#define ROOT_CERT_PATTERN "/etc/obuspa/*.pem"
 
 static glob_t cert_paths;
 
@@ -65,27 +65,29 @@ const trust_store_t *GetMyTrustStore(int *num_trusted_certs)
     trust_store_t *usp_agent_trust_store = (trust_store_t *)malloc(num_certs*sizeof(trust_store_t));
     for(p=cert_paths.gl_pathv; *p != NULL; ++p) {
         FILE *fp;
-        fp = fopen(*p, "rb");
+        fp = fopen(*p, "r");
 
         if(!fp)
-            return NULL;
+            continue;
 
-        fseek(fp, 0, SEEK_END);
-        int size = ftell(fp);
-        rewind(fp);
-
-        unsigned char *eco_agent_root_der = (unsigned char *)malloc((size+1)*sizeof(char));
-
-        for( int i =0; i<size; ++i) {
-            fread(&eco_agent_root_der[i], size * sizeof(char) , 1, fp);
+        X509 *cert = PEM_read_X509(fp, NULL, NULL, NULL);
+        if (!cert) {
+            USP_LOG_Error("[%s:%d] Error parsing x509 cert",__func__, __LINE__);
+            fclose(fp);
+            continue;
         }
-
-        usp_agent_trust_store[cert_index].cert_data = eco_agent_root_der ;
-        usp_agent_trust_store[cert_index].cert_len = size ;
-        usp_agent_trust_store[cert_index].role = kCTrustRole_FullAccess;
-        cert_index++;
+        unsigned char *eco_agent_root_der = NULL;
+        int size = i2d_X509(cert, &eco_agent_root_der);
+        if(eco_agent_root_der) {
+            usp_agent_trust_store[cert_index].cert_data = eco_agent_root_der ;
+            usp_agent_trust_store[cert_index].cert_len = size ;
+            usp_agent_trust_store[cert_index].role = kCTrustRole_FullAccess;
+            cert_index++;
+        }
+        fclose(fp);
+        X509_free(cert);
     }
-    *num_trusted_certs = num_certs;
+    *num_trusted_certs = cert_index;
     return usp_agent_trust_store;
 }
 
