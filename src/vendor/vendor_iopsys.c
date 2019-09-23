@@ -156,6 +156,7 @@ int uspd_get(char *path, char *json_buff)
 		USP_LOG_Error("[%s:%d] ubus call failed for |%s|",__func__, __LINE__, path);
 		return USP_ERR_INTERNAL_ERROR;
 	}
+	ubus_free(ctx);
 	return USP_ERR_OK;
 }
 
@@ -266,6 +267,7 @@ int uspd_operate_sync(dm_req_t *req, char *command_key, kv_vector_t *input_args,
 		USP_LOG_Error("[%s:%d] ubus call failed for |%s|",__func__, __LINE__, path);
 		return USP_ERR_INTERNAL_ERROR;
 	}
+	ubus_free(ctx);
 	return USP_ERR_OK;
 }
 int process_dm_aliases(char *path)
@@ -333,6 +335,7 @@ bool uspd_set(char *path, char *value)
 		USP_LOG_Error("[%s:%d] ubus call failed for |%s|",__func__, __LINE__, path);
 		return false;
 	}
+	ubus_free(ctx);
 	return status;
 }
 /*********************************************************************//**
