@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <unistd.h>
 
 #include <libubus.h>
 #include <libubox/blobmsg_json.h>
@@ -39,6 +40,8 @@
 #include "json.h"
 #include "vendor_iopsys.h"
 
+// Timeout in milliseconds
+#define USPD_TIMEOUT 5000
 extern bool is_running_cli_local_command;
 
 char *dm_alias_list[] =
@@ -74,8 +77,9 @@ char *dm_alias_list[] =
 	//"Device.X_IOPSYS_EU_Owsd.X_IOPSYS_EU_ListenObj.*.Alias"
 };
 
-bool uspd_set(char *path, char *value);
-int iopsys_dm_instance_init(void);
+static bool uspd_set(char *path, char *value);
+static int iopsys_dm_instance_init(void);
+static int add_object_aliase(char *path);
 
 static void receive_call_result_data(struct ubus_request *req, int type, struct blob_attr *msg)
 {
@@ -87,8 +91,7 @@ static void receive_call_result_data(struct ubus_request *req, int type, struct 
 	str = (char *) blobmsg_format_json_indent(msg, true, -1);
 	strcpy(req->priv, str);
 
-	if(str)
-		free(str);
+	USP_SAFE_FREE(str);
 }
 static void receive_call_result_status(struct ubus_request *req, int type, struct blob_attr *msg)
 {
@@ -118,8 +121,7 @@ static void receive_call_result_status(struct ubus_request *req, int type, struc
 		}
 	}
 	json_delete(json);
-	if(json_str)
-		free(json_str);
+	USP_SAFE_FREE(json_str);
 }
 
 static void receive_data_print(struct ubus_request *req, int type, struct blob_attr *msg)
@@ -130,7 +132,7 @@ static void receive_data_print(struct ubus_request *req, int type, struct blob_a
 
 	str = blobmsg_format_json_indent(msg, true, -1);
 	USP_LOG_Info("%s", str);
-	free(str);
+	USP_SAFE_FREE(str);
 }
 
 int uspd_get(char *path, char *json_buff)
@@ -146,16 +148,105 @@ int uspd_get(char *path, char *json_buff)
 
 	if (ubus_lookup_id(ctx, USP_UBUS, &id)) {
 		USP_LOG_Error("[%s:%d] %s not present",__func__, __LINE__, USP_UBUS);
+		ubus_free(ctx);
 		return USP_ERR_INTERNAL_ERROR;
 	}
 
 	memset(&b, 0, sizeof(struct blob_buf));
 	blob_buf_init(&b, 0);
 	blobmsg_add_string(&b, "path", path);
-	if (ubus_invoke(ctx, id, "get", b.head, receive_call_result_data, json_buff, 5000)) {
+	if (ubus_invoke(ctx, id, "get", b.head, receive_call_result_data, json_buff, USPD_TIMEOUT)) {
 		USP_LOG_Error("[%s:%d] ubus call failed for |%s|",__func__, __LINE__, path);
+		ubus_free(ctx);
+		blob_buf_free(&b);
 		return USP_ERR_INTERNAL_ERROR;
 	}
+	blob_buf_free(&b);
+	ubus_free(ctx);
+	return USP_ERR_OK;
+}
+
+int uspd_add(dm_req_t *req)
+{
+	uint32_t id;
+	struct ubus_context *ctx = ubus_connect(NULL);
+	struct blob_buf b = { };
+
+	if (!ctx) {
+		USP_LOG_Error("[%s:%d] ubus_connect failed",__func__, __LINE__);
+		return USP_ERR_INTERNAL_ERROR;
+	}
+
+	if (!req) {
+		USP_LOG_Error("[%s:%d] req is null",__func__, __LINE__);
+		ubus_free(ctx);
+		return USP_ERR_INTERNAL_ERROR;
+	}
+
+	if (ubus_lookup_id(ctx, USP_UBUS, &id)) {
+		USP_LOG_Error("[%s:%d] %s not present",__func__, __LINE__, USP_UBUS);
+		ubus_free(ctx);
+		return USP_ERR_INTERNAL_ERROR;
+	}
+
+	memset(&b, 0, sizeof(struct blob_buf));
+	blob_buf_init(&b, 0);
+	blobmsg_add_string(&b, "path", req->path);
+	if (ubus_invoke(ctx, id, "add_object", b.head, receive_data_print, NULL, USPD_TIMEOUT)) {
+		USP_LOG_Error("[%s:%d] ubus call failed for |%s|",__func__, __LINE__, req->path);
+		blob_buf_free(&b);
+		ubus_free(ctx);
+		return USP_ERR_INTERNAL_ERROR;
+	}
+	blob_buf_free(&b);
+	ubus_free(ctx);
+	return USP_ERR_OK;
+}
+
+int uspd_add_notify(dm_req_t *req)
+{
+	char path[MAX_DM_PATH];
+	int err = USP_ERR_OK;
+
+	USP_SNPRINTF(path, sizeof(path), "%s.Alias", req->path);
+	err = add_object_aliase(path);
+
+	return err;
+}
+
+int uspd_del(dm_req_t *req)
+{
+	uint32_t id;
+	struct ubus_context *ctx = ubus_connect(NULL);
+	struct blob_buf b = { };
+
+	if (!ctx) {
+		USP_LOG_Error("[%s:%d] ubus_connect failed",__func__, __LINE__);
+		return USP_ERR_INTERNAL_ERROR;
+	}
+
+	if (!req) {
+		USP_LOG_Error("[%s:%d] req is null",__func__, __LINE__);
+		ubus_free(ctx);
+		return USP_ERR_INTERNAL_ERROR;
+	}
+
+	if (ubus_lookup_id(ctx, USP_UBUS, &id)) {
+		USP_LOG_Error("[%s:%d] %s not present",__func__, __LINE__, USP_UBUS);
+		ubus_free(ctx);
+		return USP_ERR_INTERNAL_ERROR;
+	}
+
+	memset(&b, 0, sizeof(struct blob_buf));
+	blob_buf_init(&b, 0);
+	blobmsg_add_string(&b, "path", req->path);
+	if (ubus_invoke(ctx, id, "del_object", b.head, receive_data_print, NULL, USPD_TIMEOUT)) {
+		USP_LOG_Error("[%s:%d] ubus call failed for |%s|",__func__, __LINE__, req->path);
+		ubus_free(ctx);
+		blob_buf_free(&b);
+		return USP_ERR_INTERNAL_ERROR;
+	}
+	blob_buf_free(&b);
 	ubus_free(ctx);
 	return USP_ERR_OK;
 }
@@ -251,11 +342,14 @@ int uspd_operate_sync(dm_req_t *req, char *command_key, kv_vector_t *input_args,
 
 	if (!ctx) {
 		USP_LOG_Error("[%s:%d] ubus_connect failed",__func__, __LINE__);
+		blob_buf_free(&b);
 		return USP_ERR_INTERNAL_ERROR;
 	}
 
 	if (ubus_lookup_id(ctx, USP_UBUS, &id)) {
 		USP_LOG_Error("[%s:%d] %s not present",__func__, __LINE__, USP_UBUS);
+		ubus_free(ctx);
+		blob_buf_free(&b);
 		return USP_ERR_INTERNAL_ERROR;
 	}
 
@@ -263,11 +357,14 @@ int uspd_operate_sync(dm_req_t *req, char *command_key, kv_vector_t *input_args,
 	blobmsg_add_string(&b, "action", action);
 
 	/* invoke a method on a specific object */
-	if (ubus_invoke(ctx, id, "operate", b.head, receive_data_print, NULL, 2000)) {
+	if (ubus_invoke(ctx, id, "operate", b.head, receive_data_print, NULL, USPD_TIMEOUT)) {
 		USP_LOG_Error("[%s:%d] ubus call failed for |%s|",__func__, __LINE__, path);
+		ubus_free(ctx);
+		blob_buf_free(&b);
 		return USP_ERR_INTERNAL_ERROR;
 	}
 	ubus_free(ctx);
+	blob_buf_free(&b);
 	return USP_ERR_OK;
 }
 int process_dm_aliases(char *path)
@@ -292,7 +389,7 @@ int process_dm_aliases(char *path)
 			parameter = json_find_member(node, "parameter");
 			valueNode = json_find_member(node, "value");
 			if((parameter->tag & valueNode->tag) == JSON_STRING) {
-				USP_LOG_Debug("parameter |%s|, value |%s|\n", parameter->string_, valueNode->string_);
+				USP_LOG_Debug("parameter |%s|, value |%s|", parameter->string_, valueNode->string_);
 				if(0 == strcmp(valueNode->string_, "")) {
 					sprintf(value, "cpe-%d", count);
 					uspd_set(parameter->string_, value);
@@ -310,7 +407,45 @@ int process_dm_aliases(char *path)
 	return(err);
 }
 
-bool uspd_set(char *path, char *value)
+static int add_object_aliase(char *path)
+{
+	int err = USP_ERR_OK;
+	char json_buff[MAX_DM_VALUE_LEN] = {'\0'};
+
+	if(USP_ERR_OK != uspd_get(path, json_buff))
+		return USP_ERR_GENERAL_FAILURE;
+
+	JsonNode *json, *parameters;
+	if((json = json_decode(json_buff)) == NULL) {
+		USP_LOG_Error("[%s:%d] json decode failed",__func__, __LINE__);
+		return USP_ERR_GENERAL_FAILURE;
+	}
+	if((parameters = json_find_member(json, "parameters")) != NULL) {
+		JsonNode *node;
+		json_foreach(node, parameters) {
+			JsonNode *parameter, *valueNode;
+			parameter = json_find_member(node, "parameter");
+			valueNode = json_find_member(node, "value");
+			if((parameter->tag & valueNode->tag) == JSON_STRING) {
+				USP_LOG_Debug("parameter |%s|, value |%s|", parameter->string_, valueNode->string_);
+				if(0 == strcmp(valueNode->string_, "")) {
+					char *alias=NULL;
+					err = DM_ACCESS_GetString(path, &alias);
+					uspd_set(path, alias);
+					USP_SAFE_FREE(alias);
+				} else {
+					err = DATA_MODEL_SetParameterInDatabase(parameter->string_, valueNode->string_);
+				}
+			}
+			json_delete(parameter);
+			json_delete(valueNode);
+		}
+	}
+	json_delete(json);
+	return(err);
+}
+
+static bool uspd_set(char *path, char *value)
 {
 	uint32_t id;
 	bool status = false;
@@ -324,6 +459,7 @@ bool uspd_set(char *path, char *value)
 
 	if (ubus_lookup_id(ctx, USP_UBUS, &id)) {
 		USP_LOG_Error("[%s:%d] %s not available",__func__, __LINE__, USP_UBUS);
+		ubus_free(ctx);
 		return USP_ERR_INTERNAL_ERROR;
 	}
 
@@ -331,10 +467,13 @@ bool uspd_set(char *path, char *value)
 	blob_buf_init(&b, 0);
 	blobmsg_add_string(&b, "path", path);
 	blobmsg_add_string(&b, "value", value);
-	if (ubus_invoke(ctx, id, "set", b.head, receive_call_result_status, &status, 2000)) {
+	if (ubus_invoke(ctx, id, "set", b.head, receive_call_result_status, &status, USPD_TIMEOUT)) {
 		USP_LOG_Error("[%s:%d] ubus call failed for |%s|",__func__, __LINE__, path);
+		blob_buf_free(&b);
+		ubus_free(ctx);
 		return false;
 	}
+	blob_buf_free(&b);
 	ubus_free(ctx);
 	return status;
 }
@@ -2757,7 +2896,7 @@ int vendor_Users_init(void)
 	int err = USP_ERR_OK;
 #define USERS_USER_ROOT "Device.Users.User"
 	// Register parameters implemented by this component
-	err |= USP_REGISTER_Object(USERS_USER_ROOT ".{i}", NULL, NULL, NULL, NULL, NULL, NULL);
+	err |= USP_REGISTER_Object(USERS_USER_ROOT ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
 	err |= USP_REGISTER_DBParam_Alias(USERS_USER_ROOT ".{i}.Alias", NULL);
 	err |= USP_REGISTER_Param_NumEntries("Device.Users.UserNumberOfEntries", USERS_USER_ROOT ".{i}");
 	err |= USP_REGISTER_VendorParam_ReadWrite(USERS_USER_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
@@ -3258,7 +3397,7 @@ int iopsys_dm_Init(void)
 
 // This function must be called before getting instance numbers from db
 // to correctly populate the instances of vendor added datamodels
-int iopsys_dm_instance_init(void)
+static int iopsys_dm_instance_init(void)
 {
 	int max_dm = NUM_ELEM(dm_alias_list);
 
