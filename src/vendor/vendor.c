@@ -42,54 +42,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <glob.h>
 
 #include "usp_err_codes.h"
 #include "vendor_defs.h"
 #include "vendor_api.h"
 #include "usp_api.h"
 #include "vendor_iopsys.h"
-
-#define ROOT_CERT_PATTERN "/etc/obuspa/*.pem"
-
-static glob_t cert_paths;
-
-//-----------------------------------------------------------------------------
-// Vendor hook called back to obtain the trust store certificates
-const trust_store_t *GetMyTrustStore(int *num_trusted_certs)
-{
-
-    int num_certs = cert_paths.gl_pathc;
-    int cert_index = 0;
-    char **p;
-    trust_store_t *usp_agent_trust_store = (trust_store_t *)malloc(num_certs*sizeof(trust_store_t));
-    for(p=cert_paths.gl_pathv; *p != NULL; ++p) {
-        FILE *fp;
-        fp = fopen(*p, "r");
-
-        if(!fp)
-            continue;
-
-        X509 *cert = PEM_read_X509(fp, NULL, NULL, NULL);
-        if (!cert) {
-            USP_LOG_Error("[%s:%d] Error parsing x509 cert",__func__, __LINE__);
-            fclose(fp);
-            continue;
-        }
-        unsigned char *eco_agent_root_der = NULL;
-        int size = i2d_X509(cert, &eco_agent_root_der);
-        if(eco_agent_root_der) {
-            usp_agent_trust_store[cert_index].cert_data = eco_agent_root_der ;
-            usp_agent_trust_store[cert_index].cert_len = size ;
-            usp_agent_trust_store[cert_index].role = kCTrustRole_FullAccess;
-            cert_index++;
-        }
-        fclose(fp);
-        X509_free(cert);
-    }
-    *num_trusted_certs = cert_index;
-    return usp_agent_trust_store;
-}
 
 /*********************************************************************//**
 **
@@ -115,12 +73,6 @@ int VENDOR_Init(void)
         return USP_ERR_INTERNAL_ERROR;
     }
 
-    // Hook trust store if certificate present in path
-    if ( 0 == glob(ROOT_CERT_PATTERN, 0, NULL, &cert_paths)) {
-        vendor_hook_cb_t   my_core_vendor_hooks = {0};
-        my_core_vendor_hooks.get_trust_store_cb  = GetMyTrustStore;
-        USP_REGISTER_CoreVendorHooks(&my_core_vendor_hooks);
-    }
     // If the code gets here, then registration was successful
     return USP_ERR_OK;
 }
