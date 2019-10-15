@@ -194,7 +194,12 @@ char *USP_ERR_ToString(int err, char *buf, int len)
 #else
     // GNU version of strerror_r
     // This must return the string directly, because it usually returns a static string rather than copying into the buffer
+#ifdef USE_MUSL
+    strerror_r(err, buf, len);
+    return buf;
+#else
     return strerror_r(err, buf, len);
+#endif //USE_MUSL
 #endif
 }
 

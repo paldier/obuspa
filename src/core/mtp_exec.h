@@ -40,6 +40,7 @@
  */
 #ifndef MTP_EXEC_H
 #define MTP_EXEC_H
+#include <time.h>
 
 #include "vendor_defs.h"  // for ENABLE_COAP
 

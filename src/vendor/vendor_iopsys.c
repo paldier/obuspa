@@ -899,8 +899,9 @@ int vendor_Time_init(void)
 	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_TIME_ROOT ".NTPServer3", uspd_get_value, uspd_set_value, NULL, DM_STRING);
 	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_TIME_ROOT ".NTPServer4", uspd_get_value, uspd_set_value, NULL, DM_STRING);
 	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_TIME_ROOT ".NTPServer5", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	// CurrentLocalTime and LocalTimeZone defined in core
 	// err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_TIME_ROOT ".CurrentLocalTime", uspd_get_value, DM_DATETIME); Already registered
-	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_TIME_ROOT ".LocalTimeZone", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	// err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_TIME_ROOT ".LocalTimeZone", uspd_get_value, uspd_set_value, NULL, DM_STRING);
 	// Exit if any errors occurred
 	if (err != USP_ERR_OK)
 	{
