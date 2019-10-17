@@ -37,7 +37,8 @@
 /**
  * \file vendor_iopsys.c
  *
- * IOPSYS implementaion of data model nodes
+ * IOPSYS implementation of data model nodes
+ * Nodes registered are as per "tr-181-2-12-0-usp" data model definition
  *
  */
 
@@ -72,7 +73,7 @@ char *dm_alias_list[] =
 	"Device.DeviceInfo.TemperatureStatus.TemperatureSensor.*.Alias",
 	"Device.DeviceInfo.Processor.*.Alias",
 	"Device.DeviceInfo.VendorLogFile.*.Alias",
-	"Device.DeviceInfo.Location.*.Alias",
+	//"Device.DeviceInfo.Location.*.Alias",
 	"Device.DeviceInfo.DeviceImageFile.*.Alias",
 	"Device.DeviceInfo.FirmwareImage.*.Alias",
 	"Device.InterfaceStack.*.Alias",
@@ -92,8 +93,8 @@ char *dm_alias_list[] =
 	"Device.Ethernet.RMONStats.*.Alias",
 	"Device.Ethernet.LAG.*.Alias",
 	"Device.USB.Interface.*.Alias",
-	//"Device.USB.Port.*.Alias",
-	//"Device.USB.USBHosts.Host.*.Alias",
+	"Device.USB.Port.*.Alias",
+	"Device.USB.USBHosts.Host.*.Alias",
 	//"Device.USB.USBHosts.Host.*.Device.*.Alias",
 	//"Device.USB.USBHosts.Host.*.Device.*.Configuration.*.Alias",
 	//"Device.USB.USBHosts.Host.*.Device.*.Configuration.*.Interface.*.Alias",
@@ -133,11 +134,11 @@ char *dm_alias_list[] =
 	"Device.WiFi.Radio.*.Alias",
 	"Device.WiFi.SSID.*.Alias",
 	"Device.WiFi.AccessPoint.*.Alias",
-	"Device.WiFi.AccessPoint.*.AssociatedDevice.*.Alias",
-	"Device.WiFi.AccessPoint.*.AC.*.Alias",
+	//"Device.WiFi.AccessPoint.*.AssociatedDevice.*.Alias",
+	//"Device.WiFi.AccessPoint.*.AC.*.Alias",
 	"Device.WiFi.EndPoint.*.Alias",
 	"Device.WiFi.EndPoint.*.Profile.*.Alias",
-	"Device.WiFi.EndPoint.*.AC.*.Alias",
+	//"Device.WiFi.EndPoint.*.AC.*.Alias",
 	"Device.ZigBee.Interface.*.Alias",
 	"Device.ZigBee.Interface.*.AssociatedDevice.*.Alias",
 	"Device.ZigBee.ZDO.*.Alias",
@@ -160,7 +161,7 @@ char *dm_alias_list[] =
 	"Device.IP.Interface.*.TWAMPReflector.*.Alias",
 	"Device.IP.Interface.*.IPv6Address.*.Alias",
 	"Device.IP.Interface.*.IPv6Prefix.*.Alias",
-	"Device.IP.ActivePort.*.Alias",
+	//"Device.IP.ActivePort.*.Alias",
 	"Device.LLDP.Discovery.Device.*.Alias",
 	"Device.LLDP.Discovery.Device.*.Port.*.Alias",
 	"Device.LLDP.Discovery.Device.*.DeviceInformation.VendorSpecific.*.Alias",
@@ -169,7 +170,7 @@ char *dm_alias_list[] =
 	"Device.IPsec.Profile.*.SentCPAttr.*.Alias",
 	"Device.IPsec.Tunnel.*.Alias",
 	"Device.IPsec.IKEv2SA.*.Alias",
-	"Device.IPsec.IKEv2SA.*.ReceivedCPAttr.*.Alias",
+	//"Device.IPsec.IKEv2SA.*.ReceivedCPAttr.*.Alias",
 	"Device.IPsec.IKEv2SA.*.ChildSA.*.Alias",
 	"Device.GRE.Tunnel.*.Alias",
 	"Device.GRE.Tunnel.*.Interface.*.Alias",
@@ -188,7 +189,7 @@ char *dm_alias_list[] =
 	"Device.Services.VoiceService.*.Alias",
 	"Device.Routing.Router.*.IPv6Forwarding.*.Alias",
 	"Device.Routing.RIP.InterfaceSetting.*.Alias",
-	"Device.Routing.RouteInformation.InterfaceSetting.*.Alias",
+	//"Device.Routing.RouteInformation.InterfaceSetting.*.Alias",
 	"Device.NeighborDiscovery.InterfaceSetting.*.Alias",
 	"Device.RouterAdvertisement.InterfaceSetting.*.Alias",
 	"Device.RouterAdvertisement.InterfaceSetting.*.Option.*.Alias",
@@ -202,12 +203,12 @@ char *dm_alias_list[] =
 	"Device.QoS.QueueStats.*.Alias",
 	"Device.QoS.Shaper.*.Alias",
 	"Device.Hosts.Host.*.Alias",
-	"Device.Hosts.Host.*.IPv4Address.*.Alias",
-	"Device.Hosts.Host.*.IPv6Address.*.Alias",
+	//"Device.Hosts.Host.*.IPv4Address.*.Alias",
+	//"Device.Hosts.Host.*.IPv6Address.*.Alias",
 	"Device.DNS.Client.Server.*.Alias",
 	"Device.DNS.Relay.Forwarding.*.Alias",
-	"Device.DNS.SD.Service.*.Alias",
-	"Device.DNS.SD.Service.*.TextRecord.*.Alias",
+	//"Device.DNS.SD.Service.*.Alias",
+	//"Device.DNS.SD.Service.*.TextRecord.*.Alias",
 	"Device.NAT.InterfaceSetting.*.Alias",
 	"Device.NAT.PortMapping.*.Alias",
 	"Device.PCP.Client.*.Alias",
@@ -222,18 +223,18 @@ char *dm_alias_list[] =
 	"Device.DHCPv4.Server.Pool.*.StaticAddress.*.Alias",
 	"Device.DHCPv4.Server.Pool.*.Option.*.Alias",
 	"Device.DHCPv4.Server.Pool.*.Client.*.Alias",
-	"Device.DHCPv4.Server.Pool.*.Client.*.IPv4Address.*.Alias",
-	"Device.DHCPv4.Server.Pool.*.Client.*.Option.*.Alias",
+	//"Device.DHCPv4.Server.Pool.*.Client.*.IPv4Address.*.Alias",
+	//"Device.DHCPv4.Server.Pool.*.Client.*.Option.*.Alias",
 	"Device.DHCPv4.Relay.Forwarding.*.Alias",
 	"Device.DHCPv6.Client.*.Alias",
-	"Device.DHCPv6.Client.*.Server.*.Alias",
+	//"Device.DHCPv6.Client.*.Server.*.Alias",
 	"Device.DHCPv6.Client.*.SentOption.*.Alias",
-	"Device.DHCPv6.Client.*.ReceivedOption.*.Alias",
+	//"Device.DHCPv6.Client.*.ReceivedOption.*.Alias",
 	"Device.DHCPv6.Server.Pool.*.Alias",
 	"Device.DHCPv6.Server.Pool.*.Client.*.Alias",
-	"Device.DHCPv6.Server.Pool.*.Client.*.IPv6Address.*.Alias",
-	"Device.DHCPv6.Server.Pool.*.Client.*.IPv6Prefix.*.Alias",
-	"Device.DHCPv6.Server.Pool.*.Client.*.Option.*.Alias",
+	//"Device.DHCPv6.Server.Pool.*.Client.*.IPv6Address.*.Alias",
+	//"Device.DHCPv6.Server.Pool.*.Client.*.IPv6Prefix.*.Alias",
+	//"Device.DHCPv6.Server.Pool.*.Client.*.Option.*.Alias",
 	"Device.DHCPv6.Server.Pool.*.Option.*.Alias",
 	"Device.IEEE8021x.Supplicant.*.Alias",
 	"Device.Users.User.*.Alias",
@@ -297,7 +298,7 @@ char *dm_alias_list[] =
 	"Device.MQTT.Broker.*.Bridge.*.Server.*.Alias",
 	"Device.MQTT.Broker.*.Bridge.*.Subscription.*.Alias",
 	"Device.DynamicDNS.Client.*.Alias",
-	"Device.DynamicDNS.Client.*.Hostname.*.Alias",
+	//"Device.DynamicDNS.Client.*.Hostname.*.Alias",
 	"Device.DynamicDNS.Server.*.Alias",
 	"Device.LEDs.LED.*.Alias",
 	"Device.LEDs.LED.*.CycleElement.*.Alias",
@@ -874,7 +875,7 @@ int vendor_DeviceInfo_init(void)
 
 #define DEVICEINFO_LOCATION_ROOT "Device.DeviceInfo.Location"
 	err |= USP_REGISTER_Object(DEVICEINFO_LOCATION_ROOT ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
-	err |= USP_REGISTER_DBParam_Alias(DEVICEINFO_LOCATION_ROOT ".{i}.Alias", NULL);
+	// err |= USP_REGISTER_DBParam_Alias(DEVICEINFO_LOCATION_ROOT ".{i}.Alias", NULL);
 	err |= USP_REGISTER_Param_NumEntries(DEVICEINFO_ROOT ".LocationNumberOfEntries", DEVICEINFO_PROCESSOR_ROOT".{i}");
 
 	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICEINFO_LOCATION_ROOT ".{i}.Source", uspd_get_value, DM_STRING);
@@ -1011,6 +1012,304 @@ int vendor_InterfaceStack_init(void)
 int vendor_DSL_init(void)
 {
 	int err = USP_ERR_OK;
+#define DEVICE_DSL_ROOT "Device.DSL"
+#define DSL_LINE_ROOT "Device.DSL.Line"
+	err |= USP_REGISTER_Object(DSL_LINE_ROOT ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
+	err |= USP_REGISTER_DBParam_Alias(DSL_LINE_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_Param_NumEntries(DEVICE_DSL_ROOT ".LineNumberOfEntries", DSL_LINE_ROOT ".{i}");
+
+	err |= USP_REGISTER_VendorParam_ReadWrite(DSL_LINE_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DSL_LINE_ROOT ".{i}.EnableDataGathering", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Name", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.LastChange", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DSL_LINE_ROOT ".{i}.LowerLayers", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Upstream", uspd_get_value, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.FirmwareVersion", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.LinkStatus", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.StandardsSupported", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.XTSE", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.StandardUsed", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.XTSUSed", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.LineEncoding", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.AllowedProfiles", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.CurrentProfile", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.PowerManagementState", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.SuccessFailureCause", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.UPBOKLER", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.UPBOKLEPb", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.UPBOKLERPb", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.RXTHRSHds", uspd_get_value, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.ACTRAMODEds", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.ACTRAMODEus", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.ACTINPROCds", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.ACTINPROCus", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.SNRMROCds", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.SNRMROCus", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.LastStateTransmittedDownstream", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.LastStateTransmittedUpstream", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.UPBOKLE", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.MREFPSDds", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.MREFPSDus", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.LIMITMASK", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.US0MASK", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.TRELLISds", uspd_get_value, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.TRELLISus", uspd_get_value, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.ACTSNRMODEds", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.ACTSNRMODEus", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.VirtualNoisePSDds", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.VirtualNoisePSDus", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.ACTUALCE", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.LineNumber", uspd_get_value, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.UpstreamMaxBitRate", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.DownstreamMaxBitRate", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.UpstreamNoiseMargin", uspd_get_value, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.DownstreamNoiseMargin", uspd_get_value, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.SNRMpbus", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.SNRMpbds", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.INMIATOds", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.INMIATSds", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.INMCCds", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.INMINPEQMODEds", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.UpstreamAttenuation", uspd_get_value, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.DownstreamAttenuation", uspd_get_value, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.UpstreamPower", uspd_get_value, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.DownstreamPower", uspd_get_value, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.XTURVendor", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.XTURCountry", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.XTURANSIStd", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.XTURANSIRev", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.XTUCVendor", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.XTUCCountry", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.XTUCANSIStd", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.XTUCANSIRev", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.BytesSent", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.BytesReceived", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.PacketsSent", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.PacketsReceived", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.ErrorsSent", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.ErrorsReceived", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.DiscardPacketsSent", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.DiscardPacketsReceived", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.TotalStart", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.ShowtimeStart", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.LastShowtimeStart", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.CurrentDayStart", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.QuarterHourStart", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.Total.ErroredSecs", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.Total.SeverelyErroredSecs", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.Showtime.ErroredSecs", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.Showtime.SeverelyErroredSecs", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.LastShowtime.ErroredSecs", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.LastShowtime.SeverelyErroredSecs", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.CurrentDay.ErroredSecs", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.CurrentDay.SeverelyErroredSecs", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.QuarterHour.ErroredSecs", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.QuarterHour.SeverelyErroredSecs", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.TestParams.HLOGGds", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.TestParams.HLOGGus", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.TestParams.HLOGpsds", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.TestParams.HLOGpsus", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.TestParams.HLOGMTds", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.TestParams.HLOGMTus", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.TestParams.QLNGds", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.TestParams.QLNGus", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.TestParams.QLNpsds", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.TestParams.QLNpsus", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.TestParams.QLNMTds", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.TestParams.QLNMTus", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.TestParams.SNRGds", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.TestParams.SNRGus", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.TestParams.SNRpsds", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.TestParams.SNRpsus", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.TestParams.SNRMTds", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.TestParams.SNRMTus", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.TestParams.LATNds", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.TestParams.LATNus", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.TestParams.SATNds", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.TestParams.SATNus", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.DataGathering.LoggingDepthR", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.DataGathering.ActLoggingDepthReportingR", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_LINE_ROOT ".{i}.Stats.DataGathering.EventTraceBufferR", uspd_get_value, DM_STRING);
+	char *unique_keys_dslline[] = { "Name" };
+	err |= USP_REGISTER_Object_UniqueKey(DSL_LINE_ROOT ".{i}", unique_keys_dslline, NUM_ELEM(unique_keys_dslline));
+
+#define DSL_CHANNEL_ROOT "Device.DSL.Channel"
+	err |= USP_REGISTER_Object(DSL_CHANNEL_ROOT ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
+	err |= USP_REGISTER_DBParam_Alias(DSL_CHANNEL_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_Param_NumEntries(DEVICE_DSL_ROOT ".ChannelNumberOfEntries", DSL_CHANNEL_ROOT ".{i}");
+
+	err |= USP_REGISTER_VendorParam_ReadWrite(DSL_CHANNEL_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.Name", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.LastChange", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.LowerLayers", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.LinkEncapsulationSupported", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.LinkEncapsulationUsed", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.LPATH", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.INTLVDEPTH", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.INTLVBLOCK", uspd_get_value, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.ActualInterleavingDelay", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.ACTINP", uspd_get_value, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.INPREPORT", uspd_get_value, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.NFEC", uspd_get_value, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.RFEC", uspd_get_value, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.LSYMB", uspd_get_value, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.UpstreamCurrRate", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.DownstreamCurrRate", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.ACTNDR", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.ACTINPREIN", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.Stats.BytesSent", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.Stats.BytesReceived", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.Stats.PacketsSent", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.Stats.PacketsReceived", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.Stats.ErrorsSent", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.Stats.ErrorsReceived", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.Stats.DiscardPacketsSent", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.Stats.DiscardPacketsReceived", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.Stats.TotalStart", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.Stats.ShowtimeStart", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.Stats.LastShowtimeStart", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.Stats.CurrentDayStart", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.Stats.QuarterHourStart", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.Stats.Total.XTURFECErrors", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.Stats.Total.XTUCFECErrors", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.Stats.Total.XTURHECErrors", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.Stats.Total.XTUCHECErrors", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.Stats.Total.XTURCRCErrors", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.Stats.Total.XTUCCRCErrors", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.Stats.Showtime.XTURFECErrors", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.Stats.Showtime.XTUCFECErrors", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.Stats.Showtime.XTURHECErrors", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.Stats.Showtime.XTUCHECErrors", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.Stats.Showtime.XTURCRCErrors", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.Stats.Showtime.XTUCCRCErrors", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.Stats.LastShowtime.XTURFECErrors", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.Stats.LastShowtime.XTUCFECErrors", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.Stats.LastShowtime.XTURHECErrors", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.Stats.LastShowtime.XTUCHECErrors", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.Stats.LastShowtime.XTURCRCErrors", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.Stats.LastShowtime.XTUCCRCErrors", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.Stats.QuarterHour.XTURFECErrors", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.Stats.QuarterHour.XTUCFECErrors", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.Stats.QuarterHour.XTURHECErrors", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.Stats.QuarterHour.XTUCHECErrors", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.Stats.QuarterHour.XTURCRCErrors", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_CHANNEL_ROOT ".{i}.Stats.QuarterHour.XTUCCRCErrors", uspd_get_value, DM_UINT);
+
+	char *unique_keys_dslchannel[] = { "Name" };
+	err |= USP_REGISTER_Object_UniqueKey(DSL_CHANNEL_ROOT ".{i}", unique_keys_dslchannel, NUM_ELEM(unique_keys_dslchannel));
+
+#define DSL_BG_ROOT "Device.DSL.BondingGroup"
+	err |= USP_REGISTER_Object(DSL_BG_ROOT ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
+	err |= USP_REGISTER_DBParam_Alias(DSL_BG_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_Param_NumEntries(DEVICE_DSL_ROOT ".BondingGroupNumberOfEntries", DSL_BG_ROOT ".{i}");
+
+	err |= USP_REGISTER_VendorParam_ReadWrite(DSL_BG_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Name", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.LastChange", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.LowerLayers", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.GroupStatus", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.GroupID", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.BondSchemesSupported", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.BondScheme", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.GroupCapacity", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.RunningTime", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.TargetUpRate", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.TargetDownRate", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.ThreshLowUpRate", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.ThreshLowDownRate", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.UpstreamDifferentialDelayTolerance", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.DownstreamDifferentialDelayTolerance", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.BytesSent", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.BytesReceived", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.PacketsSent", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.PacketsReceived", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.ErrorsSent", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.ErrorsReceived", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.UnicastPacketsSent", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.UnicastPacketsReceived", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.DiscardPacketsSent", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.DiscardPacketsReceived", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.MulticastPacketsSent", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.MulticastPacketsReceived", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.BroadcastPacketsSent", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.BroadcastPacketsReceived", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.UnknownProtoPacketsReceived", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.TotalStart", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.CurrentDayStart", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.QuarterHourStart", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.Total.FailureReasons", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.Total.UpstreamRate", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.Total.DownstreamRate", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.Total.UpstreamPacketLoss", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.Total.DownstreamPacketLoss", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.Total.UpstreamDifferentialDelay", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.Total.DownstreamDifferentialDelay", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.Total.FailureCount", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.Total.ErroredSeconds", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.Total.SeverelyErroredSeconds", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.Total.UnavailableSeconds", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.CurrentDay.FailureReasons", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.CurrentDay.UpstreamRate", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.CurrentDay.DownstreamRate", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.CurrentDay.UpstreamPacketLoss", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.CurrentDay.DownstreamPacketLoss", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.CurrentDay.UpstreamDifferentialDelay", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.CurrentDay.DownstreamDifferentialDelay", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.CurrentDay.FailureCount", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.CurrentDay.ErroredSeconds", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.CurrentDay.SeverelyErroredSeconds", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.CurrentDay.UnavailableSeconds", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.QuarterHour.FailureReasons", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.QuarterHour.UpstreamRate", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.QuarterHour.DownstreamRate", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.QuarterHour.UpstreamPacketLoss", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.QuarterHour.DownstreamPacketLoss", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.QuarterHour.UpstreamDifferentialDelay", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.QuarterHour.DownstreamDifferentialDelay", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.QuarterHour.FailureCount", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.QuarterHour.ErroredSeconds", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.QuarterHour.SeverelyErroredSeconds", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Stats.QuarterHour.UnavailableSeconds", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Ethernet.Stats.PAFErrors", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Ethernet.Stats.PAFSmallFragments", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Ethernet.Stats.PAFLargeFragments", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Ethernet.Stats.PAFBadFragments", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Ethernet.Stats.PAFLostFragments", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Ethernet.Stats.PAFLateFragments", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Ethernet.Stats.PAFLostStarts", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Ethernet.Stats.PAFLostEnds", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Ethernet.Stats.PAFOverflows", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Ethernet.Stats.PauseFramesSent", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Ethernet.Stats.CRCErrorsReceived", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Ethernet.Stats.AlignmentErrorsReceived", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Ethernet.Stats.ShortPacketsReceived", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Ethernet.Stats.LongPacketsReceived", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Ethernet.Stats.OverflowErrorsReceived", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DSL_BG_ROOT ".{i}.Ethernet.Stats.FramesDropped", uspd_get_value, DM_UINT);
+
+	char *unique_keys_dslbg[] = { "Name" };
+	err |= USP_REGISTER_Object_UniqueKey(DSL_BG_ROOT ".{i}", unique_keys_dslbg, NUM_ELEM(unique_keys_dslbg));
+
+#define BG_BC_ROOT DSL_BG_ROOT ".{i}.BondedChannel"
+	err |= USP_REGISTER_Object(BG_BC_ROOT ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
+	err |= USP_REGISTER_DBParam_Alias(BG_BC_ROOT".{i}.Alias", NULL);
+	err |= USP_REGISTER_Param_NumEntries(DSL_BG_ROOT ".{i}.BondedChannelNumberOfEntries", BG_BC_ROOT ".{i}");
+	err |= USP_REGISTER_VendorParam_ReadOnly(BG_BC_ROOT ".{i}.Channel", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(BG_BC_ROOT ".{i}.Ethernet.Stats.UnderflowErrorsSent", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(BG_BC_ROOT ".{i}.Ethernet.Stats.CRCErrorsReceived", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(BG_BC_ROOT ".{i}.Ethernet.Stats.AlignmentErrorsReceived", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(BG_BC_ROOT ".{i}.Ethernet.Stats.ShortPacketsReceived", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(BG_BC_ROOT ".{i}.Ethernet.Stats.LongPacketsReceived", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(BG_BC_ROOT ".{i}.Ethernet.Stats.OverflowErrorsReceived", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(BG_BC_ROOT ".{i}.Ethernet.Stats.PauseFramesReceived", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(BG_BC_ROOT ".{i}.Ethernet.Stats.FramesDropped", uspd_get_value, DM_UINT);
+
+	char *unique_keys_bgbc[] = { "Channel" };
+	err |= USP_REGISTER_Object_UniqueKey(BG_BC_ROOT ".{i}", unique_keys_bgbc, NUM_ELEM(unique_keys_bgbc));
+
 	// Exit if any errors occurred
 	if (err != USP_ERR_OK)
 	{
@@ -1023,6 +1322,136 @@ int vendor_DSL_init(void)
 int vendor_FAST_init(void)
 {
 	int err = USP_ERR_OK;
+#define DEVICE_FAST_ROOT "Device.FAST"
+#define FAST_LINE_ROOT "Device.FAST.Line"
+	err |= USP_REGISTER_Object(FAST_LINE_ROOT ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
+	err |= USP_REGISTER_DBParam_Alias(FAST_LINE_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_Param_NumEntries(DEVICE_FAST_ROOT ".LineNumberOfEntries", FAST_LINE_ROOT ".{i}");
+
+	err |= USP_REGISTER_VendorParam_ReadWrite(FAST_LINE_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Name", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.LastChange", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(FAST_LINE_ROOT ".{i}.LowerLayers", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Upstream", uspd_get_value, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.FirmwareVersion", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.LinkStatus", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.AllowedProfiles", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.CurrentProfile", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.PowerManagementState", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.SuccessFailureCause", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.UPBOKLER", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.LastTransmittedDownstreamSignal", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.LastTransmittedUpstreamSignal", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.UPBOKLE", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.LineNumber", uspd_get_value, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.UpstreamMaxBitRate", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.DownstreamMaxBitRate", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.UpstreamNoiseMargin", uspd_get_value, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.DownstreamNoiseMargin", uspd_get_value, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.UpstreamAttenuation", uspd_get_value, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.DownstreamAttenuation", uspd_get_value, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.UpstreamPower", uspd_get_value, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.DownstreamPower", uspd_get_value, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.SNRMRMCds", uspd_get_value, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.SNRMRMCus", uspd_get_value, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.BITSRMCpsds", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.BITSRMCpsus", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.FEXTCANCELds", uspd_get_value, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.FEXTCANCELus", uspd_get_value, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.ETRds", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.ETRus", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.ATTETRds", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.ATTETRus", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.MINEFTR", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.BytesSent", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.BytesReceived", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.PacketsSent", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.PacketsReceived", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.ErrorsSent", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.ErrorsReceived", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.DiscardPacketsSent", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.DiscardPacketsReceived", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.TotalStart", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.ShowtimeStart", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.LastShowtimeStart", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.CurrentDayStart", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.QuarterHourStart", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.Total.ErroredSecs", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.Total.SeverelyErroredSecs", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.Total.LOSS", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.Total.LORS", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.Total.UAS", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.Total.RTXUC", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.Total.RTXTX", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.Total.SuccessBSW", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.Total.SuccessSRA", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.Total.SuccessFRA", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.Total.SuccessRPA", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.Total.SuccessTIGA", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.Showtime.ErroredSecs", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.Showtime.SeverelyErroredSecs", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.Showtime.LOSS", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.Showtime.LORS", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.Showtime.UAS", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.Showtime.RTXUC", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.Showtime.RTXTX", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.Showtime.SuccessBSW", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.Showtime.SuccessSRA", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.Showtime.SuccessFRA", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.Showtime.SuccessRPA", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.Showtime.SuccessTIGA", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.LastShowtime.ErroredSecs", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.LastShowtime.SeverelyErroredSecs", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.LastShowtime.LOSS", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.LastShowtime.LORS", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.LastShowtime.UAS", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.LastShowtime.RTXUC", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.LastShowtime.RTXTX", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.LastShowtime.SuccessBSW", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.LastShowtime.SuccessSRA", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.LastShowtime.SuccessFRA", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.LastShowtime.SuccessRPA", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.LastShowtime.SuccessTIGA", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.CurrentDay.ErroredSecs", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.CurrentDay.SeverelyErroredSecs", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.CurrentDay.LOSS", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.CurrentDay.LORS", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.CurrentDay.UAS", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.CurrentDay.RTXUC", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.CurrentDay.RTXTX", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.CurrentDay.SuccessBSW", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.CurrentDay.SuccessSRA", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.CurrentDay.SuccessFRA", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.CurrentDay.SuccessRPA", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.CurrentDay.SuccessTIGA", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.QuarterHour.ErroredSecs", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.QuarterHour.SeverelyErroredSecs", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.QuarterHour.LOSS", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.QuarterHour.LORS", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.QuarterHour.UAS", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.QuarterHour.RTXUC", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.QuarterHour.RTXTX", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.QuarterHour.SuccessBSW", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.QuarterHour.SuccessSRA", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.QuarterHour.SuccessFRA", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.QuarterHour.SuccessRPA", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.QuarterHour.SuccessTIGA", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.TestParams.SNRGds", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.TestParams.SNRGus", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.TestParams.SNRpsds", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.TestParams.SNRpsus", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.TestParams.SNRMTds", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.TestParams.SNRMTus", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.TestParams.ACTINP", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.TestParams.NFEC", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.TestParams.RFEC", uspd_get_value, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.TestParams.UpstreamCurrRate", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.TestParams.DownstreamCurrRate", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(FAST_LINE_ROOT ".{i}.Stats.TestParams.ACTINPREIN", uspd_get_value, DM_UINT);
+
+	char *unique_keys_fastline[] = { "Name" };
+	err |= USP_REGISTER_Object_UniqueKey(FAST_LINE_ROOT ".{i}", unique_keys_fastline, NUM_ELEM(unique_keys_fastline));
 	// Exit if any errors occurred
 	if (err != USP_ERR_OK)
 	{
@@ -1035,6 +1464,36 @@ int vendor_FAST_init(void)
 int vendor_Optical_init(void)
 {
 	int err = USP_ERR_OK;
+#define DEVICE_OPTICAL_ROOT "Device.Optical"
+#define OPTICAL_INT_ROOT "Device.Optical.Interface"
+	err |= USP_REGISTER_Object(OPTICAL_INT_ROOT ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
+	err |= USP_REGISTER_DBParam_Alias(OPTICAL_INT_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_Param_NumEntries(DEVICE_OPTICAL_ROOT ".InterfaceNumberOfEntries", OPTICAL_INT_ROOT ".{i}");
+
+	err |= USP_REGISTER_VendorParam_ReadWrite(OPTICAL_INT_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(OPTICAL_INT_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(OPTICAL_INT_ROOT ".{i}.Name", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(OPTICAL_INT_ROOT ".{i}.LastChange", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(OPTICAL_INT_ROOT ".{i}.LowerLayers", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(OPTICAL_INT_ROOT ".{i}.Upstream", uspd_get_value, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(OPTICAL_INT_ROOT ".{i}.OpticalSignalLevel", uspd_get_value, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(OPTICAL_INT_ROOT ".{i}.LowerOpticalThreshold", uspd_get_value, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(OPTICAL_INT_ROOT ".{i}.UpperOpticalThreshold", uspd_get_value, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(OPTICAL_INT_ROOT ".{i}.TransmitOpticalLevel", uspd_get_value, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(OPTICAL_INT_ROOT ".{i}.LowerTransmitPowerThreshold", uspd_get_value, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(OPTICAL_INT_ROOT ".{i}.UpperTransmitPowerThreshold", uspd_get_value, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(OPTICAL_INT_ROOT ".{i}.Stats.BytesSent", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(OPTICAL_INT_ROOT ".{i}.Stats.BytesReceived", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(OPTICAL_INT_ROOT ".{i}.Stats.PacketsSent", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(OPTICAL_INT_ROOT ".{i}.Stats.PacketsReceived", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(OPTICAL_INT_ROOT ".{i}.Stats.ErrorsSent", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(OPTICAL_INT_ROOT ".{i}.Stats.ErrorsReceived", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(OPTICAL_INT_ROOT ".{i}.Stats.DiscardPacketsSent", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(OPTICAL_INT_ROOT ".{i}.Stats.DiscardPacketsReceived", uspd_get_value, DM_UINT);
+
+	char *unique_keys_opticalint[] = { "Name" };
+	err |= USP_REGISTER_Object_UniqueKey(OPTICAL_INT_ROOT ".{i}", unique_keys_opticalint, NUM_ELEM(unique_keys_opticalint));
+
 	// Exit if any errors occurred
 	if (err != USP_ERR_OK)
 	{
@@ -1047,6 +1506,70 @@ int vendor_Optical_init(void)
 int vendor_Cellular_init(void)
 {
 	int err = USP_ERR_OK;
+#define DEVICE_CELLULAR_ROOT "Device.Cellular"
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_CELLULAR_ROOT ".RoamingEnabled", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_CELLULAR_ROOT ".RoamingStatus", uspd_get_value, DM_STRING);
+#define CELLULAR_INT_ROOT "Device.Cellular.Interface"
+	err |= USP_REGISTER_Object(CELLULAR_INT_ROOT ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
+	err |= USP_REGISTER_DBParam_Alias(CELLULAR_INT_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_Param_NumEntries(DEVICE_CELLULAR_ROOT ".InterfaceNumberOfEntries", CELLULAR_INT_ROOT ".{i}");
+
+	err |= USP_REGISTER_VendorParam_ReadWrite(CELLULAR_INT_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(CELLULAR_INT_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(CELLULAR_INT_ROOT ".{i}.Name", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(CELLULAR_INT_ROOT ".{i}.LastChange", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(CELLULAR_INT_ROOT ".{i}.LowerLayers", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(CELLULAR_INT_ROOT ".{i}.Upstream", uspd_get_value, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(CELLULAR_INT_ROOT ".{i}.IMEI", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(CELLULAR_INT_ROOT ".{i}.SupportedAccessTechnologies", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(CELLULAR_INT_ROOT ".{i}.PreferredAccessTechnology", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(CELLULAR_INT_ROOT ".{i}.CurrentAccessTechnology", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(CELLULAR_INT_ROOT ".{i}.AvailableNetworks", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(CELLULAR_INT_ROOT ".{i}.NetworkRequested", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(CELLULAR_INT_ROOT ".{i}.NetworkInUse", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(CELLULAR_INT_ROOT ".{i}.RSSI", uspd_get_value, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(CELLULAR_INT_ROOT ".{i}.UpstreamMaxBitRate", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(CELLULAR_INT_ROOT ".{i}.DownstreamMaxBitRate", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(CELLULAR_INT_ROOT ".{i}.USIM.Status", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(CELLULAR_INT_ROOT ".{i}.USIM.IMSI", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(CELLULAR_INT_ROOT ".{i}.USIM.ICCID", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(CELLULAR_INT_ROOT ".{i}.USIM.MSISDN", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(CELLULAR_INT_ROOT ".{i}.USIM.PINCheck", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(CELLULAR_INT_ROOT ".{i}.USIM.PIN", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(CELLULAR_INT_ROOT ".{i}.Stats.BytesSent", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(CELLULAR_INT_ROOT ".{i}.Stats.BytesReceived", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(CELLULAR_INT_ROOT ".{i}.Stats.PacketsSent", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(CELLULAR_INT_ROOT ".{i}.Stats.PacketsReceived", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(CELLULAR_INT_ROOT ".{i}.Stats.ErrorsSent", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(CELLULAR_INT_ROOT ".{i}.Stats.ErrorsReceived", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(CELLULAR_INT_ROOT ".{i}.Stats.UnicastPacketsSent", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(CELLULAR_INT_ROOT ".{i}.Stats.UnicastPacketsReceived", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(CELLULAR_INT_ROOT ".{i}.Stats.DiscardPacketsSent", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(CELLULAR_INT_ROOT ".{i}.Stats.DiscardPacketsReceived", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(CELLULAR_INT_ROOT ".{i}.Stats.MulticastPacketsSent", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(CELLULAR_INT_ROOT ".{i}.Stats.MulticastPacketsReceived", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(CELLULAR_INT_ROOT ".{i}.Stats.BroadcastPacketsSent", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(CELLULAR_INT_ROOT ".{i}.Stats.BroadcastPacketsReceived", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(CELLULAR_INT_ROOT ".{i}.Stats.UnknownProtoPacketsReceived", uspd_get_value, DM_UINT);
+
+	char *unique_keys_cellularint[] = { "Name" };
+	err |= USP_REGISTER_Object_UniqueKey(CELLULAR_INT_ROOT ".{i}", unique_keys_cellularint, NUM_ELEM(unique_keys_cellularint));
+
+#define CELLULAR_AP_ROOT "Device.Cellular.AccessPoint"
+	err |= USP_REGISTER_Object(CELLULAR_AP_ROOT ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
+	err |= USP_REGISTER_DBParam_Alias(CELLULAR_AP_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_Param_NumEntries(DEVICE_CELLULAR_ROOT ".AccessPointNumberOfEntries", CELLULAR_AP_ROOT ".{i}");
+
+	err |= USP_REGISTER_VendorParam_ReadWrite(CELLULAR_AP_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(CELLULAR_AP_ROOT ".{i}.APN", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(CELLULAR_AP_ROOT ".{i}.Username", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(CELLULAR_AP_ROOT ".{i}.Password", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(CELLULAR_AP_ROOT ".{i}.Proxy", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(CELLULAR_AP_ROOT ".{i}.ProxyPort", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(CELLULAR_AP_ROOT ".{i}.Interface", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+
+	char *unique_keys_cellularap[] = { "Interface" };
+	err |= USP_REGISTER_Object_UniqueKey(CELLULAR_AP_ROOT ".{i}", unique_keys_cellularap, NUM_ELEM(unique_keys_cellularap));
 	// Exit if any errors occurred
 	if (err != USP_ERR_OK)
 	{
@@ -1330,6 +1853,118 @@ int vendor_Ethernet_init(void)
 int vendor_USB_init(void)
 {
 	int err = USP_ERR_OK;
+#define DEVICE_USB_ROOT "Device.USB"
+#define USB_INT_ROOT "Device.USB.Interface"
+	err |= USP_REGISTER_Object(USB_INT_ROOT ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
+	err |= USP_REGISTER_DBParam_Alias(USB_INT_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_Param_NumEntries(DEVICE_USB_ROOT ".InterfaceNumberOfEntries", USB_INT_ROOT ".{i}");
+
+	err |= USP_REGISTER_VendorParam_ReadWrite(USB_INT_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(USB_INT_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(USB_INT_ROOT ".{i}.Name", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(USB_INT_ROOT ".{i}.LastChange", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(USB_INT_ROOT ".{i}.LowerLayers", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(USB_INT_ROOT ".{i}.Upstream", uspd_get_value, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(USB_INT_ROOT ".{i}.MACAddress", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(USB_INT_ROOT ".{i}.MaxBitRate", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(USB_INT_ROOT ".{i}.Port", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(USB_INT_ROOT ".{i}.Stats.BytesSent", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(USB_INT_ROOT ".{i}.Stats.BytesReceived", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(USB_INT_ROOT ".{i}.Stats.PacketsSent", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(USB_INT_ROOT ".{i}.Stats.PacketsReceived", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(USB_INT_ROOT ".{i}.Stats.ErrorsSent", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(USB_INT_ROOT ".{i}.Stats.ErrorsReceived", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(USB_INT_ROOT ".{i}.Stats.UnicastPacketsSent", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(USB_INT_ROOT ".{i}.Stats.UnicastPacketsReceived", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(USB_INT_ROOT ".{i}.Stats.DiscardPacketsSent", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(USB_INT_ROOT ".{i}.Stats.DiscardPacketsReceived", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(USB_INT_ROOT ".{i}.Stats.MulticastPacketsSent", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(USB_INT_ROOT ".{i}.Stats.MulticastPacketsReceived", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(USB_INT_ROOT ".{i}.Stats.BroadcastPacketsSent", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(USB_INT_ROOT ".{i}.Stats.BroadcastPacketsReceived", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(USB_INT_ROOT ".{i}.Stats.UnknownProtoPacketsReceived", uspd_get_value, DM_UINT);
+
+	char *unique_keys_usbint[] = { "Name" };
+	err |= USP_REGISTER_Object_UniqueKey(USB_INT_ROOT ".{i}", unique_keys_usbint, NUM_ELEM(unique_keys_usbint));
+
+#define USB_PORT_ROOT "Device.USB.Port"
+	err |= USP_REGISTER_Object(USB_PORT_ROOT ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
+	err |= USP_REGISTER_DBParam_Alias(USB_PORT_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_Param_NumEntries(DEVICE_USB_ROOT ".PortNumberOfEntries", USB_PORT_ROOT ".{i}");
+
+	err |= USP_REGISTER_VendorParam_ReadOnly(USB_PORT_ROOT ".{i}.Name", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(USB_PORT_ROOT ".{i}.Standard", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(USB_PORT_ROOT ".{i}.Type", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(USB_PORT_ROOT ".{i}.Receptacle", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(USB_PORT_ROOT ".{i}.Rate", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(USB_PORT_ROOT ".{i}.Power", uspd_get_value, DM_STRING);
+
+	char *unique_keys_usbport[] = { "Name" };
+	err |= USP_REGISTER_Object_UniqueKey(USB_PORT_ROOT ".{i}", unique_keys_usbport, NUM_ELEM(unique_keys_usbport));
+
+#define USB_HOSTS_ROOT "Device.USB.USBHosts"
+#define USB_HOST_ROOT "Device.USB.USBHosts.Host"
+	err |= USP_REGISTER_Object(USB_HOST_ROOT ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
+	err |= USP_REGISTER_DBParam_Alias(USB_HOST_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_Param_NumEntries(USB_HOSTS_ROOT ".HostNumberOfEntries", USB_HOST_ROOT ".{i}");
+
+	err |= USP_REGISTER_VendorParam_ReadWrite(USB_HOST_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(USB_HOST_ROOT ".{i}.Name", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(USB_HOST_ROOT ".{i}.Type", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(USB_HOST_ROOT ".{i}.PowerManagementEnable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(USB_HOST_ROOT ".{i}.USBVersion", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(USB_HOST_ROOT ".{i}.Rate", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(USB_HOST_ROOT ".{i}.Power", uspd_get_value, DM_STRING);
+
+
+#define HOST_DEVICE_ROOT "Device.USB.USBHosts.Host.{i}.Device"
+	err |= USP_REGISTER_Object(HOST_DEVICE_ROOT ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
+	// err |= USP_REGISTER_DBParam_Alias(HOST_DEVICE_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_Param_NumEntries(USB_HOST_ROOT ".{i}.DeviceNumberOfEntries", HOST_DEVICE_ROOT ".{i}");
+
+	err |= USP_REGISTER_VendorParam_ReadOnly(HOST_DEVICE_ROOT ".{i}.DeviceNumber", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(HOST_DEVICE_ROOT ".{i}.USBVersion", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(HOST_DEVICE_ROOT ".{i}.DeviceClass", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(HOST_DEVICE_ROOT ".{i}.DeviceSubClass", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(HOST_DEVICE_ROOT ".{i}.DeviceVersion", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(HOST_DEVICE_ROOT ".{i}.DeviceProtocol", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(HOST_DEVICE_ROOT ".{i}.ProductID", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(HOST_DEVICE_ROOT ".{i}.VendorID", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(HOST_DEVICE_ROOT ".{i}.Manufacturer", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(HOST_DEVICE_ROOT ".{i}.ProductClass", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(HOST_DEVICE_ROOT ".{i}.SerialNumber", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(HOST_DEVICE_ROOT ".{i}.Port", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(HOST_DEVICE_ROOT ".{i}.USBPort", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(HOST_DEVICE_ROOT ".{i}.Rate", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(HOST_DEVICE_ROOT ".{i}.Parent", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(HOST_DEVICE_ROOT ".{i}.MaxChildren", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(HOST_DEVICE_ROOT ".{i}.IsSuspended", uspd_get_value, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(HOST_DEVICE_ROOT ".{i}.IsSelfPowered", uspd_get_value, DM_BOOL);
+
+#define HOST_DEVICE_CFG_ROOT "Device.USB.USBHosts.Host.{i}.Device.{i}.Configuration"
+	err |= USP_REGISTER_Object(HOST_DEVICE_CFG_ROOT ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
+	// err |= USP_REGISTER_DBParam_Alias(HOST_DEVICE_CFG_ROOT ".{i}.Alias", NULL);
+
+	err |= USP_REGISTER_VendorParam_ReadOnly(HOST_DEVICE_CFG_ROOT ".{i}.ConfigurationNumber", uspd_get_value, DM_UINT);
+
+#define HOST_DEVICE_CFG_INT_ROOT "Device.USB.USBHosts.Host.{i}.Device.{i}.Configuration.{i}.Interface"
+	err |= USP_REGISTER_Object(HOST_DEVICE_CFG_INT_ROOT ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
+	// err |= USP_REGISTER_DBParam_Alias(HOST_DEVICE_CFG_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_Param_NumEntries(HOST_DEVICE_CFG_ROOT ".{i}.InterfaceNumberOfEntries", HOST_DEVICE_CFG_INT_ROOT ".{i}");
+
+	err |= USP_REGISTER_VendorParam_ReadOnly(HOST_DEVICE_CFG_INT_ROOT ".{i}.InterfaceNumber", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(HOST_DEVICE_CFG_INT_ROOT ".{i}.InterfaceClass", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(HOST_DEVICE_CFG_INT_ROOT ".{i}.InterfaceSubClass", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(HOST_DEVICE_CFG_INT_ROOT ".{i}.InterfaceProtocol", uspd_get_value, DM_STRING);
+
+	char *unique_keys_usbhost[] = { "Name" };
+	err |= USP_REGISTER_Object_UniqueKey(USB_HOST_ROOT ".{i}", unique_keys_usbhost, NUM_ELEM(unique_keys_usbhost));
+	char *unique_keys_hostdevice[] = { "DeviceNumber" };
+	err |= USP_REGISTER_Object_UniqueKey(HOST_DEVICE_ROOT ".{i}", unique_keys_hostdevice, NUM_ELEM(unique_keys_hostdevice));
+	char *unique_keys_hostdevicecfg[] = { "ConfigurationNumber" };
+	err |= USP_REGISTER_Object_UniqueKey(HOST_DEVICE_CFG_ROOT ".{i}", unique_keys_hostdevicecfg, NUM_ELEM(unique_keys_hostdevicecfg));
+	char *unique_keys_hostdevicecfgint[] = { "InterfaceNumber" };
+	err |= USP_REGISTER_Object_UniqueKey(HOST_DEVICE_CFG_INT_ROOT ".{i}", unique_keys_hostdevicecfgint, NUM_ELEM(unique_keys_hostdevicecfgint));
 	// Exit if any errors occurred
 	if (err != USP_ERR_OK)
 	{
@@ -1598,7 +2233,7 @@ int vendor_WiFi_init(void)
 
 #define AP_AC_ROOT WIFI_AP_ROOT".{i}.AC"
 	err |= USP_REGISTER_Object(AP_AC_ROOT ".{i}", NULL, NULL, NULL, NULL, NULL, NULL);
-	err |= USP_REGISTER_DBParam_Alias(AP_AC_ROOT".{i}.Alias", NULL);
+	//err |= USP_REGISTER_DBParam_Alias(AP_AC_ROOT".{i}.Alias", NULL);
 
 	err |= USP_REGISTER_VendorParam_ReadOnly(AP_AC_ROOT ".{i}.AccessCategory", uspd_get_value, DM_STRING);
 	err |= USP_REGISTER_VendorParam_ReadWrite(AP_AC_ROOT".{i}.AIFSN", uspd_get_value, uspd_set_value, NULL, DM_UINT);
@@ -1662,7 +2297,7 @@ int vendor_WiFi_init(void)
 	err |= USP_REGISTER_Object_UniqueKey(WIFI_EP_ROOT ".{i}.Profile.{i}", unique_keys_ep_profile, NUM_ELEM(unique_keys_ep_profile));
 #define EP_AC_ROOT WIFI_EP_ROOT".{i}.AC"
 	err |= USP_REGISTER_Object(EP_AC_ROOT ".{i}", NULL, NULL, NULL, NULL, NULL, NULL);
-	err |= USP_REGISTER_DBParam_Alias(EP_AC_ROOT".{i}.Alias", NULL);
+	// err |= USP_REGISTER_DBParam_Alias(EP_AC_ROOT".{i}.Alias", NULL);
 
 	err |= USP_REGISTER_VendorParam_ReadOnly(EP_AC_ROOT ".{i}.AccessCategory", uspd_get_value, DM_STRING);
 	err |= USP_REGISTER_VendorParam_ReadWrite(EP_AC_ROOT".{i}.AIFSN", uspd_get_value, uspd_set_value, NULL, DM_UINT);
@@ -2033,7 +2668,7 @@ int vendor_IP_init(void)
 
 #define IP_ACTIVEPORT_ROOT "Device.IP.ActivePort"
 	err |= USP_REGISTER_Object(IP_ACTIVEPORT_ROOT ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
-	err |= USP_REGISTER_DBParam_Alias(IP_ACTIVEPORT_ROOT ".{i}.Alias", NULL);
+	// err |= USP_REGISTER_DBParam_Alias(IP_ACTIVEPORT_ROOT ".{i}.Alias", NULL);
 	err |= USP_REGISTER_Param_NumEntries(DEVICE_IP_ROOT ".ActivePortNumberOfEntries", IP_ACTIVEPORT_ROOT ".{i}");
 
 	err |= USP_REGISTER_VendorParam_ReadOnly(IP_ACTIVEPORT_ROOT ".{i}.LocalIPAddress", uspd_get_value, DM_STRING);
@@ -2227,6 +2862,174 @@ int vendor_LLDP_init(void)
 int vendor_IPsec_init(void)
 {
 	int err = USP_ERR_OK;
+#define DEVICE_IPSEC_ROOT "Device.IPsec"
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_IPSEC_ROOT ".Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_IPSEC_ROOT ".Status", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_IPSEC_ROOT ".AHSupported", uspd_get_value, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_IPSEC_ROOT ".IKEv2SupportedEncryptionAlgorithms", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_IPSEC_ROOT ".ESPSupportedEncryptionAlgorithms", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_IPSEC_ROOT ".IKEv2SupportedPseudoRandomFunctions", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_IPSEC_ROOT ".SupportedIntegrityAlgorithms", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_IPSEC_ROOT ".SupportedDiffieHellmanGroupTransforms", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_IPSEC_ROOT ".MaxFilterEntries", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_IPSEC_ROOT ".MaxProfileEntries", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_IPSEC_ROOT ".Stats.NegotiationFailures", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_IPSEC_ROOT ".Stats.BytesSent", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_IPSEC_ROOT ".Stats.BytesReceived", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_IPSEC_ROOT ".Stats.PacketsSent", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_IPSEC_ROOT ".Stats.PacketsReceived", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_IPSEC_ROOT ".Stats.ErrorsSent", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_IPSEC_ROOT ".Stats.UnknownSPIErrors", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_IPSEC_ROOT ".Stats.DecryptionErrors", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_IPSEC_ROOT ".Stats.IntegrityErrors", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_IPSEC_ROOT ".Stats.ReplayErrors", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_IPSEC_ROOT ".Stats.PolicyErrors", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_IPSEC_ROOT ".Stats.OtherReceiveErrors", uspd_get_value, DM_UINT);
+
+#define IPSEC_FILTER_ROOT "Device.IPsec.Filter"
+	err |= USP_REGISTER_Object(IPSEC_FILTER_ROOT ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
+	err |= USP_REGISTER_DBParam_Alias(IPSEC_FILTER_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_Param_NumEntries(DEVICE_IPSEC_ROOT ".FilterNumberOfEntries", IPSEC_FILTER_ROOT ".{i}");
+
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_FILTER_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_FILTER_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_FILTER_ROOT ".{i}.Order", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_FILTER_ROOT ".{i}.Interface", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_FILTER_ROOT ".{i}.AllInterfaces", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_FILTER_ROOT ".{i}.DestIP", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_FILTER_ROOT ".{i}.DestMask", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_FILTER_ROOT ".{i}.DestIPExclude", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_FILTER_ROOT ".{i}.SourceIP", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_FILTER_ROOT ".{i}.SourceMask", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_FILTER_ROOT ".{i}.SourceIPExclude", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_FILTER_ROOT ".{i}.Protocol", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_FILTER_ROOT ".{i}.ProtocolExclude", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_FILTER_ROOT ".{i}.DestPort", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_FILTER_ROOT ".{i}.DestPortRangeMax", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_FILTER_ROOT ".{i}.DestPortExclude", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_FILTER_ROOT ".{i}.SourcePort", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_FILTER_ROOT ".{i}.SourcePortRangeMax", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_FILTER_ROOT ".{i}.SourcePortExclude", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_FILTER_ROOT ".{i}.ProcessingChoice", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_FILTER_ROOT ".{i}.Profile", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+
+#define IPSEC_PROFILE_ROOT "Device.IPsec.Profile"
+	err |= USP_REGISTER_Object(IPSEC_PROFILE_ROOT ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
+	err |= USP_REGISTER_DBParam_Alias(IPSEC_PROFILE_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_Param_NumEntries(DEVICE_IPSEC_ROOT ".ProfileNumberOfEntries", IPSEC_PROFILE_ROOT ".{i}");
+
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_PROFILE_ROOT ".{i}.MaxChildSAs", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_PROFILE_ROOT ".{i}.RemoteEndpoints", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_PROFILE_ROOT ".{i}.ForwardingPolicy", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_PROFILE_ROOT ".{i}.Protocol", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_PROFILE_ROOT ".{i}.IKEv2AuthenticationMethod", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_PROFILE_ROOT ".{i}.IKEv2AllowedEncryptionAlgorithms", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_PROFILE_ROOT ".{i}.ESPAllowedEncryptionAlgorithms", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_PROFILE_ROOT ".{i}.IKEv2AllowedPseudoRandomFunctions", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_PROFILE_ROOT ".{i}.IKEv2AllowedIntegrityAlgorithms", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_PROFILE_ROOT ".{i}.AHAllowedIntegrityAlgorithms", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_PROFILE_ROOT ".{i}.ESPAllowedIntegrityAlgorithms", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_PROFILE_ROOT ".{i}.IKEv2AllowedDiffieHellmanGroupTransforms", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_PROFILE_ROOT ".{i}.IKEv2DeadPeerDetectionTimeout", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_PROFILE_ROOT ".{i}.IKEv2NATTKeepaliveTimeout", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_PROFILE_ROOT ".{i}.AntiReplayWindowSize", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_PROFILE_ROOT ".{i}.DoNotFragment", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_PROFILE_ROOT ".{i}.DSCPMarkPolicy", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_PROFILE_ROOT ".{i}.IKEv2SATrafficLimit", uspd_get_value, uspd_set_value, NULL, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_PROFILE_ROOT ".{i}.IKEv2SATimeLimit", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_PROFILE_ROOT ".{i}.IKEv2SAExpiryAction", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_PROFILE_ROOT ".{i}.ChildSATrafficLimit", uspd_get_value, uspd_set_value, NULL, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_PROFILE_ROOT ".{i}.ChildSATimeLimit", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(IPSEC_PROFILE_ROOT ".{i}.ChildSAExpiryAction", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+
+#define PROFILE_SCPATTR_ROOT "Device.IPsec.Profile.{i}.SentCPAttr"
+	err |= USP_REGISTER_Object(PROFILE_SCPATTR_ROOT ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
+	err |= USP_REGISTER_DBParam_Alias(PROFILE_SCPATTR_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_Param_NumEntries(IPSEC_PROFILE_ROOT ".{i}.SentCPAttrNumberOfEntries", PROFILE_SCPATTR_ROOT ".{i}");
+
+	err |= USP_REGISTER_VendorParam_ReadWrite(PROFILE_SCPATTR_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(PROFILE_SCPATTR_ROOT ".{i}.Type", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(PROFILE_SCPATTR_ROOT ".{i}.Value", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+
+#define IPSEC_TUNNEL_ROOT "Device.IPsec.Tunnel"
+	err |= USP_REGISTER_Object(IPSEC_TUNNEL_ROOT ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
+	err |= USP_REGISTER_DBParam_Alias(IPSEC_TUNNEL_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_Param_NumEntries(DEVICE_IPSEC_ROOT ".TunnelNumberOfEntries", IPSEC_TUNNEL_ROOT ".{i}");
+
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_TUNNEL_ROOT ".{i}.TunnelInterface", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_TUNNEL_ROOT ".{i}.TunneledInterface", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_TUNNEL_ROOT ".{i}.Filters", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_TUNNEL_ROOT ".{i}.Stats.DecryptionErrors", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_TUNNEL_ROOT ".{i}.Stats.IntegrityErrors", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_TUNNEL_ROOT ".{i}.Stats.ReplayErrors", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_TUNNEL_ROOT ".{i}.Stats.PolicyErrors", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_TUNNEL_ROOT ".{i}.Stats.OtherReceiveErrors", uspd_get_value, DM_UINT);
+
+#define IPSEC_IKEv2SA_ROOT "Device.IPsec.IKEv2SA"
+	err |= USP_REGISTER_Object(IPSEC_IKEv2SA_ROOT ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
+	err |= USP_REGISTER_DBParam_Alias(IPSEC_IKEv2SA_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_Param_NumEntries(DEVICE_IPSEC_ROOT ".IKEv2SANumberOfEntries", IPSEC_IKEv2SA_ROOT ".{i}");
+
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_IKEv2SA_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_IKEv2SA_ROOT ".{i}.Tunnel", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_IKEv2SA_ROOT ".{i}.LocalAddress", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_IKEv2SA_ROOT ".{i}.RemoteAddress", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_IKEv2SA_ROOT ".{i}.EncryptionAlgorithm", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_IKEv2SA_ROOT ".{i}.EncryptionKeyLength", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_IKEv2SA_ROOT ".{i}.PseudoRandomFunction", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_IKEv2SA_ROOT ".{i}.IntegrityAlgorithm", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_IKEv2SA_ROOT ".{i}.DiffieHellmanGroupTransform", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_IKEv2SA_ROOT ".{i}.CreationTime", uspd_get_value, DM_DATETIME);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_IKEv2SA_ROOT ".{i}.NATDetected", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_IKEv2SA_ROOT ".{i}.Stats.BytesSent", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_IKEv2SA_ROOT ".{i}.Stats.BytesReceived", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_IKEv2SA_ROOT ".{i}.Stats.PacketsSent", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_IKEv2SA_ROOT ".{i}.Stats.PacketsReceived", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_IKEv2SA_ROOT ".{i}.Stats.ErrorsSent", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_IKEv2SA_ROOT ".{i}.Stats.DecryptionErrors", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_IKEv2SA_ROOT ".{i}.Stats.IntegrityErrors", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_IKEv2SA_ROOT ".{i}.Stats.OtherReceiveErrors", uspd_get_value, DM_UINT);
+
+#define IPSEC_IKEv2SA_RCPATTR_ROOT "Device.IPsec.IKEv2SA.{i}.ReceivedCPAttr"
+	err |= USP_REGISTER_Object(IPSEC_IKEv2SA_RCPATTR_ROOT ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
+	//err |= USP_REGISTER_DBParam_Alias(IPSEC_IKEv2SA_RCPATTR_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_Param_NumEntries(IPSEC_IKEv2SA_ROOT ".{i}.ReceivedCPAttrNumberOfEntries", IPSEC_IKEv2SA_RCPATTR_ROOT ".{i}");
+
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_IKEv2SA_RCPATTR_ROOT ".{i}.Type", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_IKEv2SA_RCPATTR_ROOT ".{i}.Value", uspd_get_value, DM_STRING);
+
+#define IPSEC_IKEv2SA_CHILDSA_ROOT "Device.IPsec.IKEv2SA.{i}.ChildSA"
+	err |= USP_REGISTER_Object(IPSEC_IKEv2SA_CHILDSA_ROOT ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
+	err |= USP_REGISTER_DBParam_Alias(IPSEC_IKEv2SA_CHILDSA_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_Param_NumEntries(IPSEC_IKEv2SA_ROOT ".{i}.ChildSANumberOfEntries", IPSEC_IKEv2SA_CHILDSA_ROOT ".{i}");
+
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_IKEv2SA_CHILDSA_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_IKEv2SA_CHILDSA_ROOT ".{i}.InboundSPI", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_IKEv2SA_CHILDSA_ROOT ".{i}.OutboundSPI", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_IKEv2SA_CHILDSA_ROOT ".{i}.CreationTime", uspd_get_value, DM_DATETIME);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_IKEv2SA_CHILDSA_ROOT ".{i}.Stats.BytesSent", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_IKEv2SA_CHILDSA_ROOT ".{i}.Stats.BytesReceived", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_IKEv2SA_CHILDSA_ROOT ".{i}.Stats.PacketsSent", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_IKEv2SA_CHILDSA_ROOT ".{i}.Stats.PacketsReceived", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_IKEv2SA_CHILDSA_ROOT ".{i}.Stats.ErrorsSent", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_IKEv2SA_CHILDSA_ROOT ".{i}.Stats.DecryptionErrors", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_IKEv2SA_CHILDSA_ROOT ".{i}.Stats.IntegrityErrors", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_IKEv2SA_CHILDSA_ROOT ".{i}.Stats.ReplayErrors", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_IKEv2SA_CHILDSA_ROOT ".{i}.Stats.PolicyErrors", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(IPSEC_IKEv2SA_CHILDSA_ROOT ".{i}.Stats.OtherReceiveErrors", uspd_get_value, DM_UINT);
+
+	char *unique_keys_ipsecfilter[] = { "Alias" };
+	err |= USP_REGISTER_Object_UniqueKey(IPSEC_FILTER_ROOT ".{i}", unique_keys_ipsecfilter, NUM_ELEM(unique_keys_ipsecfilter));
+	char *unique_keys_ipsecprofile[] = { "Alias" };
+	err |= USP_REGISTER_Object_UniqueKey(IPSEC_PROFILE_ROOT ".{i}", unique_keys_ipsecprofile, NUM_ELEM(unique_keys_ipsecprofile));
+	char *unique_keys_profilescpattr[] = { "Type" };
+	err |= USP_REGISTER_Object_UniqueKey(PROFILE_SCPATTR_ROOT ".{i}", unique_keys_profilescpattr, NUM_ELEM(unique_keys_profilescpattr));
+	char *unique_keys_ipsectunnel[] = { "TunnelInterface", "TunneledInterface" };
+	err |= USP_REGISTER_Object_UniqueKey(IPSEC_TUNNEL_ROOT ".{i}", unique_keys_ipsectunnel, NUM_ELEM(unique_keys_ipsectunnel));
+	char *unique_keys_ipsecIKEv2SA[] = { "Tunnel" };
+	err |= USP_REGISTER_Object_UniqueKey(IPSEC_IKEv2SA_ROOT ".{i}", unique_keys_ipsecIKEv2SA, NUM_ELEM(unique_keys_ipsecIKEv2SA));
+	char *unique_keys_IKEv2SAchildsa[] = { "Alias" };
+	err |= USP_REGISTER_Object_UniqueKey(IPSEC_IKEv2SA_CHILDSA_ROOT ".{i}", unique_keys_IKEv2SAchildsa, NUM_ELEM(unique_keys_IKEv2SAchildsa));
 	// Exit if any errors occurred
 	if (err != USP_ERR_OK)
 	{
@@ -2239,6 +3042,74 @@ int vendor_IPsec_init(void)
 int vendor_GRE_init(void)
 {
 	int err = USP_ERR_OK;
+#define DEVICE_GRE_ROOT "Device.GRE"
+#define GRE_TUNNEL_ROOT "Device.GRE.Tunnel"
+	err |= USP_REGISTER_Object(GRE_TUNNEL_ROOT ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
+	err |= USP_REGISTER_DBParam_Alias(GRE_TUNNEL_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_Param_NumEntries(DEVICE_GRE_ROOT ".TunnelNumberOfEntries", GRE_TUNNEL_ROOT ".{i}");
+
+	err |= USP_REGISTER_VendorParam_ReadWrite(GRE_TUNNEL_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(GRE_TUNNEL_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(GRE_TUNNEL_ROOT ".{i}.RemoteEndpoints", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(GRE_TUNNEL_ROOT ".{i}.KeepAlivePolicy", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(GRE_TUNNEL_ROOT ".{i}.KeepAliveTimeout", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(GRE_TUNNEL_ROOT ".{i}.KeepAliveThreshold", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(GRE_TUNNEL_ROOT ".{i}.DeliveryHeaderProtocol", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(GRE_TUNNEL_ROOT ".{i}.DefaultDSCPMark", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(GRE_TUNNEL_ROOT ".{i}.ConnectedRemoteEndpoint", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(GRE_TUNNEL_ROOT ".{i}.Stats.KeepAliveSent", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(GRE_TUNNEL_ROOT ".{i}.Stats.KeepAliveReceived", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(GRE_TUNNEL_ROOT ".{i}.Stats.BytesSent", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(GRE_TUNNEL_ROOT ".{i}.Stats.BytesReceived", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(GRE_TUNNEL_ROOT ".{i}.Stats.PacketsSent", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(GRE_TUNNEL_ROOT ".{i}.Stats.PacketsReceived", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(GRE_TUNNEL_ROOT ".{i}.Stats.ErrorsSent", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(GRE_TUNNEL_ROOT ".{i}.Stats.ErrorsReceived", uspd_get_value, DM_UINT);
+
+#define GRE_TUNNEL_INTERFACE "Device.GRE.Tunnel.{i}.Interface"
+	err |= USP_REGISTER_Object(GRE_TUNNEL_INTERFACE ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
+	err |= USP_REGISTER_DBParam_Alias(GRE_TUNNEL_INTERFACE ".{i}.Alias", NULL);
+	err |= USP_REGISTER_Param_NumEntries(GRE_TUNNEL_ROOT ".{i}.InterfaceNumberOfEntries", GRE_TUNNEL_INTERFACE ".{i}");
+
+	err |= USP_REGISTER_VendorParam_ReadWrite(GRE_TUNNEL_INTERFACE ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(GRE_TUNNEL_INTERFACE ".{i}.Status", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(GRE_TUNNEL_INTERFACE ".{i}.Name", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(GRE_TUNNEL_INTERFACE ".{i}.LastChange", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(GRE_TUNNEL_INTERFACE ".{i}.LowerLayers", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(GRE_TUNNEL_INTERFACE ".{i}.ProtocolIdOverride", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(GRE_TUNNEL_INTERFACE ".{i}.UseChecksum", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(GRE_TUNNEL_INTERFACE ".{i}.KeyIdentifierGenerationPolicy", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(GRE_TUNNEL_INTERFACE ".{i}.KeyIdentifier", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(GRE_TUNNEL_INTERFACE ".{i}.UseSequenceNumber", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(GRE_TUNNEL_INTERFACE ".{i}.Stats.BytesSent", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(GRE_TUNNEL_INTERFACE ".{i}.Stats.BytesReceived", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(GRE_TUNNEL_INTERFACE ".{i}.Stats.PacketsSent", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(GRE_TUNNEL_INTERFACE ".{i}.Stats.PacketsReceived", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(GRE_TUNNEL_INTERFACE ".{i}.Stats.ErrorsSent", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(GRE_TUNNEL_INTERFACE ".{i}.Stats.ErrorsReceived", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(GRE_TUNNEL_INTERFACE ".{i}.Stats.DiscardChecksumReceived", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(GRE_TUNNEL_INTERFACE ".{i}.Stats.DiscardSequenceNumberReceived", uspd_get_value, DM_UINT);
+
+#define GRE_FILTER_ROOT "Device.GRE.Filter"
+	err |= USP_REGISTER_Object(GRE_FILTER_ROOT ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
+	err |= USP_REGISTER_DBParam_Alias(GRE_FILTER_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_Param_NumEntries(DEVICE_GRE_ROOT ".FilterNumberOfEntries", GRE_FILTER_ROOT ".{i}");
+
+	err |= USP_REGISTER_VendorParam_ReadWrite(GRE_FILTER_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(GRE_FILTER_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(GRE_FILTER_ROOT ".{i}.Order", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(GRE_FILTER_ROOT ".{i}.Interface", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(GRE_FILTER_ROOT ".{i}.AllInterfaces", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(GRE_FILTER_ROOT ".{i}.VLANIDCheck", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(GRE_FILTER_ROOT ".{i}.VLANIDExclude", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(GRE_FILTER_ROOT ".{i}.DSCPMarkPolicy", uspd_get_value, uspd_set_value, NULL, DM_INT);
+
+	char *unique_keys_gretunnel[] = { "Alias" };
+	err |= USP_REGISTER_Object_UniqueKey(GRE_TUNNEL_ROOT ".{i}", unique_keys_gretunnel, NUM_ELEM(unique_keys_gretunnel));
+	char *unique_keys_gretunnelint[] = { "Name" };
+	err |= USP_REGISTER_Object_UniqueKey(GRE_TUNNEL_INTERFACE ".{i}", unique_keys_gretunnelint, NUM_ELEM(unique_keys_gretunnelint));
+	char *unique_keys_grefilter[] = { "Alias" };
+	err |= USP_REGISTER_Object_UniqueKey(GRE_FILTER_ROOT ".{i}", unique_keys_grefilter, NUM_ELEM(unique_keys_grefilter));
 	// Exit if any errors occurred
 	if (err != USP_ERR_OK)
 	{
@@ -2263,6 +3134,73 @@ int vendor_L2TPv3_init(void)
 int vendor_VXLAN_init(void)
 {
 	int err = USP_ERR_OK;
+#define DEVICE_VXLAN_ROOT "Device.VXLAN"
+#define VXLAN_TUNNEL_ROOT "Device.VXLAN.Tunnel"
+	err |= USP_REGISTER_Object(VXLAN_TUNNEL_ROOT ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
+	err |= USP_REGISTER_DBParam_Alias(VXLAN_TUNNEL_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_Param_NumEntries(DEVICE_VXLAN_ROOT ".TunnelNumberOfEntries", VXLAN_TUNNEL_ROOT ".{i}");
+
+	err |= USP_REGISTER_VendorParam_ReadWrite(VXLAN_TUNNEL_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(VXLAN_TUNNEL_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(VXLAN_TUNNEL_ROOT ".{i}.RemoteEndpoints", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(VXLAN_TUNNEL_ROOT ".{i}.KeepAlivePolicy", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(VXLAN_TUNNEL_ROOT ".{i}.KeepAliveTimeout", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(VXLAN_TUNNEL_ROOT ".{i}.KeepAliveThreshold", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(VXLAN_TUNNEL_ROOT ".{i}.DeliveryHeaderProtocol", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(VXLAN_TUNNEL_ROOT ".{i}.DefaultDSCPMark", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(VXLAN_TUNNEL_ROOT ".{i}.ConnectedRemoteEndpoint", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(VXLAN_TUNNEL_ROOT ".{i}.SourcePort", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(VXLAN_TUNNEL_ROOT ".{i}.RemotePort", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(VXLAN_TUNNEL_ROOT ".{i}.Stats.KeepAliveSent", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(VXLAN_TUNNEL_ROOT ".{i}.Stats.KeepAliveReceived", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(VXLAN_TUNNEL_ROOT ".{i}.Stats.BytesSent", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(VXLAN_TUNNEL_ROOT ".{i}.Stats.BytesReceived", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(VXLAN_TUNNEL_ROOT ".{i}.Stats.PacketsSent", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(VXLAN_TUNNEL_ROOT ".{i}.Stats.PacketsReceived", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(VXLAN_TUNNEL_ROOT ".{i}.Stats.ErrorsSent", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(VXLAN_TUNNEL_ROOT ".{i}.Stats.ErrorsReceived", uspd_get_value, DM_UINT);
+
+#define VXLAN_TUNNEL_INTERFACE "Device.VXLAN.Tunnel.{i}.Interface"
+	err |= USP_REGISTER_Object(VXLAN_TUNNEL_INTERFACE ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
+	err |= USP_REGISTER_DBParam_Alias(VXLAN_TUNNEL_INTERFACE ".{i}.Alias", NULL);
+	err |= USP_REGISTER_Param_NumEntries(VXLAN_TUNNEL_ROOT ".{i}.InterfaceNumberOfEntries", VXLAN_TUNNEL_INTERFACE ".{i}");
+
+	err |= USP_REGISTER_VendorParam_ReadWrite(VXLAN_TUNNEL_INTERFACE ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(VXLAN_TUNNEL_INTERFACE ".{i}.Status", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(VXLAN_TUNNEL_INTERFACE ".{i}.Name", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(VXLAN_TUNNEL_INTERFACE ".{i}.LastChange", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(VXLAN_TUNNEL_INTERFACE ".{i}.LowerLayers", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(VXLAN_TUNNEL_INTERFACE ".{i}.VNI", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(VXLAN_TUNNEL_INTERFACE ".{i}.Stats.BytesSent", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(VXLAN_TUNNEL_INTERFACE ".{i}.Stats.BytesReceived", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(VXLAN_TUNNEL_INTERFACE ".{i}.Stats.PacketsSent", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(VXLAN_TUNNEL_INTERFACE ".{i}.Stats.PacketsReceived", uspd_get_value, DM_ULONG);
+	err |= USP_REGISTER_VendorParam_ReadOnly(VXLAN_TUNNEL_INTERFACE ".{i}.Stats.ErrorsSent", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(VXLAN_TUNNEL_INTERFACE ".{i}.Stats.ErrorsReceived", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(VXLAN_TUNNEL_INTERFACE ".{i}.Stats.DiscardChecksumReceived", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(VXLAN_TUNNEL_INTERFACE ".{i}.Stats.DiscardSequenceNumberReceived", uspd_get_value, DM_UINT);
+
+#define VXLAN_FILTER_ROOT "Device.VXLAN.Filter"
+	err |= USP_REGISTER_Object(VXLAN_FILTER_ROOT ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
+	err |= USP_REGISTER_DBParam_Alias(VXLAN_FILTER_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_Param_NumEntries(DEVICE_VXLAN_ROOT ".FilterNumberOfEntries", VXLAN_FILTER_ROOT ".{i}");
+
+	err |= USP_REGISTER_VendorParam_ReadWrite(VXLAN_FILTER_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(VXLAN_FILTER_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(VXLAN_FILTER_ROOT ".{i}.Order", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(VXLAN_FILTER_ROOT ".{i}.Interface", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(VXLAN_FILTER_ROOT ".{i}.AllInterfaces", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(VXLAN_FILTER_ROOT ".{i}.VLANIDCheck", uspd_get_value, uspd_set_value, NULL, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(VXLAN_FILTER_ROOT ".{i}.VLANIDExclude", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(VXLAN_FILTER_ROOT ".{i}.DSCPMarkPolicy", uspd_get_value, uspd_set_value, NULL, DM_INT);
+
+	char *unique_keys_vxlantunnel[] = { "Alias" };
+	err |= USP_REGISTER_Object_UniqueKey(VXLAN_TUNNEL_ROOT ".{i}", unique_keys_vxlantunnel, NUM_ELEM(unique_keys_vxlantunnel));
+	char *unique_keys_vxlantunnelint[] = { "Name" };
+	err |= USP_REGISTER_Object_UniqueKey(VXLAN_TUNNEL_INTERFACE ".{i}", unique_keys_vxlantunnelint, NUM_ELEM(unique_keys_vxlantunnelint));
+	char *unique_keys_vxlanfilter[] = { "Alias" };
+	err |= USP_REGISTER_Object_UniqueKey(VXLAN_FILTER_ROOT ".{i}", unique_keys_vxlanfilter, NUM_ELEM(unique_keys_vxlanfilter));
+
 	// Exit if any errors occurred
 	if (err != USP_ERR_OK)
 	{
@@ -2350,7 +3288,7 @@ int vendor_Routing_init(void)
 	err |= USP_REGISTER_VendorParam_ReadOnly(ROUTING_ROUTEINFO_ROOT ".Enable", uspd_get_value, DM_BOOL);
 #define ROUTING_ROUTEINFO_IS_ROOT ROUTING_ROUTEINFO_ROOT ".InterfaceSetting"
 	err |= USP_REGISTER_Object(ROUTING_ROUTEINFO_IS_ROOT ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
-	err |= USP_REGISTER_DBParam_Alias(ROUTING_ROUTEINFO_IS_ROOT ".{i}.Alias", NULL);
+	// err |= USP_REGISTER_DBParam_Alias(ROUTING_ROUTEINFO_IS_ROOT ".{i}.Alias", NULL);
 	err |= USP_REGISTER_Param_NumEntries(ROUTING_ROUTEINFO_ROOT ".InterfaceSettingNumberOfEntries", ROUTING_ROUTEINFO_IS_ROOT ".{i}");
 
 	err |= USP_REGISTER_VendorParam_ReadOnly(ROUTING_ROUTEINFO_IS_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
@@ -2775,12 +3713,14 @@ int vendor_Hosts_init(void)
 	err |= USP_REGISTER_Object_UniqueKey(HOSTS_HOST_ROOT ".{i}", unique_keys_hosts_host, NUM_ELEM(unique_keys_hosts_host));
 
 #define HOSTS_HOST_IPV4_ROOT "Device.Hosts.Host.{i}.IPv4Address"
+	err |= USP_REGISTER_Object(HOSTS_HOST_IPV4_ROOT ".{i}", NULL, NULL, NULL, NULL, NULL, NULL);
 	err |= USP_REGISTER_Param_NumEntries(HOSTS_HOST_ROOT ".{i}.IPv4AddressNumberOfEntries", HOSTS_HOST_IPV4_ROOT ".{i}");
 	err |= USP_REGISTER_VendorParam_ReadOnly(HOSTS_HOST_IPV4_ROOT ".{i}.IPAddress", uspd_get_value, DM_STRING);
 	char *unique_keys_hosts_host_ipv4[] = { "IPAddress" };
 	err |= USP_REGISTER_Object_UniqueKey(HOSTS_HOST_IPV4_ROOT ".{i}", unique_keys_hosts_host_ipv4, NUM_ELEM(unique_keys_hosts_host_ipv4));
 
 #define HOSTS_HOST_IPV6_ROOT "Device.Hosts.Host.{i}.IPv6Address"
+	err |= USP_REGISTER_Object(HOSTS_HOST_IPV6_ROOT ".{i}", NULL, NULL, NULL, NULL, NULL, NULL);
 	err |= USP_REGISTER_Param_NumEntries(HOSTS_HOST_ROOT ".{i}.IPv6AddressNumberOfEntries", HOSTS_HOST_IPV6_ROOT ".{i}");
 	err |= USP_REGISTER_VendorParam_ReadOnly(HOSTS_HOST_IPV6_ROOT ".{i}.IPAddress", uspd_get_value, DM_STRING);
 	char *unique_keys_hosts_host_ipv6[] = { "IPAddress" };
@@ -2852,6 +3792,7 @@ int vendor_DNS_init(void)
 	err |= USP_REGISTER_VendorParam_ReadWrite(DNS_SD_ROOT ".AdvertisedInterfaces", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
 
 #define DNS_SD_SERVICE_ROOT DNS_SD_ROOT ".Service"
+	err |= USP_REGISTER_Object(DNS_SD_SERVICE_ROOT ".{i}", NULL, NULL, NULL, NULL, NULL, NULL);
 	err |= USP_REGISTER_Param_NumEntries(DNS_SD_ROOT ".ServiceNumberOfEntries", DNS_SD_SERVICE_ROOT ".{i}");
 	err |= USP_REGISTER_VendorParam_ReadOnly(DNS_SD_SERVICE_ROOT ".{i}.InstanceName", uspd_get_value, DM_STRING);
 	err |= USP_REGISTER_VendorParam_ReadOnly(DNS_SD_SERVICE_ROOT ".{i}.ApplicationProtocol", uspd_get_value, DM_STRING);
@@ -2870,6 +3811,7 @@ int vendor_DNS_init(void)
 
 
 #define DNS_SD_SERVICE_TR_ROOT DNS_SD_SERVICE_ROOT ".{i}.TextRecord"
+	err |= USP_REGISTER_Object(DNS_SD_SERVICE_TR_ROOT ".{i}", NULL, NULL, NULL, NULL, NULL, NULL);
 	err |= USP_REGISTER_Param_NumEntries(DNS_SD_SERVICE_ROOT ".{i}.TextRecordNumberOfEntries", DNS_SD_SERVICE_TR_ROOT ".{i}");
 	err |= USP_REGISTER_VendorParam_ReadOnly(DNS_SD_SERVICE_TR_ROOT ".{i}.Key", uspd_get_value, DM_STRING);
 	err |= USP_REGISTER_VendorParam_ReadOnly(DNS_SD_SERVICE_TR_ROOT ".{i}.Value", uspd_get_value, DM_STRING);
@@ -3065,6 +4007,8 @@ int vendor_DHCPv4_init(void)
 	err |= USP_REGISTER_Object_UniqueKey(DHCPv4_SERVER_POOL_STATIC ".{i}", unique_keys_pool_static, NUM_ELEM(unique_keys_pool_static));
 
 #define DHCPv4_SERVER_POOL_OPTION "Device.DHCPv4.Server.Pool.{i}.Option"
+	err |= USP_REGISTER_Object(DHCPv4_SERVER_POOL_OPTION ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
+	err |= USP_REGISTER_DBParam_Alias(DHCPv4_SERVER_POOL_OPTION ".{i}.Alias", NULL);
 	err |= USP_REGISTER_Param_NumEntries(DHCPv4_SERVER_POOL ".{i}.OptionNumberOfEntries", DHCPv4_SERVER_POOL ".{i}.Option.{i}");
 	err |= USP_REGISTER_VendorParam_ReadWrite(DHCPv4_SERVER_POOL_OPTION ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
 	err |= USP_REGISTER_VendorParam_ReadWrite(DHCPv4_SERVER_POOL_OPTION ".{i}.Tag", uspd_get_value, uspd_set_value, NULL, DM_UINT);
@@ -3085,7 +4029,7 @@ int vendor_DHCPv4_init(void)
 
 #define DHCPv4_SERVER_POOL_CLIENT_IPV4 DHCPv4_SERVER_POOL_CLIENT ".{i}.IPv4Address"
 	err |= USP_REGISTER_Object(DHCPv4_SERVER_POOL_CLIENT_IPV4 ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
-	err |= USP_REGISTER_DBParam_Alias(DHCPv4_SERVER_POOL_CLIENT_IPV4 ".{i}.Alias", NULL);
+	// err |= USP_REGISTER_DBParam_Alias(DHCPv4_SERVER_POOL_CLIENT_IPV4 ".{i}.Alias", NULL);
 	err |= USP_REGISTER_Param_NumEntries(DHCPv4_SERVER_POOL_CLIENT ".{i}.IPv4AddressNumberOfEntries", DHCPv4_SERVER_POOL_CLIENT_IPV4 ".{i}");
 
 	err |= USP_REGISTER_VendorParam_ReadOnly(DHCPv4_SERVER_POOL_CLIENT_IPV4 ".{i}.IPAddress", uspd_get_value, DM_STRING);
@@ -3095,7 +4039,7 @@ int vendor_DHCPv4_init(void)
 
 #define DHCPv4_SERVER_POOL_CLIENT_OPTION DHCPv4_SERVER_POOL_CLIENT ".{i}.Option"
 	err |= USP_REGISTER_Object(DHCPv4_SERVER_POOL_CLIENT_OPTION ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
-	err |= USP_REGISTER_DBParam_Alias(DHCPv4_SERVER_POOL_CLIENT_OPTION ".{i}.Alias", NULL);
+	// err |= USP_REGISTER_DBParam_Alias(DHCPv4_SERVER_POOL_CLIENT_OPTION ".{i}.Alias", NULL);
 	err |= USP_REGISTER_Param_NumEntries(DHCPv4_SERVER_POOL_CLIENT ".{i}.OptionNumberOfEntries", DHCPv4_SERVER_POOL_CLIENT_OPTION ".{i}");
 
 	err |= USP_REGISTER_VendorParam_ReadOnly(DHCPv4_SERVER_POOL_CLIENT_OPTION ".{i}.Tag", uspd_get_value, DM_UINT);
@@ -3140,6 +4084,7 @@ int vendor_DHCPv6_init(void)
 	err |= USP_REGISTER_Object_UniqueKey(DHCPv6_CLIENT_ROOT ".{i}", unique_keys_dhcpv6_client, NUM_ELEM(unique_keys_dhcpv6_client));
 
 #define DHCPv6_CLIENT_SERVER_ROOT "Device.DHCPv6.Client.{i}.Server"
+	err |= USP_REGISTER_Object(DHCPv6_CLIENT_SERVER_ROOT ".{i}", NULL, NULL, NULL, NULL, NULL, NULL);
 	err |= USP_REGISTER_Param_NumEntries(DHCPv6_CLIENT_ROOT".{i}.ServerNumberOfEntries", DHCPv6_CLIENT_SERVER_ROOT ".{i}");
 	err |= USP_REGISTER_VendorParam_ReadOnly(DHCPv6_CLIENT_SERVER_ROOT ".{i}.SourceAddress", uspd_get_value, DM_STRING);
 	err |= USP_REGISTER_VendorParam_ReadOnly(DHCPv6_CLIENT_SERVER_ROOT ".{i}.DUID", uspd_get_value, DM_STRING);
@@ -3160,7 +4105,7 @@ int vendor_DHCPv6_init(void)
 
 #define DHCPv6_CLIENT_REC_ROOT "Device.DHCPv6.Client.{i}.ReceivedOption"
 	err |= USP_REGISTER_Object(DHCPv6_CLIENT_REC_ROOT ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
-	err |= USP_REGISTER_DBParam_Alias(DHCPv6_CLIENT_REC_ROOT ".{i}.Alias", NULL);
+	// err |= USP_REGISTER_DBParam_Alias(DHCPv6_CLIENT_REC_ROOT ".{i}.Alias", NULL);
 	err |= USP_REGISTER_Param_NumEntries(DHCPv6_CLIENT_ROOT".{i}.ReceivedOptionNumberOfEntries", DHCPv6_CLIENT_REC_ROOT ".{i}");
 
 	err |= USP_REGISTER_VendorParam_ReadOnly(DHCPv6_CLIENT_REC_ROOT ".{i}.Tag", uspd_get_value, DM_UINT);
@@ -3215,7 +4160,7 @@ int vendor_DHCPv6_init(void)
 	err |= USP_REGISTER_Object_UniqueKey(DHCPv6_SERVER_POOL_CLIENT ".{i}", unique_keys_v6_server_pool_client, NUM_ELEM(unique_keys_v6_server_pool_client));
 #define DHCPv6_SERVER_POOL_CLIENT_IPV6 DHCPv6_SERVER_POOL_CLIENT ".{i}.IPv6Address"
 	err |= USP_REGISTER_Object(DHCPv6_SERVER_POOL_CLIENT_IPV6 ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
-	err |= USP_REGISTER_DBParam_Alias(DHCPv6_SERVER_POOL_CLIENT_IPV6 ".{i}.Alias", NULL);
+	// err |= USP_REGISTER_DBParam_Alias(DHCPv6_SERVER_POOL_CLIENT_IPV6 ".{i}.Alias", NULL);
 	err |= USP_REGISTER_Param_NumEntries(DHCPv6_SERVER_POOL_CLIENT ".{i}.IPv6AddressNumberOfEntries", DHCPv6_SERVER_POOL_CLIENT_IPV6 ".{i}");
 
 	err |= USP_REGISTER_VendorParam_ReadOnly(DHCPv6_SERVER_POOL_CLIENT_IPV6 ".{i}.IPAddress", uspd_get_value, DM_STRING);
@@ -3225,7 +4170,7 @@ int vendor_DHCPv6_init(void)
 	err |= USP_REGISTER_Object_UniqueKey(DHCPv6_SERVER_POOL_CLIENT_IPV6 ".{i}", unique_keys_spool_ipv6_client, NUM_ELEM(unique_keys_spool_ipv6_client));
 #define DHCPv6_SERVER_POOL_CLIENT_PREFIX DHCPv6_SERVER_POOL_CLIENT ".{i}.IPv6Prefix"
 	err |= USP_REGISTER_Object(DHCPv6_SERVER_POOL_CLIENT_PREFIX ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
-	err |= USP_REGISTER_DBParam_Alias(DHCPv6_SERVER_POOL_CLIENT_PREFIX ".{i}.Alias", NULL);
+	// err |= USP_REGISTER_DBParam_Alias(DHCPv6_SERVER_POOL_CLIENT_PREFIX ".{i}.Alias", NULL);
 	err |= USP_REGISTER_Param_NumEntries(DHCPv6_SERVER_POOL_CLIENT ".{i}.IPv6PrefixNumberOfEntries", DHCPv6_SERVER_POOL_CLIENT_PREFIX ".{i}");
 
 	err |= USP_REGISTER_VendorParam_ReadOnly(DHCPv6_SERVER_POOL_CLIENT_PREFIX ".{i}.Prefix", uspd_get_value, DM_STRING);
@@ -3237,7 +4182,7 @@ int vendor_DHCPv6_init(void)
 
 #define DHCPv6_SERVER_POOL_CLIENT_OPTION DHCPv6_SERVER_POOL_CLIENT ".{i}.Option"
 	err |= USP_REGISTER_Object(DHCPv6_SERVER_POOL_CLIENT_OPTION ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
-	err |= USP_REGISTER_DBParam_Alias(DHCPv6_SERVER_POOL_CLIENT_OPTION ".{i}.Alias", NULL);
+	// err |= USP_REGISTER_DBParam_Alias(DHCPv6_SERVER_POOL_CLIENT_OPTION ".{i}.Alias", NULL);
 	err |= USP_REGISTER_Param_NumEntries(DHCPv6_SERVER_POOL_CLIENT ".{i}.OptionNumberOfEntries", DHCPv6_SERVER_POOL_CLIENT_OPTION ".{i}");
 
 	err |= USP_REGISTER_VendorParam_ReadOnly(DHCPv6_SERVER_POOL_CLIENT_OPTION ".{i}.Tag", uspd_get_value, DM_UINT);
@@ -3592,6 +4537,55 @@ int vendor_MQTT_init(void)
 int vendor_DynamicDNS_init(void)
 {
 	int err = USP_ERR_OK;
+#define DEVICE_DDNS_ROOT "Device.DynamicDNS"
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_DDNS_ROOT ".SupportedServices", uspd_get_value, DM_STRING);
+
+#define DDNS_CLIENT_ROOT "Device.DynamicDNS.Client"
+	err |= USP_REGISTER_Object(DDNS_CLIENT_ROOT ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
+	err |= USP_REGISTER_DBParam_Alias(DDNS_CLIENT_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_Param_NumEntries(DEVICE_DDNS_ROOT ".ClientNumberOfEntries", DDNS_CLIENT_ROOT ".{i}");
+
+	err |= USP_REGISTER_VendorParam_ReadWrite(DDNS_CLIENT_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DDNS_CLIENT_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DDNS_CLIENT_ROOT ".{i}.LastError", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DDNS_CLIENT_ROOT ".{i}.Server", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DDNS_CLIENT_ROOT ".{i}.Interface", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DDNS_CLIENT_ROOT ".{i}.Username", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DDNS_CLIENT_ROOT ".{i}.Password", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+
+#define CLIENT_HOSTNAME_ROOT "Device.DynamicDNS.Client.{i}.Hostname"
+	err |= USP_REGISTER_Object(CLIENT_HOSTNAME_ROOT ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
+	// err |= USP_REGISTER_DBParam_Alias(CLIENT_HOSTNAME_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_Param_NumEntries(DDNS_CLIENT_ROOT ".{i}.HostnameNumberOfEntries", CLIENT_HOSTNAME_ROOT ".{i}");
+
+	err |= USP_REGISTER_VendorParam_ReadWrite(CLIENT_HOSTNAME_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(CLIENT_HOSTNAME_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(CLIENT_HOSTNAME_ROOT ".{i}.Name", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(CLIENT_HOSTNAME_ROOT ".{i}.LastUpdate", uspd_get_value, DM_DATETIME);
+
+#define DDNS_SERVER_ROOT "Device.DynamicDNS.Server"
+	err |= USP_REGISTER_Object(DDNS_SERVER_ROOT ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
+	err |= USP_REGISTER_DBParam_Alias(DDNS_SERVER_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_Param_NumEntries(DEVICE_DDNS_ROOT ".ServerNumberOfEntries", DDNS_SERVER_ROOT ".{i}");
+
+	err |= USP_REGISTER_VendorParam_ReadWrite(DDNS_SERVER_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DDNS_SERVER_ROOT ".{i}.Name", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DDNS_SERVER_ROOT ".{i}.ServiceName", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DDNS_SERVER_ROOT ".{i}.ServerAddress", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DDNS_SERVER_ROOT ".{i}.ServerPort", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DDNS_SERVER_ROOT ".{i}.SupportedProtocols", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DDNS_SERVER_ROOT ".{i}.Protocol", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DDNS_SERVER_ROOT ".{i}.CheckInterval", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DDNS_SERVER_ROOT ".{i}.RetryInterval", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DDNS_SERVER_ROOT ".{i}.MaxRetries", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+
+	char *unique_keys_ddnsclient[] = { "Server", "Username" };
+	err |= USP_REGISTER_Object_UniqueKey(DDNS_CLIENT_ROOT ".{i}", unique_keys_ddnsclient, NUM_ELEM(unique_keys_ddnsclient));
+	char *unique_keys_clienthostname[] = { "Name" };
+	err |= USP_REGISTER_Object_UniqueKey(CLIENT_HOSTNAME_ROOT ".{i}", unique_keys_clienthostname, NUM_ELEM(unique_keys_clienthostname));
+	char *unique_keys_ddnsserver[] = { "Name" };
+	err |= USP_REGISTER_Object_UniqueKey(DDNS_SERVER_ROOT ".{i}", unique_keys_ddnsserver, NUM_ELEM(unique_keys_ddnsserver));
+
 	// Exit if any errors occurred
 	if (err != USP_ERR_OK)
 	{
@@ -3605,6 +4599,39 @@ int vendor_DynamicDNS_init(void)
 int vendor_LEDs_init(void)
 {
 	int err = USP_ERR_OK;
+#define DEVICE_LEDs_ROOT "Device.LEDs"
+#define LEDs_LED_ROOT "Device.LEDs.LED"
+	err |= USP_REGISTER_Object(LEDs_LED_ROOT ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
+	err |= USP_REGISTER_DBParam_Alias(LEDs_LED_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_Param_NumEntries(DEVICE_LEDs_ROOT ".LEDNumberOfEntries", LEDs_LED_ROOT ".{i}");
+
+	err |= USP_REGISTER_VendorParam_ReadWrite(LEDs_LED_ROOT ".{i}.Name", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(LEDs_LED_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(LEDs_LED_ROOT ".{i}.Reason", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(LEDs_LED_ROOT ".{i}.CyclePeriodRepetitions", uspd_get_value, DM_INT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(LEDs_LED_ROOT ".{i}.Location", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(LEDs_LED_ROOT ".{i}.RelativeXPosition", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(LEDs_LED_ROOT ".{i}.RelativeYPosition", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(LEDs_LED_ROOT ".{i}.CurrentCycleElement.CycleElementReference", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(LEDs_LED_ROOT ".{i}.CurrentCycleElement.Color", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(LEDs_LED_ROOT ".{i}.CurrentCycleElement.Duration", uspd_get_value, DM_UINT);
+
+#define LED_CYCLEELEMENT_ROOT "Device.LEDs.LED.{i}.CycleElement"
+	err |= USP_REGISTER_Object(LED_CYCLEELEMENT_ROOT ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
+	err |= USP_REGISTER_DBParam_Alias(LED_CYCLEELEMENT_ROOT ".{i}.Alias", NULL);
+	err |= USP_REGISTER_Param_NumEntries(LEDs_LED_ROOT ".{i}.CycleElementNumberOfEntries", LED_CYCLEELEMENT_ROOT ".{i}");
+
+	err |= USP_REGISTER_VendorParam_ReadWrite(LED_CYCLEELEMENT_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(LED_CYCLEELEMENT_ROOT ".{i}.Order", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(LED_CYCLEELEMENT_ROOT ".{i}.Color", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(LED_CYCLEELEMENT_ROOT ".{i}.Duration", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(LED_CYCLEELEMENT_ROOT ".{i}.FadeInterval", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+
+	char *unique_keys_led[] = { "Name" };
+	err |= USP_REGISTER_Object_UniqueKey(LEDs_LED_ROOT ".{i}", unique_keys_led, NUM_ELEM(unique_keys_led));
+	char *unique_keys_ledcelem[] = { "Order" };
+	err |= USP_REGISTER_Object_UniqueKey(LED_CYCLEELEMENT_ROOT ".{i}", unique_keys_ledcelem, NUM_ELEM(unique_keys_ledcelem));
+
 	// Exit if any errors occurred
 	if (err != USP_ERR_OK)
 	{
