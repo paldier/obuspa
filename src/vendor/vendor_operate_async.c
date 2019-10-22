@@ -58,12 +58,12 @@
 #define WIFI_NDIAG "Device.WiFi.NeighboringWiFiDiagnostic"
 #define VENDOR_CONF "Device.DeviceInfo.VendorConfigFile."
 #define IP_DIAG "Device.IP.Diagnostics."
-#define IPPING_DIAG IP_DIAG "IPPing"
-#define TRACEROUTE_DIAG IP_DIAG "TraceRoute"
-#define DOWNLOAD_DIAG IP_DIAG "DownloadDiagnostics"
-#define UPLOAD_DIAG IP_DIAG "UploadDiagnostics"
-#define UDPECHO_DIAG IP_DIAG "UDPEchoDiagnostics"
-#define SERVERSELECTION_DIAG IP_DIAG "ServerSelectionDiagnostics"
+#define IPPING_DIAG "Device.IP.Diagnostics.IPPing"
+#define TRACEROUTE_DIAG "Device.IP.Diagnostics.TraceRoute"
+#define DOWNLOAD_DIAG "Device.IP.Diagnostics.DownloadDiagnostics"
+#define UPLOAD_DIAG "Device.IP.Diagnostics.UploadDiagnostics"
+#define UDPECHO_DIAG "Device.IP.Diagnostics.UDPEchoDiagnostics"
+#define SERVERSELECTION_DIAG "Device.IP.Diagnostics.ServerSelectionDiagnostics"
 #define NSLOOKUP_DIAG "Device.DNS.Diagnostics.NSLookupDiagnostics"
 
 typedef struct
@@ -118,11 +118,11 @@ static char *ipping_diag_output_args[] =
     "SuccessCount",
     "FailureCount",
     "AverageResponseTime",
-    "MinimumResonseTime",
-    "MaximumResonseTime",
+    "MinimumResponseTime",
+    "MaximumResponseTime",
     "AverageResponseTimeDetailed",
-    "MinimumResonseTimeDetailed",
-    "MaximumResonseTimeDetailed"
+    "MinimumResponseTimeDetailed",
+    "MaximumResponseTimeDetailed"
 };
 
 static char *traceroute_diag_input_args[] =
@@ -235,8 +235,8 @@ static char *server_selection_diag_output_args[] =
 {
     "FastestHost",
     "AverageResponseTime",
-    "MinimumResonseTime",
-    "MaximumResonseTime"
+    "MinimumResponseTime",
+    "MaximumResponseTime"
 };
 
 static char *nslookup_diag_input_args[] =
@@ -252,6 +252,23 @@ static char *nslookup_diag_output_args[] =
 {
     "SuccessCount",
     "NSLookupResult"
+};
+
+struct output_list_t {
+    char *command;
+    char **args;
+    size_t argc;
+};
+
+static struct output_list_t output_list[] = {
+    {WIFI_NDIAG, wifi_diag_output_args, ARRAY_SIZE(wifi_diag_output_args)},
+    {IPPING_DIAG, ipping_diag_output_args, ARRAY_SIZE(ipping_diag_output_args)},
+    {TRACEROUTE_DIAG, traceroute_diag_output_args, ARRAY_SIZE(traceroute_diag_output_args)},
+    {DOWNLOAD_DIAG, download_diag_output_args, ARRAY_SIZE(download_diag_output_args)},
+    {UPLOAD_DIAG, upload_diag_output_args, ARRAY_SIZE(upload_diag_output_args)},
+    {UDPECHO_DIAG, udp_echo_diag_output_args, ARRAY_SIZE(udp_echo_diag_output_args)},
+    {SERVERSELECTION_DIAG, server_selection_diag_output_args, ARRAY_SIZE(server_selection_diag_output_args)},
+    {NSLOOKUP_DIAG, nslookup_diag_output_args, ARRAY_SIZE(nslookup_diag_output_args)}
 };
 
 static void receive_print(struct ubus_request *req, int type, struct blob_attr *msg)
@@ -310,93 +327,30 @@ int ExecuteTestDiagnostic(char *cpath, kv_vector_t *input_args, output_res_t *re
     return USP_ERR_OK;
 }
 
-kv_vector_t *save_output_args(input_cond_t *cond, output_res_t *res)
+void save_output_args(input_cond_t *cond, output_res_t *res, kv_vector_t *output_args)
 {
-    kv_vector_t *output_args;
-    output_args = USP_MALLOC(sizeof(kv_vector_t));
-    KV_VECTOR_Init(output_args);
-    char *encoded_result;
-    uint8_t len = 0;
-
-    JsonNode *json, *jr;
+    JsonNode *json;
     if((json = json_decode(res->result_str)) == NULL) {
         USP_LOG_Error("Decoding of json failed");
-        return NULL;
+        return;
     }
-    if(0 == strncmp(cond->path, WIFI_NDIAG, sizeof(WIFI_NDIAG))) {
-        if((jr = json_find_member(json, wifi_diag_output_args[0])) != NULL) {
-        encoded_result = json_encode(jr);
-        KV_VECTOR_Add(output_args, wifi_diag_output_args[0], encoded_result);
-        json_delete(jr);
-        }
-    } else if(0 == strncmp(cond->path, IPPING_DIAG, sizeof(IPPING_DIAG))) {
-        len = ARRAY_SIZE(ipping_diag_output_args);
-        for(uint8_t i=0; i<len; i++) {
-            if((jr = json_find_member(json, ipping_diag_output_args[i])) != NULL) {
-            encoded_result = json_encode(jr);
-            KV_VECTOR_Add(output_args, ipping_diag_output_args[i], encoded_result);
-            json_delete(jr);
+    size_t alen = ARRAY_SIZE(output_list);
+
+    for(size_t i=0; i<alen; ++i) {
+        if(strstr(cond->path, output_list[i].command)) {
+            size_t len = output_list[i].argc;
+            for(size_t j=0; j<len; j++) {
+                JsonNode *jr;
+                if((jr = json_find_member(json, output_list[i].args[j]))!=NULL) {
+                    char *encoded_result = json_encode(jr);
+                    USP_ARG_Add(output_args, output_list[i].args[j], encoded_result);
+                    json_delete(jr);
+                }
             }
+            break;
         }
-    } else if(0 == strncmp(cond->path, TRACEROUTE_DIAG, sizeof(TRACEROUTE_DIAG))) {
-        len = ARRAY_SIZE(traceroute_diag_output_args);
-        for(uint8_t i=0; i<len; i++) {
-            if((jr = json_find_member(json, traceroute_diag_output_args[i])) != NULL) {
-            encoded_result = json_encode(jr);
-            KV_VECTOR_Add(output_args, traceroute_diag_output_args[i], encoded_result);
-            json_delete(jr);
-            }
-        }
-    } else if(0 == strncmp(cond->path, DOWNLOAD_DIAG, sizeof(DOWNLOAD_DIAG))) {
-        len = ARRAY_SIZE(download_diag_output_args);
-        for(uint8_t i=0; i<len; i++) {
-            if((jr = json_find_member(json, download_diag_output_args[i])) != NULL) {
-            encoded_result = json_encode(jr);
-            KV_VECTOR_Add(output_args, download_diag_output_args[i], encoded_result);
-            json_delete(jr);
-            }
-        }
-    } else if(0 == strncmp(cond->path, UPLOAD_DIAG, sizeof(UPLOAD_DIAG))) {
-        len = ARRAY_SIZE(upload_diag_output_args);
-        for(uint8_t i=0; i<len; i++) {
-            if((jr = json_find_member(json, upload_diag_output_args[i])) != NULL) {
-            encoded_result = json_encode(jr);
-            KV_VECTOR_Add(output_args, upload_diag_output_args[i], encoded_result);
-            json_delete(jr);
-            }
-        }
-    } else if(0 == strncmp(cond->path, UDPECHO_DIAG, sizeof(UDPECHO_DIAG))) {
-        len = ARRAY_SIZE(udp_echo_diag_output_args);
-        for(uint8_t i=0; i<len; i++) {
-            if((jr = json_find_member(json, udp_echo_diag_output_args[i])) != NULL) {
-            encoded_result = json_encode(jr);
-            KV_VECTOR_Add(output_args, udp_echo_diag_output_args[i], encoded_result);
-            json_delete(jr);
-            }
-        }
-    } else if(0 == strncmp(cond->path, SERVERSELECTION_DIAG, sizeof(SERVERSELECTION_DIAG))) {
-        len = ARRAY_SIZE(server_selection_diag_output_args);
-        for(uint8_t i=0; i<len; i++) {
-            if((jr = json_find_member(json, server_selection_diag_output_args[i])) != NULL) {
-            encoded_result = json_encode(jr);
-            KV_VECTOR_Add(output_args, server_selection_diag_output_args[i], encoded_result);
-            json_delete(jr);
-            }
-        }
-    } else if(0 == strncmp(cond->path, NSLOOKUP_DIAG, sizeof(NSLOOKUP_DIAG))) {
-        len = ARRAY_SIZE(nslookup_diag_output_args);
-        for(uint8_t i=0; i<len; i++) {
-            if((jr = json_find_member(json, nslookup_diag_output_args[i])) != NULL) {
-            encoded_result = json_encode(jr);
-            KV_VECTOR_Add(output_args, nslookup_diag_output_args[i], encoded_result);
-            json_delete(jr);
-            }
-        }
-    } else {
-        return NULL;
     }
     json_delete(json);
-    return output_args;
 }
 
 void *OperationThreadMain(void *param)
@@ -404,9 +358,9 @@ void *OperationThreadMain(void *param)
     input_cond_t *cond = (input_cond_t *) param;
     output_res_t results;
     output_res_t *res = &results;
-    kv_vector_t *output_args;
     char *err_msg;
     int err = USP_ERR_OK;
+    kv_vector_t *output_args;
 
     memset(&results, 0, sizeof(results));
 
@@ -426,7 +380,8 @@ void *OperationThreadMain(void *param)
     USP_LOG_Info("=== Operation completed with result=%d ===", err);
     USP_LOG_Info("Result: %s", res->result_str);
     // Save all results into the output arguments using KV_VECTOR_ functions
-    output_args = save_output_args(cond, res);
+    output_args = USP_ARG_Create();
+    save_output_args(cond, res, output_args);
 
     // Inform the protocol handler, that the operation has completed
     // Ownership of the output args passes to protocol handler
@@ -485,8 +440,7 @@ int Wifi_NeighboringWiFiDiagnostics_Init(void)
 
     // Register neighboring wifi diagnostics
     err |= USP_REGISTER_AsyncOperation("Device.WiFi.NeighboringWiFiDiagnostic()", async_operate_handler, NULL);
-    err |=
-	    USP_REGISTER_OperationArguments("Device.WiFi.NeighboringWiFiDiagnostic()", NULL, 0, wifi_diag_output_args, NUM_ELEM(wifi_diag_output_args));
+    err |= USP_REGISTER_OperationArguments("Device.WiFi.NeighboringWiFiDiagnostic()", NULL, 0, wifi_diag_output_args, NUM_ELEM(wifi_diag_output_args));
 
     if (err != USP_ERR_OK)
     {
@@ -503,8 +457,7 @@ int VendorConfig_Backup_Init(void)
 
     // Register vendor config backup
     err |= USP_REGISTER_AsyncOperation("Device.DeviceInfo.VendorConfigFile.{i}.Backup()", async_operate_handler, NULL);
-    err |=
-	    USP_REGISTER_OperationArguments("Device.DeviceInfo.VendorConfigFile.{i}.Backup()", vendor_cfg_backup_input_args, NUM_ELEM(vendor_cfg_backup_input_args), NULL, 0);
+    err |= USP_REGISTER_OperationArguments("Device.DeviceInfo.VendorConfigFile.{i}.Backup()", vendor_cfg_backup_input_args, NUM_ELEM(vendor_cfg_backup_input_args), NULL, 0);
 
     if (err != USP_ERR_OK)
     {
@@ -521,8 +474,7 @@ int VendorConfig_Restore_Init(void)
 
     // Register vendor config restore
     err |= USP_REGISTER_AsyncOperation("Device.DeviceInfo.VendorConfigFile.{i}.Restore()", async_operate_handler, NULL);
-    err |=
-	    USP_REGISTER_OperationArguments("Device.DeviceInfo.VendorConfigFile.{i}.Restore()", vendor_cfg_restore_input_args, NUM_ELEM(vendor_cfg_restore_input_args), NULL, 0);
+    err |= USP_REGISTER_OperationArguments("Device.DeviceInfo.VendorConfigFile.{i}.Restore()", vendor_cfg_restore_input_args, NUM_ELEM(vendor_cfg_restore_input_args), NULL, 0);
 
     if (err != USP_ERR_OK)
     {
