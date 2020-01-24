@@ -68,6 +68,7 @@
 #include "stomp.h"
 #include "retry_wait.h"
 #include "nu_macaddr.h"
+#include "vendor_iopsys.h"
 
 #ifdef ENABLE_HIDL
 #include "hidl_server.h"
@@ -411,6 +412,7 @@ void MAIN_Stop(void)
     // Free all memory used by USP Agent
     DM_EXEC_Destroy();
     curl_global_cleanup();
+    destroy_uspd_json();
 }
 
 /*********************************************************************//**

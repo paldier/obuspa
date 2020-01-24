@@ -65,6 +65,9 @@
 #define USPD_TIMEOUT 5000
 extern bool is_running_cli_local_command;
 
+// Local USPD Database containing the JSON Data
+static JsonNode *g_uspd_json_db = NULL;
+
 char *dm_alias_list[] =
 {
 	"Device.DeviceInfo.VendorConfigFile.*.Alias",
@@ -335,6 +338,26 @@ char *dm_alias_list[] =
 static bool uspd_set(char *path, char *value);
 static int iopsys_dm_instance_init(void);
 static int add_object_aliase(char *path);
+static bool json_get_param_value(char *path, char *buff);
+void (*call_result_func)(struct ubus_request *req, int type, struct blob_attr *msg);
+
+static void store_call_result_data(struct ubus_request *req, int type, struct blob_attr *msg)
+{
+	if (!msg) {
+		USP_LOG_Error("[%s:%d] recieved msg is null",__func__, __LINE__);
+		return;
+	}
+	char *str = NULL;
+	str = (char *) blobmsg_format_json_indent(msg, true, -1);
+
+	if (str != NULL) {
+		if (g_uspd_json_db != NULL)
+			json_delete(g_uspd_json_db);
+
+		g_uspd_json_db = json_decode(str);
+	}
+	USP_SAFE_FREE(str);
+}
 
 static void receive_call_result_data(struct ubus_request *req, int type, struct blob_attr *msg)
 {
@@ -348,6 +371,7 @@ static void receive_call_result_data(struct ubus_request *req, int type, struct 
 
 	USP_SAFE_FREE(str);
 }
+
 static void receive_call_result_status(struct ubus_request *req, int type, struct blob_attr *msg)
 {
 	bool *status = (bool *)req->priv;
@@ -390,6 +414,10 @@ static void receive_data_print(struct ubus_request *req, int type, struct blob_a
 	USP_SAFE_FREE(str);
 }
 
+/*
+ * This function takes care to initialize global json database
+ * (g_uspd_json_db) in case json_buff is NULL
+ */
 int uspd_get(char *path, char *json_buff)
 {
 	uint32_t id;
@@ -410,7 +438,9 @@ int uspd_get(char *path, char *json_buff)
 	memset(&b, 0, sizeof(struct blob_buf));
 	blob_buf_init(&b, 0);
 	blobmsg_add_string(&b, "path", path);
-	if (ubus_invoke(ctx, id, "get", b.head, receive_call_result_data, json_buff, USPD_TIMEOUT)) {
+	json_buff ? (call_result_func = receive_call_result_data) :
+		(call_result_func = store_call_result_data);
+	if (ubus_invoke(ctx, id, "get", b.head, call_result_func, json_buff, USPD_TIMEOUT)) {
 		USP_LOG_Error("[%s:%d] ubus call failed for |%s|",__func__, __LINE__, path);
 		ubus_free(ctx);
 		blob_buf_free(&b);
@@ -419,6 +449,25 @@ int uspd_get(char *path, char *json_buff)
 	blob_buf_free(&b);
 	ubus_free(ctx);
 	return USP_ERR_OK;
+}
+
+int init_uspd_database(char *path)
+{
+	int status = uspd_get(path, NULL);
+	if (status == USP_ERR_OK) {
+		USP_LOG_Debug("USPD Database Init done");
+	} else {
+		USP_LOG_Error("UBUS failue: |Unable to initialize local USPD "
+			      "database|");
+	}
+
+	return status;
+}
+
+void destroy_uspd_json() {
+	if (g_uspd_json_db)
+		json_delete(g_uspd_json_db);
+	g_uspd_json_db = NULL;
 }
 
 int uspd_add(dm_req_t *req)
@@ -506,6 +555,33 @@ int uspd_del(dm_req_t *req)
 	return USP_ERR_OK;
 }
 
+bool json_get_param_value(char *path, char *buff) {
+	bool status = false;
+	JsonNode *parameters, *member;
+
+	if (g_uspd_json_db == NULL)
+		return status;
+
+	if ((parameters = json_find_member(g_uspd_json_db, "parameters")) != NULL) {
+		json_foreach(member, parameters) {
+			JsonNode *parameter;
+			if ((parameter = json_find_member(member, "parameter")) != NULL) {
+				if (!strcmp(parameter->string_, path)) {
+					JsonNode *value;
+					if ((value = json_find_member(member, "value")) != NULL) {
+						strcpy(buff, value->string_);
+						status = true;
+					}
+					break;
+				}
+			}
+		}
+	} else {
+		USP_LOG_Debug("%s: Parameters tag not found in json database", __func__);
+	}
+	return status;
+}
+
 int json_get_value_index(char *json_buff,char *node, char *buff, uint8_t index)
 {
 	JsonNode *json, *zeroth, *parameters;
@@ -544,6 +620,8 @@ int json_get_value_index(char *json_buff,char *node, char *buff, uint8_t index)
 ** uspd_get_value
 **
 ** Gets the value of req->path
+** First lookup into the local USPD Database
+** else call usp_get method for the requested path
 **
 ** \param   req - pointer to structure identifying the path
 ** \param   buf - pointer to buffer into which to return the value of the parameter (as a textual string)
@@ -561,8 +639,12 @@ int uspd_get_value(dm_req_t *req, char *buf, int len)
 		return USP_ERR_INTERNAL_ERROR;
 	}
 
-	if(USP_ERR_OK == uspd_get(req->path, json_buff))
-		json_get_value_index(json_buff, NULL, buf, 0);
+	/* First lookup into local uspd_database */
+	if (false == json_get_param_value(req->path, buf)) {
+		USP_LOG_Debug("Not found in local database:|%s|", req->path);
+		if (USP_ERR_OK == uspd_get(req->path, json_buff))
+			json_get_value_index(json_buff, NULL, buf, 0);
+	}
 
 	len = strlen(buf);
 	return USP_ERR_OK;
