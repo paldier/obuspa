@@ -441,46 +441,6 @@ int uspd_operate_sync(dm_req_t *req, char *command_key, kv_vector_t *input_args,
 	blob_buf_free(&b);
 	return USP_ERR_OK;
 }
-int process_dm_aliases(char *path) __attribute__((unused));
-int process_dm_aliases(char *path)
-{
-	int err = USP_ERR_OK;
-	char json_buff[MAX_DM_VALUE_LEN] = {'\0'};
-
-	if(USP_ERR_OK != uspd_get(path, json_buff))
-		return USP_ERR_GENERAL_FAILURE;
-
-	JsonNode *json, *parameters;
-	if((json = json_decode(json_buff)) == NULL) {
-		USP_LOG_Error("[%s:%d] json decode failed",__func__, __LINE__);
-		return USP_ERR_GENERAL_FAILURE;
-	}
-	if((parameters = json_find_member(json, "parameters")) != NULL) {
-		int count=1;
-		JsonNode *node;
-		json_foreach(node, parameters) {
-			JsonNode *parameter, *valueNode;
-			char value[MAX_DM_SHORT_VALUE_LEN] = {'\0'};
-			parameter = json_find_member(node, "parameter");
-			valueNode = json_find_member(node, "value");
-			if((parameter->tag & valueNode->tag) == JSON_STRING) {
-				USP_LOG_Debug("parameter |%s|, value |%s|", parameter->string_, valueNode->string_);
-				if(0 == strcmp(valueNode->string_, "")) {
-					sprintf(value, "cpe-%d", count);
-					uspd_set(parameter->string_, value);
-				} else {
-					strcpy(value, valueNode->string_);
-				}
-				err = DATA_MODEL_SetParameterInDatabase(parameter->string_, value);
-				++count;
-			}
-			json_delete(parameter);
-			json_delete(valueNode);
-		}
-	}
-	json_delete(json);
-	return(err);
-}
 
 static int add_object_aliase(char *path)
 {
@@ -4733,7 +4693,7 @@ static int iopsys_dm_instance_init(void)
 	STR_VECTOR_Init(&instance_vector);
 	uspd_get_parameter("Device.", &instance_vector, GET_ALL_INSTANCES);
 	for(size_t i=0; i< instance_vector.num_entries; ++i) {
-		USP_LOG_Error("##### instance name |%s|", instance_vector.vector[i]);
+		USP_LOG_Debug("## Instance name |%s|", instance_vector.vector[i]);
 		USP_DM_InformInstance(instance_vector.vector[i]);
 	}
 	STR_VECTOR_Destroy(&instance_vector);
