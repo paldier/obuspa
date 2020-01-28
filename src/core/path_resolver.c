@@ -209,7 +209,7 @@ int PATH_RESOLVER_ResolvePath(char *path, str_vector_t *sv, resolve_op_t op, int
         *separator_split = state.separator_count;
     }
 
-    if (err == USP_ERR_OK) {
+    if ((err == USP_ERR_OK) && (op == kResolveOp_Get)) {
 	    err = init_uspd_database(path);
     }
     return err;

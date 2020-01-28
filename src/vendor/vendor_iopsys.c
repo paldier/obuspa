@@ -47,6 +47,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <unistd.h>
+#include <ctype.h>
 
 #include <libubus.h>
 #include <libubox/blobmsg_json.h>
@@ -60,6 +61,8 @@
 #include "common_defs.h"
 #include "json.h"
 #include "vendor_iopsys.h"
+#include "path_resolver.h"
+#include "str_vector.h"
 
 // Timeout in milliseconds
 #define USPD_TIMEOUT 5000
@@ -67,273 +70,6 @@ extern bool is_running_cli_local_command;
 
 // Local USPD Database containing the JSON Data
 static JsonNode *g_uspd_json_db = NULL;
-
-char *dm_alias_list[] =
-{
-	"Device.DeviceInfo.VendorConfigFile.*.Alias",
-	// processtatus does not have alias need to handle diffrently
-	//"Device.DeviceInfo.ProcessStatus.Process.*.Alias",
-	"Device.DeviceInfo.TemperatureStatus.TemperatureSensor.*.Alias",
-	"Device.DeviceInfo.Processor.*.Alias",
-	"Device.DeviceInfo.VendorLogFile.*.Alias",
-	//"Device.DeviceInfo.Location.*.Alias",
-	"Device.DeviceInfo.DeviceImageFile.*.Alias",
-	"Device.DeviceInfo.FirmwareImage.*.Alias",
-	"Device.InterfaceStack.*.Alias",
-	"Device.DSL.Line.*.Alias",
-	"Device.DSL.Channel.*.Alias",
-	"Device.DSL.BondingGroup.*.Alias",
-	"Device.DSL.BondingGroup.*.BondedChannel.*.Alias",
-	"Device.FAST.Line.*.Alias",
-	"Device.Optical.Interface.*.Alias",
-	"Device.Cellular.Interface.*.Alias",
-	"Device.Cellular.AccessPoint.*.Alias",
-	"Device.ATM.Link.*.Alias",
-	"Device.PTM.Link.*.Alias",
-	"Device.Ethernet.Interface.*.Alias",
-	"Device.Ethernet.Link.*.Alias",
-	"Device.Ethernet.VLANTermination.*.Alias",
-	"Device.Ethernet.RMONStats.*.Alias",
-	"Device.Ethernet.LAG.*.Alias",
-	"Device.USB.Interface.*.Alias",
-	"Device.USB.Port.*.Alias",
-	"Device.USB.USBHosts.Host.*.Alias",
-	//"Device.USB.USBHosts.Host.*.Device.*.Alias",
-	//"Device.USB.USBHosts.Host.*.Device.*.Configuration.*.Alias",
-	//"Device.USB.USBHosts.Host.*.Device.*.Configuration.*.Interface.*.Alias",
-	"Device.HPNA.Interface.*.Alias",
-	"Device.HPNA.Interface.*.QoS.FlowSpec.*.Alias",
-	"Device.HPNA.Interface.*.AssociatedDevice.*.Alias",
-	"Device.MoCA.Interface.*.Alias",
-	"Device.MoCA.Interface.*.QoS.FlowStats.*.Alias",
-	"Device.MoCA.Interface.*.AssociatedDevice.*.Alias",
-	"Device.Ghn.Interface.*.Alias",
-	"Device.Ghn.Interface.*.AssociatedDevice.*.Alias",
-	"Device.Ghn.Interface.*.SMMaskedBand.*.Alias",
-	"Device.HomePlug.Interface.*.Alias",
-	"Device.HomePlug.Interface.*.AssociatedDevice.*.Alias",
-	"Device.UPA.Interface.*.Alias",
-	"Device.UPA.Interface.*.AssociatedDevice.*.Alias",
-	"Device.UPA.Interface.*.ActiveNotch.*.Alias",
-	"Device.UPA.Interface.*.BridgeFor.*.Alias",
-	"Device.WiFi.MultiAP.APDevice.*.Alias",
-	"Device.WiFi.MultiAP.APDevice.*.Radio.*.Alias",
-	"Device.WiFi.MultiAP.APDevice.*.Radio.*.AP.*.Alias",
-	"Device.WiFi.MultiAP.APDevice.*.Radio.*.AP.*.AssociatedDevice.*.Alias",
-	"Device.WiFi.MultiAP.APDevice.*.Radio.*.AP.*.AssociatedDevice.*.SteeringHistory.*.Alias",
-	"Device.WiFi.DataElements.Network.Device.*.Alias",
-	"Device.WiFi.DataElements.Network.Device.*.Radio.*.Alias",
-	"Device.WiFi.DataElements.Network.Device.*.Radio.*.Capabilities.CapableOperatingClassProfile.*.Alias",
-	"Device.WiFi.DataElements.Network.Device.*.Radio.*.CurrentOperatingClassProfile.*.Alias",
-	"Device.WiFi.DataElements.Network.Device.*.Radio.*.BSS.*.Alias",
-	"Device.WiFi.DataElements.Network.Device.*.Radio.*.BSS.*.STA.*.Alias",
-	"Device.WiFi.DataElements.Network.Device.*.Radio.*.ScanResult.*.Alias",
-	"Device.WiFi.DataElements.Network.Device.*.Radio.*.ScanResult.*.OpClassScan.*.Alias",
-	"Device.WiFi.DataElements.Network.Device.*.Radio.*.ScanResult.*.OpClassScan.*.ChannelScan.*.Alias",
-	"Device.WiFi.DataElements.Network.Device.*.Radio.*.ScanResult.*.OpClassScan.*.ChannelScan.*.NeighborBSS.*.Alias",
-	"Device.WiFi.DataElements.Network.Device.*.Radio.*.UnassociatedSTA.*.Alias",
-	"Device.WiFi.DataElements.AssociationEvent.AssociationEventData.*.Alias",
-	"Device.WiFi.DataElements.DisassociationEvent.DisassociationEventData.*.Alias",
-	"Device.WiFi.Radio.*.Alias",
-	"Device.WiFi.SSID.*.Alias",
-	"Device.WiFi.AccessPoint.*.Alias",
-	//"Device.WiFi.AccessPoint.*.AssociatedDevice.*.Alias",
-	//"Device.WiFi.AccessPoint.*.AC.*.Alias",
-	"Device.WiFi.EndPoint.*.Alias",
-	"Device.WiFi.EndPoint.*.Profile.*.Alias",
-	//"Device.WiFi.EndPoint.*.AC.*.Alias",
-	"Device.ZigBee.Interface.*.Alias",
-	"Device.ZigBee.Interface.*.AssociatedDevice.*.Alias",
-	"Device.ZigBee.ZDO.*.Alias",
-	"Device.ZigBee.ZDO.*.Network.Neighbor.*.Alias",
-	"Device.ZigBee.ZDO.*.NodeManager.RoutingTable.*.Alias",
-	"Device.ZigBee.ZDO.*.Binding.*.Alias",
-	"Device.ZigBee.ZDO.*.Group.*.Alias",
-	"Device.ZigBee.ZDO.*.ApplicationEndpoint.*.Alias",
-	"Device.ZigBee.Discovery.AreaNetwork.*.Alias",
-	"Device.Bridging.Bridge.*.Alias",
-	"Device.Bridging.Bridge.*.Port.*.Alias",
-	"Device.Bridging.Bridge.*.VLAN.*.Alias",
-	"Device.Bridging.Bridge.*.VLANPort.*.Alias",
-	"Device.Bridging.Filter.*.Alias",
-	"Device.Bridging.ProviderBridge.*.Alias",
-	"Device.PPP.Interface.*.Alias",
-	"Device.IP.Interface.*.Alias",
-	"Device.IP.Interface.*.IPv4Address.*.Alias",
-	"Device.NAT.InterfaceSetting.*.Alias",
-	"Device.IP.Interface.*.TWAMPReflector.*.Alias",
-	"Device.IP.Interface.*.IPv6Address.*.Alias",
-	"Device.IP.Interface.*.IPv6Prefix.*.Alias",
-	//"Device.IP.ActivePort.*.Alias",
-	"Device.LLDP.Discovery.Device.*.Alias",
-	"Device.LLDP.Discovery.Device.*.Port.*.Alias",
-	"Device.LLDP.Discovery.Device.*.DeviceInformation.VendorSpecific.*.Alias",
-	"Device.IPsec.Filter.*.Alias",
-	"Device.IPsec.Profile.*.Alias",
-	"Device.IPsec.Profile.*.SentCPAttr.*.Alias",
-	"Device.IPsec.Tunnel.*.Alias",
-	"Device.IPsec.IKEv2SA.*.Alias",
-	//"Device.IPsec.IKEv2SA.*.ReceivedCPAttr.*.Alias",
-	"Device.IPsec.IKEv2SA.*.ChildSA.*.Alias",
-	"Device.GRE.Tunnel.*.Alias",
-	"Device.GRE.Tunnel.*.Interface.*.Alias",
-	"Device.GRE.Filter.*.Alias",
-	"Device.L2TPv3.Tunnel.*.Alias",
-	"Device.L2TPv3.Tunnel.*.Interface.*.Alias",
-	"Device.L2TPv3.Filter.*.Alias",
-	"Device.VXLAN.Tunnel.*.Alias",
-	"Device.VXLAN.Tunnel.*.Interface.*.Alias",
-	"Device.VXLAN.Filter.*.Alias",
-	"Device.MAP.Domain.*.Alias",
-	"Device.MAP.Domain.*.Rule.*.Alias",
-	"Device.Routing.Router.*.Alias",
-	"Device.Routing.Router.*.IPv4Forwarding.*.Alias",
-	// need to create voice service
-	"Device.Services.VoiceService.*.Alias",
-	"Device.Routing.Router.*.IPv6Forwarding.*.Alias",
-	"Device.Routing.RIP.InterfaceSetting.*.Alias",
-	//"Device.Routing.RouteInformation.InterfaceSetting.*.Alias",
-	"Device.NeighborDiscovery.InterfaceSetting.*.Alias",
-	"Device.RouterAdvertisement.InterfaceSetting.*.Alias",
-	"Device.RouterAdvertisement.InterfaceSetting.*.Option.*.Alias",
-	"Device.IPv6rd.InterfaceSetting.*.Alias",
-	"Device.DSLite.InterfaceSetting.*.Alias",
-	"Device.QoS.Classification.*.Alias",
-	"Device.QoS.App.*.Alias",
-	"Device.QoS.Flow.*.Alias",
-	"Device.QoS.Policer.*.Alias",
-	"Device.QoS.Queue.*.Alias",
-	"Device.QoS.QueueStats.*.Alias",
-	"Device.QoS.Shaper.*.Alias",
-	"Device.Hosts.Host.*.Alias",
-	//"Device.Hosts.Host.*.IPv4Address.*.Alias",
-	//"Device.Hosts.Host.*.IPv6Address.*.Alias",
-	"Device.DNS.Client.Server.*.Alias",
-	"Device.DNS.Relay.Forwarding.*.Alias",
-	//"Device.DNS.SD.Service.*.Alias",
-	//"Device.DNS.SD.Service.*.TextRecord.*.Alias",
-	"Device.NAT.InterfaceSetting.*.Alias",
-	"Device.NAT.PortMapping.*.Alias",
-	"Device.PCP.Client.*.Alias",
-	"Device.PCP.Client.*.Server.*.Alias",
-	"Device.PCP.Client.*.Server.*.InboundMapping.*.Alias",
-	"Device.PCP.Client.*.Server.*.InboundMapping.*.Filter.*.Alias",
-	"Device.PCP.Client.*.Server.*.OutboundMapping.*.Alias",
-	"Device.DHCPv4.Client.*.Alias",
-	"Device.DHCPv4.Client.*.SentOption.*.Alias",
-	"Device.DHCPv4.Client.*.ReqOption.*.Alias",
-	"Device.DHCPv4.Server.Pool.*.Alias",
-	"Device.DHCPv4.Server.Pool.*.StaticAddress.*.Alias",
-	"Device.DHCPv4.Server.Pool.*.Option.*.Alias",
-	"Device.DHCPv4.Server.Pool.*.Client.*.Alias",
-	//"Device.DHCPv4.Server.Pool.*.Client.*.IPv4Address.*.Alias",
-	//"Device.DHCPv4.Server.Pool.*.Client.*.Option.*.Alias",
-	"Device.DHCPv4.Relay.Forwarding.*.Alias",
-	"Device.DHCPv6.Client.*.Alias",
-	//"Device.DHCPv6.Client.*.Server.*.Alias",
-	"Device.DHCPv6.Client.*.SentOption.*.Alias",
-	//"Device.DHCPv6.Client.*.ReceivedOption.*.Alias",
-	"Device.DHCPv6.Server.Pool.*.Alias",
-	"Device.DHCPv6.Server.Pool.*.Client.*.Alias",
-	//"Device.DHCPv6.Server.Pool.*.Client.*.IPv6Address.*.Alias",
-	//"Device.DHCPv6.Server.Pool.*.Client.*.IPv6Prefix.*.Alias",
-	//"Device.DHCPv6.Server.Pool.*.Client.*.Option.*.Alias",
-	"Device.DHCPv6.Server.Pool.*.Option.*.Alias",
-	"Device.IEEE8021x.Supplicant.*.Alias",
-	"Device.Users.User.*.Alias",
-	"Device.SmartCardReaders.SmartCardReader.*.Alias",
-	"Device.UPnP.Discovery.RootDevice.*.Alias",
-	"Device.UPnP.Discovery.Device.*.Alias",
-	"Device.UPnP.Discovery.Service.*.Alias",
-	"Device.UPnP.Description.DeviceDescription.*.Alias",
-	"Device.UPnP.Description.DeviceInstance.*.Alias",
-	"Device.UPnP.Description.ServiceInstance.*.Alias",
-	"Device.Firewall.Level.*.Alias",
-	"Device.Firewall.Chain.*.Alias",
-	"Device.Firewall.Chain.*.Rule.*.Alias",
-	"Device.PeriodicStatistics.SampleSet.*.Alias",
-	"Device.PeriodicStatistics.SampleSet.*.Parameter.*.Alias",
-	"Device.FaultMgmt.SupportedAlarm.*.Alias",
-	"Device.FaultMgmt.CurrentAlarm.*.Alias",
-	"Device.FaultMgmt.HistoryEvent.*.Alias",
-	"Device.FaultMgmt.ExpeditedEvent.*.Alias",
-	"Device.FaultMgmt.QueuedEvent.*.Alias",
-	"Device.Security.Certificate.*.Alias",
-	"Device.FAP.PerfMgmt.Config.*.Alias",
-	"Device.BulkData.Profile.*.Alias",
-	"Device.BulkData.Profile.*.Parameter.*.Alias",
-	"Device.BulkData.Profile.*.HTTP.RequestURIParameter.*.Alias",
-	"Device.LocalAgent.MTP.*.Alias",
-	"Device.LocalAgent.Threshold.*.Alias",
-	"Device.LocalAgent.Controller.*.Alias",
-	"Device.LocalAgent.Controller.*.MTP.*.Alias",
-	"Device.LocalAgent.Controller.*.BootParameter.*.Alias",
-	"Device.LocalAgent.Subscription.*.Alias",
-	"Device.LocalAgent.Request.*.Alias",
-	"Device.LocalAgent.Certificate.*.Alias",
-	"Device.LocalAgent.ControllerTrust.Role.*.Alias",
-	"Device.LocalAgent.ControllerTrust.Role.*.Permission.*.Alias",
-	"Device.LocalAgent.ControllerTrust.Credential.*.Alias",
-	"Device.LocalAgent.ControllerTrust.Challenge.*.Alias",
-	"Device.STOMP.Connection.*.Alias",
-	"Device.XMPP.Connection.*.Alias",
-	"Device.XMPP.Connection.*.Server.*.Alias",
-	"Device.IEEE1905.AL.Interface.*.Alias",
-	"Device.IEEE1905.AL.Interface.*.VendorProperties.*.Alias",
-	"Device.IEEE1905.AL.Interface.*.Link.*.Alias",
-	"Device.IEEE1905.AL.ForwardingTable.ForwardingRule.*.Alias",
-	"Device.IEEE1905.AL.NetworkTopology.ChangeLog.*.Alias",
-	"Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.*.Alias",
-	"Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.*.IPv4Address.*.Alias",
-	"Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.*.IPv6Address.*.Alias",
-	"Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.*.VendorProperties.*.Alias",
-	"Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.*.Interface.*.Alias",
-	"Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.*.NonIEEE1905Neighbor.*.Alias",
-	"Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.*.L2Neighbor.*.Alias",
-	"Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.*.IEEE1905Neighbor.*.Alias",
-	"Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.*.IEEE1905Neighbor.*.Metric.*.Alias",
-	"Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.*.BridgingTuple.*.Alias",
-	"Device.MQTT.Client.*.Alias",
-	"Device.MQTT.Client.*.Subscription.*.Alias",
-	"Device.MQTT.Client.*.UserProperty.*.Alias",
-	"Device.MQTT.Broker.*.Alias",
-	"Device.MQTT.Broker.*.Bridge.*.Alias",
-	"Device.MQTT.Broker.*.Bridge.*.Server.*.Alias",
-	"Device.MQTT.Broker.*.Bridge.*.Subscription.*.Alias",
-	"Device.DynamicDNS.Client.*.Alias",
-	//"Device.DynamicDNS.Client.*.Hostname.*.Alias",
-	"Device.DynamicDNS.Server.*.Alias",
-	"Device.LEDs.LED.*.Alias",
-	"Device.LEDs.LED.*.CycleElement.*.Alias",
-	"Device.BASAPM.MeasurementEndpoint.*.Alias",
-	"Device.LMAP.MeasurementAgent.*.Alias",
-	"Device.LMAP.MeasurementAgent.*.TaskCapability.*.Alias",
-	"Device.LMAP.MeasurementAgent.*.TaskCapability.*.Registry.*.Alias",
-	"Device.LMAP.MeasurementAgent.*.Schedule.*.Alias",
-	"Device.LMAP.MeasurementAgent.*.Schedule.*.Action.*.Alias",
-	"Device.LMAP.MeasurementAgent.*.Schedule.*.Action.*.Option.*.Alias",
-	"Device.LMAP.MeasurementAgent.*.Task.*.Alias",
-	"Device.LMAP.MeasurementAgent.*.Task.*.Registry.*.Alias",
-	"Device.LMAP.MeasurementAgent.*.Task.*.Option.*.Alias",
-	"Device.LMAP.MeasurementAgent.*.CommunicationChannel.*.Alias",
-	"Device.LMAP.MeasurementAgent.*.Instruction.*.Alias",
-	"Device.LMAP.MeasurementAgent.*.Instruction.*.MeasurementSuppression.*.Alias",
-	"Device.LMAP.Report.*.Alias",
-	"Device.LMAP.Report.*.Result.*.Alias",
-	"Device.LMAP.Report.*.Result.*.Option.*.Alias",
-	"Device.LMAP.Report.*.Result.*.Conflict.*.Alias",
-	"Device.LMAP.Report.*.Result.*.ReportTable.*.Alias",
-	"Device.LMAP.Report.*.Result.*.ReportTable.*.ResultRow.*.Alias",
-	"Device.LMAP.Report.*.Result.*.ReportTable.*.Registry.*.Alias",
-	"Device.LMAP.Event.*.Alias",
-	"Device.SoftwareModules.ExecEnv.*.Alias",
-	"Device.SoftwareModules.DeploymentUnit.*.Alias",
-	"Device.SoftwareModules.ExecutionUnit.*.Alias",
-	"Device.ProxiedDevice.*.Alias",
-	"Device.ProxiedDevice.*.Node.*.Alias",
-	"Device.IoTCapability.*.Alias",
-	"Device.Node.*.Alias"
-};
 
 static bool uspd_set(char *path, char *value);
 static int iopsys_dm_instance_init(void);
@@ -440,6 +176,7 @@ int uspd_get(char *path, char *json_buff)
 	blobmsg_add_string(&b, "path", path);
 	json_buff ? (call_result_func = receive_call_result_data) :
 		(call_result_func = store_call_result_data);
+
 	if (ubus_invoke(ctx, id, "get", b.head, call_result_func, json_buff, USPD_TIMEOUT)) {
 		USP_LOG_Error("[%s:%d] ubus call failed for |%s|",__func__, __LINE__, path);
 		ubus_free(ctx);
@@ -704,6 +441,7 @@ int uspd_operate_sync(dm_req_t *req, char *command_key, kv_vector_t *input_args,
 	blob_buf_free(&b);
 	return USP_ERR_OK;
 }
+int process_dm_aliases(char *path) __attribute__((unused));
 int process_dm_aliases(char *path)
 {
 	int err = USP_ERR_OK;
@@ -4904,16 +4642,100 @@ int iopsys_dm_Init(void)
 	return err;
 }
 
+int uspd_get_names(char *path)
+{
+	uint32_t id;
+	struct ubus_context *ctx = ubus_connect(NULL);
+	struct blob_buf b = { };
+
+	if (!ctx) {
+		USP_LOG_Error("[%s:%d] ubus_connect failed",__func__, __LINE__);
+		return USP_ERR_INTERNAL_ERROR;
+	}
+
+	if (ubus_lookup_id(ctx, USP_UBUS, &id)) {
+		USP_LOG_Error("[%s:%d] %s not present",__func__, __LINE__, USP_UBUS);
+		ubus_free(ctx);
+		return USP_ERR_INTERNAL_ERROR;
+	}
+
+	memset(&b, 0, sizeof(struct blob_buf));
+	blob_buf_init(&b, 0);
+	blobmsg_add_string(&b, "path", path);
+	if (ubus_invoke(ctx, id, "object_names", b.head, store_call_result_data,
+			NULL, USPD_TIMEOUT)) {
+		USP_LOG_Error("[%s:%d] ubus call failed for |%s|",__func__, __LINE__, path);
+		ubus_free(ctx);
+		blob_buf_free(&b);
+		return USP_ERR_INTERNAL_ERROR;
+	}
+	blob_buf_free(&b);
+	ubus_free(ctx);
+	return USP_ERR_OK;
+}
+
+void update_instance_vector(str_vector_t *vec, char *param)
+{
+        char instance[MAX_DM_PATH]={'\0'};
+        char *token = strtok(param, ".");
+
+        while(token) {
+                strcat(instance, token);
+                if(isdigit(token[0])){
+                        STR_VECTOR_Add_IfNotExist(vec, instance);
+                }
+                strcat(instance, ".");
+                token = strtok(NULL, ".");
+        }
+}
+
+void update_path_vector(str_vector_t *vec, char *param, unsigned flags)
+{
+	if(flags&GET_ALL_INSTANCES) {
+		update_instance_vector(vec, param);
+	} else {
+		size_t slen = strlen(param);
+		if(param[slen-1]!='.')
+			STR_VECTOR_Add_IfNotExist(vec, param);
+	}
+}
+
+int json_get_params(str_vector_t *vec, unsigned flag)
+{
+	JsonNode *parameters;
+
+	if((parameters = json_find_member(g_uspd_json_db, "parameters")) != NULL) {
+		JsonNode *element;
+		json_foreach(element, parameters) {
+			JsonNode *parameter;
+			if((parameter = json_find_member(element, "parameter")) != NULL) {
+				if(parameter->tag == JSON_STRING) {
+					update_path_vector(vec, parameter->string_, flag);
+				}
+			}
+		}
+		json_delete(parameters);
+	}
+	return USP_ERR_OK;
+}
+int uspd_get_parameter(char *path, str_vector_t *vec, unsigned flags)
+{
+	if(USP_ERR_OK == uspd_get_names(path)) {
+		json_get_params(vec, flags);
+	}
+	return USP_ERR_OK;
+}
 // This function must be called before getting instance numbers from db
 // to correctly populate the instances of vendor added datamodels
 static int iopsys_dm_instance_init(void)
 {
-	int max_dm = NUM_ELEM(dm_alias_list);
-
-	for(int i=0; i<max_dm; ++i)
-	{
-		process_dm_aliases(dm_alias_list[i]);
+	str_vector_t instance_vector;
+	STR_VECTOR_Init(&instance_vector);
+	uspd_get_parameter("Device.", &instance_vector, GET_ALL_INSTANCES);
+	for(size_t i=0; i< instance_vector.num_entries; ++i) {
+		USP_LOG_Error("##### instance name |%s|", instance_vector.vector[i]);
+		USP_DM_InformInstance(instance_vector.vector[i]);
 	}
-
+	STR_VECTOR_Destroy(&instance_vector);
 	return USP_ERR_OK;
 }
