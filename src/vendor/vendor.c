@@ -111,7 +111,7 @@ int VENDOR_Start(void)
 **************************************************************************/
 int VENDOR_Stop(void)
 {
-
+    destroy_uspd_json();
     return USP_ERR_OK;
 }
 

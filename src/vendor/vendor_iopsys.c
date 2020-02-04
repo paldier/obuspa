@@ -4521,10 +4521,58 @@ int vendor_ProxiedDevice_init(void)
 
 }
 
+int factory_reset()
+{
+	int res = 0;
+	dm_req_t req;
+	kv_vector_t input_args, output_args;
+	KV_VECTOR_Init(&input_args);
+	memset(&req, 0, sizeof(req));
+
+	req.path = "Device.FactoryReset()";
+	res = uspd_operate_sync(&req, NULL, &input_args, &output_args);
+	KV_VECTOR_Destroy(&input_args);
+	KV_VECTOR_Destroy(&output_args);
+	return res;
+}
+
+int reboot()
+{
+	int ret = 0;
+	dm_req_t req;
+	kv_vector_t input_args, output_args;
+	KV_VECTOR_Init(&input_args);
+
+	memset(&req, 0, sizeof(req));
+	req.path = "Device.Reboot()";
+	ret = uspd_operate_sync(&req, NULL, &input_args, &output_args);
+	KV_VECTOR_Destroy(&input_args);
+	KV_VECTOR_Destroy(&output_args);
+	return ret;
+}
+
+int vendor_factory_reset_init()
+{
+	vendor_hook_cb_t callbacks;
+	memset(&callbacks, 0, sizeof(callbacks));
+	callbacks.factory_reset_cb = factory_reset;
+	return USP_REGISTER_CoreVendorHooks(&callbacks);
+}
+
+int vendor_reset_init()
+{
+	vendor_hook_cb_t callbacks;
+	memset(&callbacks, 0, sizeof(callbacks));
+	callbacks.reboot_cb = reboot;
+	return USP_REGISTER_CoreVendorHooks(&callbacks);
+}
+
 int iopsys_dm_Init(void)
 {
 	int err = USP_ERR_OK;
 	err |= vendor_device_init();
+	err |= vendor_reset_init();
+	err |= vendor_factory_reset_init();
 	err |= vendor_Services_init();
 	err |= vendor_DeviceInfo_init();
 	err |= vendor_Time_init();

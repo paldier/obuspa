@@ -53,7 +53,6 @@
 #include "nu_ipaddr.h"
 #include "text_utils.h"
 #include "uptime.h"
-#include "vendor_iopsys.h"
 
 
 //------------------------------------------------------------------------------
@@ -390,16 +389,6 @@ int DEVICE_LOCAL_AGENT_ScheduleReboot(exit_action_t exit_action, char *reboot_ca
 
     scheduled_exit_action = exit_action;
     MTP_EXEC_ScheduleExit();
-    dm_req_t req;
-    kv_vector_t input_args, output_args;
-    KV_VECTOR_Init(&input_args);
-
-    if(exit_action == kExitAction_Reboot) {
-        req.path = "Device.Reboot()";
-    } else if(exit_action == kExitAction_FactoryReset ) {
-        req.path = "Device.FactoryReset()";
-    }
-    uspd_operate_sync(&req, NULL, &input_args, &output_args);
     return USP_ERR_OK;
 }
 
