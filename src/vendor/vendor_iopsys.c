@@ -541,8 +541,120 @@ int vendor_device_init(void)
 int vendor_Services_init(void)
 {
 	int err = USP_ERR_OK;
-	//#define DEVICE_SERVICE_ROOT "Device.Services",
-	//CreateNode(DEVICE_SERVICE_ROOT, kDMNodeType_Object_SingleInstance, DEVICE_SERVICE_ROOT);
+#define DEVICE_SERVICE_ROOT "Device.Services"
+#define DEVICE_SERVICE_VOICESERVICE_ROOT "Device.Services.VoiceService"
+
+	err |= USP_REGISTER_Object(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
+	err |= USP_REGISTER_DBParam_Alias(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Alias", NULL);
+
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.ButtonMap", uspd_get_value, DM_BOOL); 
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.DigitMap", uspd_get_value, DM_BOOL); 
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.FaxPassThrough", uspd_get_value, DM_BOOL); 
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.FaxT38", uspd_get_value, DM_BOOL); 
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.FileBasedRingGeneration", uspd_get_value, DM_BOOL); 
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.FileBasedToneGeneration", uspd_get_value, DM_BOOL); 
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.MaxLineCount", uspd_get_value, DM_UINT); 
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.MaxProfileCount", uspd_get_value, DM_UINT); 
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.MaxSessionCount", uspd_get_value, DM_UINT); 
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.MaxSessionsPerLine", uspd_get_value, DM_UINT); 
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.ModemPassThrough", uspd_get_value, DM_BOOL); 
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.NumberingPlan", uspd_get_value, DM_BOOL); 
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.PSTNSoftSwitchOver", uspd_get_value, DM_BOOL); 
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.PatternBasedRingGeneration", uspd_get_value, DM_BOOL); 
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.PatternBasedToneGeneration", uspd_get_value, DM_BOOL); 
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.RTCP", uspd_get_value, DM_BOOL); 
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.RTPRedundancy", uspd_get_value, DM_BOOL); 
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.Regions", uspd_get_value, DM_STRING); 
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.RingDescriptionsEditable", uspd_get_value, DM_BOOL); 
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.RingFileFormats", uspd_get_value, DM_STRING); 
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.RingGeneration", uspd_get_value, DM_BOOL); 
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.RingPatternEditable", uspd_get_value, DM_BOOL); 
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.SIP.EventSubscription", uspd_get_value, DM_BOOL); 
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.SIP.Extensions", uspd_get_value, DM_STRING); 
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.SIP.ResponseMap", uspd_get_value, DM_BOOL); 
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.SIP.Role", uspd_get_value, DM_STRING); 
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.SIP.TLSAuthenticationProtocols", uspd_get_value, DM_STRING); 
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.SIP.TLSEncryptionProtocols", uspd_get_value, DM_STRING); 
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.SIP.TLSKeyExchangeProtocols", uspd_get_value, DM_STRING); 
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.SIP.Transports", uspd_get_value, DM_STRING); 
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.SIP.URISchemes", uspd_get_value, DM_STRING); 
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.SRTP", uspd_get_value, DM_BOOL); 
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.SignalingProtocols", uspd_get_value, DM_STRING); 
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.ToneDescriptionsEditable", uspd_get_value, DM_BOOL); 
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.ToneFileFormats", uspd_get_value, DM_STRING); 
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.ToneGeneration", uspd_get_value, DM_BOOL); 
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.VoicePortTests", uspd_get_value, DM_BOOL);
+
+
+	err |= USP_REGISTER_Object(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.Codecs.{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
+        err |= USP_REGISTER_DBParam_Alias(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.Codecs.{i}.Alias", NULL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.Codecs.{i}.BitRate", uspd_get_value, DM_UINT); 
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.Codecs.{i}.Codec", uspd_get_value, DM_STRING); 
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.Codecs.{i}.EntryID", uspd_get_value, DM_UINT); 
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.Codecs.{i}.PacketizationPeriod", uspd_get_value, DM_STRING); 
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.Codecs.{i}.SilenceSuppression", uspd_get_value, DM_BOOL); 
+
+	err |= USP_REGISTER_Object(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
+	err |= USP_REGISTER_DBParam_Alias(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.Alias", NULL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.DTMFMethod", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.FaxT38.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.MaxSessions", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.Name", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.NumberOfLines", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.RTP.DSCPMark", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.RTP.LocalPortMax", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.RTP.LocalPortMin", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.RTP.RTCP.Enable", uspd_get_value, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.RTP.RTCP.TxRepeatInterval", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.RTP.SRTP.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.Region", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.Reset", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.SIP.OutboundProxy", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.SIP.OutboundProxyPort", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.SIP.ProxyServer", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.SIP.ProxyServerPort", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.SIP.ProxyServerTransport", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.SIP.ReInviteExpires", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.SIP.RegisterExpires", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.SIP.RegisterRetryInterval", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.SIP.RegistrarServer", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.SIP.RegistrarServerPort", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.SIP.RegistrarServerTransport", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.SIP.RegistrationPeriod", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.SIP.UserAgentDomain", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.SIP.UserAgentPort", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.SIP.UserAgentTransport", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.SIP.X_IOPSYS_EU_CallLines", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.ServiceProviderInfo.Name", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.SignalingProtocol", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+
+	err |= USP_REGISTER_Object(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.Line.{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
+	err |= USP_REGISTER_DBParam_Alias(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.Line.{i}.Alias", NULL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.Line.{i}.CallState", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.Line.{i}.CallingFeatures.CallWaitingEnable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.Line.{i}.CallingFeatures.CallerIDName", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.Line.{i}.DirectoryNumber", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.Line.{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.Line.{i}.SIP.AuthPassword", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.Line.{i}.SIP.AuthUserName", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.Line.{i}.SIP.URI", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.Line.{i}.Status", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.Line.{i}.VoiceProcessing.EchoCancellationEnable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.Line.{i}.X_IOPSYS_EU_Confort_Noise_Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.Line.{i}.X_IOPSYS_EU_LineProfile", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.Line.{i}.X_IOPSYS_EU_TELLine", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+
+	err |= USP_REGISTER_Object(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.Line.{i}.Codec.List.{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
+	err |= USP_REGISTER_DBParam_Alias(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.Line.{i}.Codec.List.{i}.Alias", NULL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.Line.{i}.Codec.List.{i}.BitRate", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.Line.{i}.Codec.List.{i}.Codec", uspd_get_value, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.Line.{i}.Codec.List.{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.Line.{i}.Codec.List.{i}.EntryID", uspd_get_value, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.Line.{i}.Codec.List.{i}.PacketizationPeriod", uspd_get_value, uspd_set_value, NULL, DM_STRING);
+	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.Line.{i}.Codec.List.{i}.Priority", uspd_get_value, uspd_set_value, NULL, DM_UINT);
+	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.VoiceProfile.{i}.Line.{i}.Codec.List.{i}.SilenceSuppression", uspd_get_value, DM_BOOL);
+
 	return err;
 }
 
@@ -4670,7 +4782,7 @@ int uspd_get_names(char *path)
 	memset(&b, 0, sizeof(struct blob_buf));
 	blob_buf_init(&b, 0);
 	blobmsg_add_string(&b, "path", path);
-	if (ubus_invoke(ctx, id, "object_names", b.head, store_call_result_data,
+	if (ubus_invoke(ctx, id, "instances", b.head, store_call_result_data,
 			NULL, USPD_TIMEOUT)) {
 		USP_LOG_Error("[%s:%d] ubus call failed for |%s|",__func__, __LINE__, path);
 		ubus_free(ctx);
