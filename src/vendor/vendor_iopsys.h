@@ -50,6 +50,8 @@ int uspd_operate_sync(dm_req_t *req, char *command_key, kv_vector_t *input_args,
 int vendor_operate_async_init(void);
 int init_uspd_database(char *path);
 void destroy_uspd_json();
+void destroy_instance_vector();
+void *monitor_instances(void *arg);
 
 #endif // VENDOR_IOPSYS_H
 

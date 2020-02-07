@@ -66,10 +66,12 @@
 
 // Timeout in milliseconds
 #define USPD_TIMEOUT 5000
+#define INST_MONITOR_TIMER 60
 extern bool is_running_cli_local_command;
 
 // Local USPD Database containing the JSON Data
 static JsonNode *g_uspd_json_db = NULL;
+static str_vector_t g_inst_vector;
 
 static bool uspd_set(char *path, char *value);
 static int iopsys_dm_instance_init(void);
@@ -587,7 +589,7 @@ int vendor_Services_init(void)
 
 
 	err |= USP_REGISTER_Object(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.Codecs.{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
-        err |= USP_REGISTER_DBParam_Alias(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.Codecs.{i}.Alias", NULL);
+	err |= USP_REGISTER_DBParam_Alias(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.Codecs.{i}.Alias", NULL);
 	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.Codecs.{i}.BitRate", uspd_get_value, DM_UINT); 
 	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.Codecs.{i}.Codec", uspd_get_value, DM_STRING); 
 	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_SERVICE_VOICESERVICE_ROOT ".{i}.Capabilities.Codecs.{i}.EntryID", uspd_get_value, DM_UINT); 
@@ -4796,17 +4798,17 @@ int uspd_get_names(char *path)
 
 void update_instance_vector(str_vector_t *vec, char *param)
 {
-        char instance[MAX_DM_PATH]={'\0'};
-        char *token = strtok(param, ".");
+	char instance[MAX_DM_PATH]={'\0'};
+	char *token = strtok(param, ".");
 
-        while(token) {
-                strcat(instance, token);
-                if(isdigit(token[0])){
-                        STR_VECTOR_Add_IfNotExist(vec, instance);
-                }
-                strcat(instance, ".");
-                token = strtok(NULL, ".");
-        }
+	while(token) {
+		strcat(instance, token);
+		if(isdigit(token[0])){
+			STR_VECTOR_Add_IfNotExist(vec, instance);
+		}
+		strcat(instance, ".");
+		token = strtok(NULL, ".");
+	}
 }
 
 void update_path_vector(str_vector_t *vec, char *param, unsigned flags)
@@ -4856,6 +4858,61 @@ static int iopsys_dm_instance_init(void)
 		USP_LOG_Debug("## Instance name |%s|", instance_vector.vector[i]);
 		USP_DM_InformInstance(instance_vector.vector[i]);
 	}
+	STR_VECTOR_Clone(&g_inst_vector, instance_vector.vector, instance_vector.num_entries);
 	STR_VECTOR_Destroy(&instance_vector);
 	return USP_ERR_OK;
+}
+
+/**
+  * This Thread monitors the instance objects,
+  * re-initialize the global string vector(g_inst_vector)
+  */
+void *monitor_instances(void *arg) {
+	while(1) {
+		sleep(INST_MONITOR_TIMER);
+		int i = 0, j = 0;
+		str_vector_t inst_vect;
+		STR_VECTOR_Init(&inst_vect);
+		uspd_get_parameter("Device.", &inst_vect, GET_ALL_INSTANCES);
+
+		while((i < inst_vect.num_entries) && (j < g_inst_vector.num_entries)) {
+			if(!strcmp(inst_vect.vector[i], g_inst_vector.vector[j])) {
+				i++; j++;
+				continue;
+			} else if(strcmp(inst_vect.vector[i], g_inst_vector.vector[j]) < 0) {
+				// need to add current vector node
+				USP_LOG_Debug("Object Instance Added:|%s|", inst_vect.vector[i]);
+				USP_SIGNAL_ObjectAdded(inst_vect.vector[i]);
+				i++;
+			} else if(strcmp(inst_vect.vector[i], g_inst_vector.vector[j]) > 0) {
+				//need to delete previous vector node
+				USP_LOG_Debug("Object Instance Deleted:|%s|", g_inst_vector.vector[j]);
+				USP_SIGNAL_ObjectDeleted(g_inst_vector.vector[j]);
+				j++;
+			}
+		}
+
+		// Delete all the remaining nodes
+		while(j < g_inst_vector.num_entries) {
+			USP_LOG_Debug("Object Instance Deleted:|%s|", g_inst_vector.vector[j]);
+			USP_SIGNAL_ObjectDeleted(g_inst_vector.vector[j]);
+			j++;
+		}
+
+		// Add all the remaining nodes
+		while(i < inst_vect.num_entries) {
+			USP_LOG_Debug("Object Instance Added:|%s|", inst_vect.vector[i]);
+			USP_SIGNAL_ObjectAdded(inst_vect.vector[i]);
+			i++;
+		}
+
+		STR_VECTOR_Destroy(&g_inst_vector);
+		STR_VECTOR_Clone(&g_inst_vector, inst_vect.vector, inst_vect.num_entries);
+		STR_VECTOR_Destroy(&inst_vect);
+	}
+	return NULL;
+}
+
+void destroy_instance_vector() {
+	STR_VECTOR_Destroy(&g_inst_vector);
 }

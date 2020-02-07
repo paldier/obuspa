@@ -48,6 +48,7 @@
 #include "vendor_api.h"
 #include "usp_api.h"
 #include "vendor_iopsys.h"
+#include "os_utils.h"
 
 /*********************************************************************//**
 **
@@ -93,7 +94,8 @@ int VENDOR_Init(void)
 **************************************************************************/
 int VENDOR_Start(void)
 {
-    
+    // Start a thread to monitor datamodel instances
+    OS_UTILS_CreateThread(monitor_instances, NULL);
     return USP_ERR_OK;
 }
 
@@ -112,6 +114,7 @@ int VENDOR_Start(void)
 int VENDOR_Stop(void)
 {
     destroy_uspd_json();
+    destroy_instance_vector();
     return USP_ERR_OK;
 }
 
