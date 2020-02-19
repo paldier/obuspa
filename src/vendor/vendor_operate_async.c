@@ -309,6 +309,7 @@ int ExecuteTestDiagnostic(char *cpath, kv_vector_t *input_args, output_res_t *re
 
     blobmsg_add_string(&b, "path", path);
     blobmsg_add_string(&b, "action", action);
+    blobmsg_add_string(&b, "proto", USP_PROTO);
     if(input_args->num_entries) {
         void *table = blobmsg_open_table(&b, "input");
         for(int i=0; i<input_args->num_entries; ++i) {

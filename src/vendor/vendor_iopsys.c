@@ -176,6 +176,7 @@ int uspd_get(char *path, char *json_buff)
 	memset(&b, 0, sizeof(struct blob_buf));
 	blob_buf_init(&b, 0);
 	blobmsg_add_string(&b, "path", path);
+	blobmsg_add_string(&b, "proto", USP_PROTO);
 	json_buff ? (call_result_func = receive_call_result_data) :
 		(call_result_func = store_call_result_data);
 
@@ -235,6 +236,7 @@ int uspd_add(dm_req_t *req)
 	memset(&b, 0, sizeof(struct blob_buf));
 	blob_buf_init(&b, 0);
 	blobmsg_add_string(&b, "path", req->path);
+	blobmsg_add_string(&b, "proto", USP_PROTO);
 	if (ubus_invoke(ctx, id, "add_object", b.head, receive_data_print, NULL, USPD_TIMEOUT)) {
 		USP_LOG_Error("[%s:%d] ubus call failed for |%s|",__func__, __LINE__, req->path);
 		blob_buf_free(&b);
@@ -283,6 +285,7 @@ int uspd_del(dm_req_t *req)
 	memset(&b, 0, sizeof(struct blob_buf));
 	blob_buf_init(&b, 0);
 	blobmsg_add_string(&b, "path", req->path);
+	blobmsg_add_string(&b, "proto", USP_PROTO);
 	if (ubus_invoke(ctx, id, "del_object", b.head, receive_data_print, NULL, USPD_TIMEOUT)) {
 		USP_LOG_Error("[%s:%d] ubus call failed for |%s|",__func__, __LINE__, req->path);
 		ubus_free(ctx);
@@ -431,6 +434,7 @@ int uspd_operate_sync(dm_req_t *req, char *command_key, kv_vector_t *input_args,
 
 	blobmsg_add_string(&b, "path", path);
 	blobmsg_add_string(&b, "action", action);
+	blobmsg_add_string(&b, "proto", USP_PROTO);
 
 	/* invoke a method on a specific object */
 	if (ubus_invoke(ctx, id, "operate", b.head, receive_data_print, NULL, USPD_TIMEOUT)) {
@@ -504,6 +508,7 @@ static bool uspd_set(char *path, char *value)
 	blob_buf_init(&b, 0);
 	blobmsg_add_string(&b, "path", path);
 	blobmsg_add_string(&b, "value", value);
+	blobmsg_add_string(&b, "proto", USP_PROTO);
 	if (ubus_invoke(ctx, id, "set", b.head, receive_call_result_status, &status, USPD_TIMEOUT)) {
 		USP_LOG_Error("[%s:%d] ubus call failed for |%s|",__func__, __LINE__, path);
 		blob_buf_free(&b);
@@ -6859,6 +6864,7 @@ int uspd_get_names(char *path)
 	memset(&b, 0, sizeof(struct blob_buf));
 	blob_buf_init(&b, 0);
 	blobmsg_add_string(&b, "path", path);
+	blobmsg_add_string(&b, "proto", USP_PROTO);
 	if (ubus_invoke(ctx, id, "instances", b.head, store_call_result_data,
 			NULL, USPD_TIMEOUT)) {
 		USP_LOG_Error("[%s:%d] ubus call failed for |%s|",__func__, __LINE__, path);
