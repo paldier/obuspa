@@ -1980,7 +1980,7 @@ int vendor_HPNA_init(void)
 	err |=USP_REGISTER_VendorParam_ReadOnly(HPNA_DEVICE_ROOT ".{i}.Synced", uspd_get_value, DM_BOOL);
 	err |=USP_REGISTER_VendorParam_ReadOnly(HPNA_DEVICE_ROOT ".{i}.TotalSyncTime", uspd_get_value, DM_UINT);
 	err |=USP_REGISTER_VendorParam_ReadOnly(HPNA_DEVICE_ROOT ".{i}.MaxBitRate", uspd_get_value, DM_UINT);
-	err |=USP_REGISTER_VendorParam_ReadWrite(HPNA_DEVICE_ROOT ".{i}.(PHYDiagnosticsEnable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
+	err |=USP_REGISTER_VendorParam_ReadWrite(HPNA_DEVICE_ROOT ".{i}.PHYDiagnosticsEnable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
 	err |=USP_REGISTER_VendorParam_ReadOnly(HPNA_DEVICE_ROOT ".{i}.Active", uspd_get_value, DM_BOOL);
 	char *unique_keys_device[] = { "MACAddress" };
         err |= USP_REGISTER_Object_UniqueKey(HPNA_DEVICE_ROOT ".{i}", unique_keys_device, NUM_ELEM(unique_keys_device));

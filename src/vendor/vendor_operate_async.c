@@ -54,17 +54,9 @@
 #include "json.h"
 #include "vendor_iopsys.h"
 
+#define ASYNC_USPD_TIMEOUT 30000
 
-#define WIFI_NDIAG "Device.WiFi.NeighboringWiFiDiagnostic"
-#define VENDOR_CONF "Device.DeviceInfo.VendorConfigFile."
-#define IP_DIAG "Device.IP.Diagnostics."
-#define IPPING_DIAG "Device.IP.Diagnostics.IPPing"
-#define TRACEROUTE_DIAG "Device.IP.Diagnostics.TraceRoute"
-#define DOWNLOAD_DIAG "Device.IP.Diagnostics.DownloadDiagnostics"
-#define UPLOAD_DIAG "Device.IP.Diagnostics.UploadDiagnostics"
-#define UDPECHO_DIAG "Device.IP.Diagnostics.UDPEchoDiagnostics"
-#define SERVERSELECTION_DIAG "Device.IP.Diagnostics.ServerSelectionDiagnostics"
-#define NSLOOKUP_DIAG "Device.DNS.Diagnostics.NSLookupDiagnostics"
+void save_output_args(char *res, kv_vector_t *output_args);
 
 typedef struct
 {
@@ -73,15 +65,47 @@ typedef struct
     kv_vector_t *input_args;
 } input_cond_t;
 
-typedef struct
+static char *packetcapture_diag_input_args[] =
 {
-    char result_str[MAX_DM_VALUE_LEN*4];
-    char err_msg[256];
-} output_res_t;
+    "Interface",
+    "Format",
+    "Duration",
+    "PacketCount",
+    "ByteCount",
+    "FileTarget",
+    "FilterExpression",
+    "Username",
+    "Password"
+};
+
+static char *packetcapture_diag_output_args[] =
+{
+    "Status",
+    "PacketCaptureResult.{i}.FileLocation",
+    "PacketCaptureResult.{i}.StartTime",
+    "PacketCaptureResult.{i}.EndTime",
+    "PacketCaptureResult.{i}.Count"
+};
 
 static char *wifi_diag_output_args[] =
 {
-    "Result.",
+    "Result.{i}.Radio",
+    "Result.{i}.SSID",
+    "Result.{i}.BSSID",
+    "Result.{i}.Mode",
+    "Result.{i}.Channel",
+    "Result.{i}.SignalStrength",
+    "Result.{i}.SecurityModeEnabled",
+    "Result.{i}.EncryptionMode",
+    "Result.{i}.OperatingFrequencyBand",
+    "Result.{i}.SupportedStandards",
+    "Result.{i}.OperatingStandards",
+    "Result.{i}.OperatingChannelBandwidth",
+    "Result.{i}.BeaconPeriod",
+    "Result.{i}.Noise",
+    "Result.{i}.BasicDataTransferRates",
+    "Result.{i}.SupportedDataTransferRates",
+    "Result.{i}.DTIMPeriod"
 };
 
 static char *vendor_cfg_backup_input_args[] =
@@ -102,11 +126,306 @@ static char *vendor_cfg_restore_input_args[] =
     "CheckSum"
 };
 
+static char *vendor_logfile_upload_input_args[] =
+{
+    "URL",
+    "Username",
+    "Password"
+};
+
+static char *device_firmwareimage_download_input_args[] =
+{
+    "URL",
+    "AutoActivate",
+    "Username",
+    "Password",
+    "FileSize",
+    "CheckSumAlgorithm",
+    "CheckSum"
+};
+
+static char *device_firmwareimage_activate_input_args[] =
+{
+    "Start",
+    "End",
+    "Mode",
+    "UserMessage",
+    "MaxRetries"
+};
+
+static char *dsl_ethernet_adslline_input_args[] =
+{
+    "Interface"
+};
+
+static char *dsl_ethernet_adslline_output_args[] =
+{
+    "Status",
+    "ACTPSDds",
+    "ACTPSDus",
+    "ACTATPds",
+    "ACTATPus",
+    "HLINSCds",
+    "HLINSCus",
+    "HLINGds",
+    "HLINGus",
+    "HLOGGds",
+    "HLOGGus",
+    "HLOGpsds",
+    "HLOGpsus",
+    "HLOGMTds",
+    "HLOGMTus",
+    "LATNpbds",
+    "LATNpbus",
+    "SATNds",
+    "SATNus",
+    "HLINpsds",
+    "HLINpsus",
+    "QLNGds",
+    "QLNGus",
+    "QLNpsds",
+    "QLNpsus",
+    "QLNMTds",
+    "QLNMTus",
+    "SNRGds",
+    "SNRGus",
+    "SNRpsds",
+    "SNRpsus",
+    "SNRMTds",
+    "SNRMTus",
+    "BITSpsds",
+    "BITSpsus"
+};
+
+static char *dsl_ethernet_seltuer_input_args[] =
+{
+    "Interface",
+    "UERMaxMeasurementDuration"
+};
+
+static char *dsl_ethernet_seltuer_output_args[] =
+{
+    "Status",
+    "ExtendedBandwidthOperation",
+    "UER",
+    "UERScaleFactor",
+    "UERGroupSize",
+    "UERVar"
+};
+
+static char *dsl_ethernet_seltqln_input_args[] =
+{
+    "Interface",
+    "QLNMaxMeasurementDuration"
+};
+
+static char *dsl_ethernet_seltqln_output_args[] =
+{
+    "Status",
+    "ExtendedBandwidthOperation",
+    "QLN",
+    "QLNGroupSize"
+};
+
+static char *dsl_ethernet_seltp_input_args[] =
+{
+    "Interface",
+    "CapacityEstimateEnabling",
+    "CapacitySignalPSD",
+    "CapacityNoisePSD",
+    "CapacityTargetMargin"
+};
+
+static char *dsl_ethernet_seltp_output_args[] =
+{
+    "Status",
+    "LoopTermination",
+    "LoopLength",
+    "LoopTopology",
+    "AttenuationCharacteristics",
+    "MissingFilter",
+    "CapacityEstimate"
+};
+
+static char *atm_diag_f5loopback_input_args[] =
+{
+    "Interface",
+    "NumberOfRepetitions",
+    "Timeout"
+};
+
+static char *atm_diag_f5loopback_output_args[] =
+{
+    "Status",
+    "SuccessCount",
+    "FailureCount",
+    "AverageResponseTime",
+    "MinimumResponseTime",
+    "MaximumResponseTime"
+};
+
+static char *eth_wol_sendmagicpacket_input_args[] =
+{
+    "MACAddress",
+    "Password"
+};
+
+static char *hpna_diag_phythroughput_input_args[] =
+{
+    "Interface",
+    "NumPacketsInBurst",
+    "BurstInterval",
+    "TestPacketPayloadLength",
+    "PayloadEncoding",
+    "PayloadDataGen",
+    "PayloadType",
+    "PriorityLevel"
+};
+
+static char *hpna_diag_phythroughput_output_args[] =
+{
+    "Status",
+    "Result.{i}.SrcMACAddress",
+    "Result.{i}.DestMACAddress",
+    "Result.{i}.PHYRate",
+    "Result.{i}.BaudRate",
+    "Result.{i}.SNR",
+    "Result.{i}.PacketsReceived",
+    "Result.{i}.Attenuation"
+};
+
+static char *hpna_diag_perfmonitor_input_args[] =
+{
+    "Interface",
+    "SampleInterval"
+};
+
+static char *hpna_diag_perfmonitor_output_args[] =
+{
+    "Status",
+    "Nodes.CurrentStart",
+    "Nodes.CurrentEnd",
+    "Nodes.NodeNumberOfEntries",
+    "Nodes.Node.{i}.MACAddress",
+    "Nodes.Node.{i}.BytesSent",
+    "Nodes.Node.{i}.BytesReceived",
+    "Nodes.Node.{i}.PacketsSent",
+    "Nodes.Node.{i}.PacketsReceived",
+    "Nodes.Node.{i}.BroadcastPacketsSent",
+    "Nodes.Node.{i}.BroadcastPacketsReceived",
+    "Nodes.Node.{i}.MulticastPacketsSent",
+    "Nodes.Node.{i}.MulticastPacketsReceived",
+    "Nodes.Node.{i}.PacketsCrcErrored",
+    "Nodes.Node.{i}.PacketsCrcErroredHost",
+    "Nodes.Node.{i}.PacketsShortErrored",
+    "Nodes.Node.{i}.PacketsShortErroredHost",
+    "Nodes.Node.{i}.RxPacketsDropped",
+    "Nodes.Node.{i}.TxPacketsDropped",
+    "Nodes.Node.{i}.ControlRequestLocal",
+    "Nodes.Node.{i}.ControlReplyLocal",
+    "Nodes.Node.{i}.ControlRequestRemote",
+    "Nodes.Node.{i}.ControlReplyRemote",
+    "Nodes.Node.{i}.PacketsSentWire",
+    "Nodes.Node.{i}.BroadcastPacketsSentWire",
+    "Nodes.Node.{i}.MulticastPacketsSentWire",
+    "Nodes.Node.{i}.PacketsInternalControl",
+    "Nodes.Node.{i}.BroadcastPacketsInternalControl",
+    "Nodes.Node.{i}.PacketsReceivedQueued",
+    "Nodes.Node.{i}.PacketsReceivedForwardUnknown",
+    "Nodes.Node.{i}.NodeUtilization",
+    "Channels.TimeStamp",
+    "Channels.ChannelNumberOfEntries",
+    "Channels.Channel.{i}.HostSrcMACAddress",
+    "Channels.Channel.{i}.HostDestMACAddress",
+    "Channels.Channel.{i}.HPNASrcMACAddress",
+    "Channels.Channel.{i}.HPNADestMACAddress",
+    "Channels.Channel.{i}.PHYRate",
+    "Channels.Channel.{i}.BaudRate",
+    "Channels.Channel.{i}.SNR",
+    "Channels.Channel.{i}.PacketsSent",
+    "Channels.Channel.{i}.PacketsReceived",
+    "Channels.Channel.{i}.LARQPacketsReceived",
+    "Channels.Channel.{i}.FlowSpec"
+};
+
+static char *ghn_diag_phythroughput_input_args[] =
+{
+    "Interface",
+    "DiagnoseMACAddress"
+};
+
+static char *ghn_diag_phythroughput_output_args[] =
+{
+    "Status",
+    "Result.{i}.DestinationMACAddress",
+    "Result.{i}.LinkState",
+    "Result.{i}.TxPhyRate",
+    "Result.{i}.RxPhyRate"
+};
+
+static char *ghn_diag_perfmonitor_input_args[] =
+{
+    "Interface",
+    "DiagnoseMACAddress",
+    "SampleInterval",
+    "SNRGroupLength"
+};
+
+static char *ghn_diag_perfmonitor_output_args[] =
+{
+    "Status",
+    "Nodes.CurrentStart",
+    "Nodes.CurrentEnd",
+    "Nodes.NodeNumberOfEntries",
+    "Nodes.Node.{i}.DestinationMACAddress",
+    "Nodes.Node.{i}.BytesSent",
+    "Nodes.Node.{i}.BytesReceived",
+    "Nodes.Node.{i}.PacketsSent",
+    "Nodes.Node.{i}.PacketsReceived",
+    "Nodes.Node.{i}.ErrorsSent",
+    "Nodes.Node.{i}.ErrorsReceived",
+    "Nodes.Node.{i}.UnicastPacketsSent",
+    "Nodes.Node.{i}.UnicastPacketsReceived",
+    "Nodes.Node.{i}.DiscardPacketsSent",
+    "Nodes.Node.{i}.DiscardPacketsReceived",
+    "Nodes.Node.{i}.MulticastPacketsSent",
+    "Nodes.Node.{i}.MulticastPacketsReceived",
+    "Nodes.Node.{i}.BroadcastPacketsSent",
+    "Nodes.Node.{i}.BroadcastPacketsReceived",
+    "Nodes.Node.{i}.UnknownProtoPacketsReceived",
+    "Nodes.Node.{i}.MgmtBytesSent",
+    "Nodes.Node.{i}.MgmtBytesReceived",
+    "Nodes.Node.{i}.MgmtPacketsSent",
+    "Nodes.Node.{i}.MgmtPacketsReceived",
+    "Nodes.Node.{i}.BlocksSent",
+    "Nodes.Node.{i}.BlocksReceived",
+    "Nodes.Node.{i}.BlocksResent",
+    "Nodes.Node.{i}.BlocksErrorsReceived",
+    "Channels.TimeStamp",
+    "Channels.ChannelNumberOfEntries",
+    "Channels.Channel.{i}.DestinationMACAddress",
+    "Channels.Channel.{i}.SNR"
+};
+
+static char *upa_diag_interfacemeasure_input_args[] =
+{
+    "Type",
+    "Interface",
+    "Port"
+};
+
+static char *upa_diag_interfacemeasure_output_args[] =
+{
+    "Status",
+    "Measurements",
+    "RxGain"
+};
+
 static char *ipping_diag_input_args[] =
 {
-    "Host",
     "Interface",
     "ProtocolVersion",
+    "Host",
     "NumberOfRepetitions",
     "Timeout",
     "DataBlockSize",
@@ -115,6 +434,8 @@ static char *ipping_diag_input_args[] =
 
 static char *ipping_diag_output_args[] =
 {
+    "Status",
+    "IPAddressUsed",
     "SuccessCount",
     "FailureCount",
     "AverageResponseTime",
@@ -127,9 +448,9 @@ static char *ipping_diag_output_args[] =
 
 static char *traceroute_diag_input_args[] =
 {
-    "Host",
     "Interface",
     "ProtocolVersion",
+    "Host",
     "NumberOfTries",
     "Timeout",
     "DataBlockSize",
@@ -139,16 +460,24 @@ static char *traceroute_diag_input_args[] =
 
 static char *traceroute_diag_output_args[] =
 {
+    "Status",
+    "IPAddressUsed",
     "ResponseTime",
-    "RouteHops"
+    "RouteHops.{i}.Host",
+    "RouteHops.{i}.HostAddress",
+    "RouteHops.{i}.ErrorCode",
+    "RouteHops.{i}.RTTimes"
 };
 
 static char *download_diag_input_args[] =
 {
-    "DownloadURL",
     "Interface",
+    "DownloadURL",
     "DSCP",
     "EthernetPriority",
+    "TimeBasedTestDuration",
+    "TimeBasedTestMeasurementInterval",
+    "TimeBasedTestMeasurementOffset",
     "ProtocolVersion",
     "NumberOfConnections",
     "EnablePerConnectionResults"
@@ -156,6 +485,8 @@ static char *download_diag_input_args[] =
 
 static char *download_diag_output_args[] =
 {
+    "Status",
+    "IPAddressUsed",
     "ROMTime",
     "BOMTime",
     "EOMTime",
@@ -167,16 +498,32 @@ static char *download_diag_output_args[] =
     "TotalBytesSentUnderFullLoading",
     "PeriodOfFullLoading",
     "TCPOpenRequestTime",
-    "TCPOpenResponseTime"
+    "TCPOpenResponseTime",
+    "PerConnectionResult.{i}.ROMTime",
+    "PerConnectionResult.{i}.BOMTime",
+    "PerConnectionResult.{i}.EOMTime",
+    "PerConnectionResult.{i}.TestBytesReceived",
+    "PerConnectionResult.{i}.TotalBytesReceived",
+    "PerConnectionResult.{i}.TotalBytesSent",
+    "PerConnectionResult.{i}.TCPOpenRequestTime",
+    "PerConnectionResult.{i}.TCPOpenResponseTime",
+    "IncrementalResult.{i}.TestBytesReceived",
+    "IncrementalResult.{i}.TotalBytesReceived",
+    "IncrementalResult.{i}.TotalBytesSent",
+    "IncrementalResult.{i}.StartTime",
+    "IncrementalResult.{i}.EndTime"
 };
 
 static char *upload_diag_input_args[] =
 {
-    "UploadURL",
-    "TestFileLength",
     "Interface",
+    "UploadURL",
     "DSCP",
     "EthernetPriority",
+    "TestFileLength",
+    "TimeBasedTestDuration",
+    "TimeBasedTestMeasurementInterval",
+    "TimeBasedTestMeasurementOffset",
     "ProtocolVersion",
     "NumberOfConnections",
     "EnablePerConnectionResults"
@@ -184,6 +531,8 @@ static char *upload_diag_input_args[] =
 
 static char *upload_diag_output_args[] =
 {
+    "Status",
+    "IPAddressUsed",
     "ROMTime",
     "BOMTime",
     "EOMTime",
@@ -192,83 +541,113 @@ static char *upload_diag_output_args[] =
     "TotalBytesSent",
     "TestBytesSentUnderFullLoading",
     "TotalBytesReceivedUnderFullLoading"
-    "TotalBytesSentUnderFullLoading",
+        "TotalBytesSentUnderFullLoading",
     "PeriodOfFullLoading",
     "TCPOpenRequestTime",
-    "TCPOpenResponseTime"
+    "TCPOpenResponseTime",
+    "PerConnectionResult.{i}.ROMTime",
+    "PerConnectionResult.{i}.BOMTime",
+    "PerConnectionResult.{i}.EOMTime",
+    "PerConnectionResult.{i}.TestBytesSent",
+    "PerConnectionResult.{i}.TotalBytesReceived",
+    "PerConnectionResult.{i}.TotalBytesSent",
+    "PerConnectionResult.{i}.TCPOpenRequestTime",
+    "PerConnectionResult.{i}.TCPOpenResponseTime",
+    "IncrementalResult.{i}.TestBytesSent",
+    "IncrementalResult.{i}.TotalBytesReceived",
+    "IncrementalResult.{i}.TotalBytesSent",
+    "IncrementalResult.{i}.StartTime",
+    "IncrementalResult.{i}.EndTime"
 };
 
 static char *udp_echo_diag_input_args[] =
 {
+    "Interface",
     "Host",
     "Port",
-    "Interface",
-    "ProtocolVersion",
     "NumberOfRepetitions",
     "Timeout",
     "DataBlockSize",
     "DSCP",
-    "InterTransmissionTime"
+    "InterTransmissionTime",
+    "ProtocolVersion",
+    "EnableIndividualPacketResults"
 };
 
 static char *udp_echo_diag_output_args[] =
 {
+    "Status",
+    "IPAddressUsed",
     "SuccessCount",
     "FailureCount",
     "AverageResponseTime",
     "MinimumResponseTime",
-    "MaximumResponseTime"
+    "MaximumResponseTime",
+    "IndividualPacketResult.{i}.PacketSuccess",
+    "IndividualPacketResult.{i}.PacketSendTime",
+    "IndividualPacketResult.{i}.PacketReceiveTime",
+    "IndividualPacketResult.{i}.TestGenSN",
+    "IndividualPacketResult.{i}.TestRespSN",
+    "IndividualPacketResult.{i}.TestRespRcvTimeStamp",
+    "IndividualPacketResult.{i}.TestRespReplyTimeStamp",
+    "IndividualPacketResult.{i}.TestRespReplyFailureCount"
 };
 
 static char *server_selection_diag_input_args[] =
 {
-    "HostList",
     "Interface",
     "ProtocolVersion",
-    "NumberOfRepetitions",
-    "Port",
     "Protocol",
+    "HostList",
+    "NumberOfRepetitions",
     "Timeout"
 };
 
 static char *server_selection_diag_output_args[] =
 {
+    "Status",
     "FastestHost",
-    "AverageResponseTime",
     "MinimumResponseTime",
-    "MaximumResponseTime"
+    "AverageResponseTime",
+    "MaximumResponseTime",
+    "IPAddressUsed"
 };
 
 static char *nslookup_diag_input_args[] =
 {
-    "HostName",
     "Interface",
+    "HostName",
     "DNSServer",
-    "NumberOfRepetitions",
-    "Timeout"
+    "Timeout",
+    "NumberOfRepetitions"
 };
 
 static char *nslookup_diag_output_args[] =
 {
+    "Status",
     "SuccessCount",
-    "NSLookupResult"
+    "Result.{i}.Status",
+    "Result.{i}.AnswerType",
+    "Result.{i}.HostNameReturned",
+    "Result.{i}.IPAddresses",
+    "Result.{i}.DNSServerIP",
+    "Result.{i}.ResponseTime"
 };
 
-struct output_list_t {
-    char *command;
-    char **args;
-    size_t argc;
+static char *softwaremodule_installdu_input_args[] =
+{
+    "URL",
+    "UUID",
+    "Username",
+    "Password",
+    "ExecutionEnvRef"
 };
 
-static struct output_list_t output_list[] = {
-    {WIFI_NDIAG, wifi_diag_output_args, ARRAY_SIZE(wifi_diag_output_args)},
-    {IPPING_DIAG, ipping_diag_output_args, ARRAY_SIZE(ipping_diag_output_args)},
-    {TRACEROUTE_DIAG, traceroute_diag_output_args, ARRAY_SIZE(traceroute_diag_output_args)},
-    {DOWNLOAD_DIAG, download_diag_output_args, ARRAY_SIZE(download_diag_output_args)},
-    {UPLOAD_DIAG, upload_diag_output_args, ARRAY_SIZE(upload_diag_output_args)},
-    {UDPECHO_DIAG, udp_echo_diag_output_args, ARRAY_SIZE(udp_echo_diag_output_args)},
-    {SERVERSELECTION_DIAG, server_selection_diag_output_args, ARRAY_SIZE(server_selection_diag_output_args)},
-    {NSLOOKUP_DIAG, nslookup_diag_output_args, ARRAY_SIZE(nslookup_diag_output_args)}
+static char *softwaremodule_deployunit_update_input_args[]=
+{
+    "URL",
+    "Username",
+    "Password"
 };
 
 static void receive_print(struct ubus_request *req, int type, struct blob_attr *msg)
@@ -278,12 +657,12 @@ static void receive_print(struct ubus_request *req, int type, struct blob_attr *
         return;
 
     str = blobmsg_format_json_indent(msg, true, -1);
-    USP_LOG_Debug("%s", str);
-    strncpy(req->priv, str, MAX_DM_VALUE_LEN*4);
+    USP_LOG_Debug("Output data:|%s|", str);
+    save_output_args(str, req->priv);
     free(str);
 }
 
-int ExecuteTestDiagnostic(char *cpath, kv_vector_t *input_args, output_res_t *res)
+int ExecuteTestDiagnostic(char *cpath, kv_vector_t *input_args, kv_vector_t *output_args)
 {
     uint32_t id;
     struct blob_buf b = { };
@@ -319,7 +698,7 @@ int ExecuteTestDiagnostic(char *cpath, kv_vector_t *input_args, output_res_t *re
         }
         blobmsg_close_table(&b, table);
     }
-    if (ubus_invoke(ctx, id, "operate", b.head, receive_print, res->result_str, 10000)) {
+    if (ubus_invoke(ctx, id, "operate", b.head, receive_print, output_args, ASYNC_USPD_TIMEOUT)) {
         USP_LOG_Error("[%s:%d] ubus call failed for |%s|",__func__, __LINE__, path);
         return USP_ERR_INTERNAL_ERROR;
     }
@@ -328,27 +707,62 @@ int ExecuteTestDiagnostic(char *cpath, kv_vector_t *input_args, output_res_t *re
     return USP_ERR_OK;
 }
 
-void save_output_args(input_cond_t *cond, output_res_t *res, kv_vector_t *output_args)
+void save_output_args(char *res, kv_vector_t *output_args)
 {
     JsonNode *json;
-    if((json = json_decode(res->result_str)) == NULL) {
+    if(res == NULL) {
+        USP_LOG_Error("Json data string with NULL value");
+        return;
+    }
+    if((json = json_decode(res)) == NULL) {
         USP_LOG_Error("Decoding of json failed");
         return;
     }
-    size_t alen = ARRAY_SIZE(output_list);
 
-    for(size_t i=0; i<alen; ++i) {
-        if(strstr(cond->path, output_list[i].command)) {
-            size_t len = output_list[i].argc;
-            for(size_t j=0; j<len; j++) {
-                JsonNode *jr;
-                if((jr = json_find_member(json, output_list[i].args[j]))!=NULL) {
-                    char *encoded_result = json_encode(jr);
-                    USP_ARG_Add(output_args, output_list[i].args[j], encoded_result);
-                    json_delete(jr);
+    JsonNode *js_tmp;
+    json_foreach(js_tmp, json) {
+        char buf[64] = {0};
+        memset(buf, 0, sizeof(buf));
+        if(js_tmp->tag == JSON_ARRAY){
+            JsonNode *inner_json;
+            int inst_count = 0;
+            json_foreach(inner_json, js_tmp) {
+                inst_count++;
+                JsonNode *inner_json2;
+                json_foreach(inner_json2, inner_json) {
+                    sprintf(buf, "%s.%d.%s", js_tmp->key, inst_count, inner_json2->key);
+                    USP_LOG_Debug("|%s:%s|", buf, json_encode(inner_json2));
+                    USP_ARG_Add(output_args, buf, json_encode(inner_json2));
+                    memset(buf, 0, sizeof(buf));
                 }
             }
-            break;
+        } else if(js_tmp->tag == JSON_OBJECT) {
+            JsonNode *jnode;
+            json_foreach(jnode, js_tmp) {
+                if(jnode->tag == JSON_ARRAY) {
+                    JsonNode *inner_json;
+                    int inst_count = 0;
+                    json_foreach(inner_json, jnode) {
+                        inst_count++;
+                        JsonNode *inner_json2;
+                        json_foreach(inner_json2, inner_json) {
+                            sprintf(buf, "%s.%s.%d.%s", js_tmp->key, jnode->key, inst_count, inner_json2->key);
+                            USP_LOG_Debug("|%s:%s|", buf, json_encode(inner_json2));
+                            USP_ARG_Add(output_args, buf, json_encode(inner_json2));
+                            memset(buf, 0, sizeof(buf));
+                        }
+                    }
+
+                } else {
+                    sprintf(buf, "%s.%s", js_tmp->key, jnode->key);
+                    USP_LOG_Debug("|%s:%s|", buf, json_encode(jnode));
+                    USP_ARG_Add(output_args, buf, json_encode(jnode));
+                    memset(buf, 0, sizeof(buf));
+                }
+            }
+        } else {
+            USP_LOG_Debug("|%s:%s|", js_tmp->key, json_encode(js_tmp));
+            USP_ARG_Add(output_args, js_tmp->key, json_encode(js_tmp));
         }
     }
     json_delete(json);
@@ -357,36 +771,29 @@ void save_output_args(input_cond_t *cond, output_res_t *res, kv_vector_t *output
 void *OperationThreadMain(void *param)
 {
     input_cond_t *cond = (input_cond_t *) param;
-    output_res_t results;
-    output_res_t *res = &results;
+    char err_log[128];
     char *err_msg;
     int err = USP_ERR_OK;
     kv_vector_t *output_args;
 
-    memset(&results, 0, sizeof(results));
+    memset(err_log, 0, sizeof(err_log));
 
     // Exit if unable to signal that this operation is active
     err = USP_SIGNAL_OperationStatus(cond->request_instance, "Active");
+    output_args = USP_ARG_Create();
     if (err == USP_ERR_OK)
     {
         // Perform the self test diagnostic
-        err = ExecuteTestDiagnostic(cond->path, cond->input_args, res);
+        err = ExecuteTestDiagnostic(cond->path, cond->input_args, output_args);
     }
     else
     {
-        USP_SNPRINTF(res->err_msg, sizeof(res->err_msg), "%s: USP_SIGNAL_OperationStatus() failed", __FUNCTION__);
+        USP_SNPRINTF(err_log, sizeof(err_log), "%s: USP_SIGNAL_OperationStatus() failed", __FUNCTION__);
     }
-
-    // Log output results
-    USP_LOG_Info("=== Operation completed with result=%d ===", err);
-    USP_LOG_Info("Result: %s", res->result_str);
-    // Save all results into the output arguments using KV_VECTOR_ functions
-    output_args = USP_ARG_Create();
-    save_output_args(cond, res, output_args);
 
     // Inform the protocol handler, that the operation has completed
     // Ownership of the output args passes to protocol handler
-    err_msg = (err != USP_ERR_OK) ? res->err_msg : NULL;
+    err_msg = (err != USP_ERR_OK) ? err_log : NULL;
     USP_SIGNAL_OperationComplete(cond->request_instance, err, err_msg, output_args);
 
     // Free the input conditions
@@ -426,6 +833,7 @@ int async_operate_handler(dm_req_t *req, kv_vector_t *input_args, int instance)
     // Exit if unable to start a thread to perform this operation
     // NOTE: ownership of input conditions passes to the thread
     err = OS_UTILS_CreateThread(OperationThreadMain, cond);
+
     if (err != USP_ERR_OK)
     {
         err = USP_ERR_COMMAND_FAILURE;
@@ -433,6 +841,25 @@ int async_operate_handler(dm_req_t *req, kv_vector_t *input_args, int instance)
 
     // Ownership of the input conditions has passed to the thread
     return err;
+}
+
+int Device_PacketCaptureDiagnostics_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_AsyncOperation("Device.PacketCaptureDiagnostics()",
+                                       async_operate_handler, NULL);
+    err |= USP_REGISTER_OperationArguments("Device.PacketCaptureDiagnostics()",	
+                                           packetcapture_diag_input_args, NUM_ELEM(packetcapture_diag_input_args),
+                                           packetcapture_diag_output_args, NUM_ELEM(packetcapture_diag_output_args));
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
 }
 
 int Wifi_NeighboringWiFiDiagnostics_Init(void)
@@ -486,17 +913,307 @@ int VendorConfig_Restore_Init(void)
     return USP_ERR_OK;
 }
 
+int VendorLogFile_Upload_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_AsyncOperation("Device.DeviceInfo.VendorLogFile.{i}.Upload()", 
+                                       async_operate_handler, NULL);
+    err |= USP_REGISTER_OperationArguments("Device.DeviceInfo.VendorLogFile.{i}.Upload()", 
+                                           vendor_logfile_upload_input_args,
+                                           NUM_ELEM(vendor_logfile_upload_input_args),
+                                           NULL, 0);
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int Device_FirmwareImage_Download_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_AsyncOperation("Device.DeviceInfo.FirmwareImage.{i}.Download()",
+                                       async_operate_handler, NULL);
+    err |= USP_REGISTER_OperationArguments("Device.DeviceInfo.FirmwareImage.{i}.Download()",
+                                           device_firmwareimage_download_input_args, 
+                                           NUM_ELEM(device_firmwareimage_download_input_args),
+                                           NULL, 0);
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int Device_FirmwareImage_Activate_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_AsyncOperation("Device.DeviceInfo.FirmwareImage.{i}.Activate()",
+                                       async_operate_handler, NULL);
+    err |= USP_REGISTER_OperationArguments("Device.DeviceInfo.FirmwareImage.{i}.Activate()",
+                                           device_firmwareimage_activate_input_args,
+                                           NUM_ELEM(device_firmwareimage_activate_input_args),
+                                           NULL, 0);
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int DSL_Ethernet_ADSLLineTest_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_AsyncOperation("Device.DSL.BondingGroup.{i}.Ethernet.Stats.ADSLLineTest()",
+                                       async_operate_handler, NULL);
+    err |= USP_REGISTER_OperationArguments("Device.DSL.BondingGroup.{i}.Ethernet.Stats.ADSLLineTest()",
+                                           dsl_ethernet_adslline_input_args,
+                                           NUM_ELEM(dsl_ethernet_adslline_input_args),
+                                           dsl_ethernet_adslline_output_args,
+                                           NUM_ELEM(dsl_ethernet_adslline_output_args));
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int DSL_Ethernet_SELTUER_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_AsyncOperation("Device.DSL.BondingGroup.{i}.Ethernet.Stats.SELTUER()",
+                                       async_operate_handler, NULL);
+    err |= USP_REGISTER_OperationArguments("Device.DSL.BondingGroup.{i}.Ethernet.Stats.SELTUER()",
+                                           dsl_ethernet_seltuer_input_args,
+                                           NUM_ELEM(dsl_ethernet_seltuer_input_args),
+                                           dsl_ethernet_seltuer_output_args,
+                                           NUM_ELEM(dsl_ethernet_seltuer_output_args));
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int DSL_Ethernet_SELTQLN_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_AsyncOperation("Device.DSL.BondingGroup.{i}.Ethernet.Stats.SELTQLN()",
+                                       async_operate_handler, NULL);
+    err |= USP_REGISTER_OperationArguments("Device.DSL.BondingGroup.{i}.Ethernet.Stats.SELTQLN()",
+                                           dsl_ethernet_seltqln_input_args,
+                                           NUM_ELEM(dsl_ethernet_seltqln_input_args),
+                                           dsl_ethernet_seltqln_output_args,
+                                           NUM_ELEM(dsl_ethernet_seltqln_output_args));
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int DSL_Ethernet_SELTP_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_AsyncOperation("Device.DSL.BondingGroup.{i}.Ethernet.Stats.SELTP()",
+                                       async_operate_handler, NULL);
+    err |= USP_REGISTER_OperationArguments("Device.DSL.BondingGroup.{i}.Ethernet.Stats.SELTP()",
+                                           dsl_ethernet_seltp_input_args,
+                                           NUM_ELEM(dsl_ethernet_seltp_input_args),
+                                           dsl_ethernet_seltp_output_args,
+                                           NUM_ELEM(dsl_ethernet_seltp_output_args));
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int ATM_Diagnostics_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_AsyncOperation("Device.ATM.Diagnostics.F5Loopback()",
+                                       async_operate_handler, NULL);
+    err |= USP_REGISTER_OperationArguments("Device.ATM.Diagnostics.F5Loopback()",
+                                           atm_diag_f5loopback_input_args,
+                                           NUM_ELEM(atm_diag_f5loopback_input_args),
+                                           atm_diag_f5loopback_output_args,
+                                           NUM_ELEM(atm_diag_f5loopback_output_args));
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int Ethernet_WoL_SendMagicPacket_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_AsyncOperation("Device.Ethernet.WoL.SendMagicPacket()",
+                                       async_operate_handler, NULL);
+    err |= USP_REGISTER_OperationArguments("Device.Ethernet.WoL.SendMagicPacket()",
+                                           eth_wol_sendmagicpacket_input_args,
+                                           NUM_ELEM(eth_wol_sendmagicpacket_input_args),
+                                           NULL, 0);
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int HPNA_Diag_PHYThroughput_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_AsyncOperation("Device.HPNA.Diagnostics.PHYThroughput()",
+                                       async_operate_handler, NULL);
+    err |= USP_REGISTER_OperationArguments("Device.HPNA.Diagnostics.PHYThroughput()",
+                                           hpna_diag_phythroughput_input_args,
+                                           NUM_ELEM(hpna_diag_phythroughput_input_args),
+                                           hpna_diag_phythroughput_output_args,
+                                           NUM_ELEM(hpna_diag_phythroughput_output_args));
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int HPNA_Diag_PerformanceMonitor_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_AsyncOperation("Device.HPNA.Diagnostics.PerformanceMonitoring()",
+                                       async_operate_handler, NULL);
+    err |= USP_REGISTER_OperationArguments("Device.HPNA.Diagnostics.PerformanceMonitoring()",
+                                           hpna_diag_perfmonitor_input_args,
+                                           NUM_ELEM(hpna_diag_perfmonitor_input_args),
+                                           hpna_diag_perfmonitor_output_args,
+                                           NUM_ELEM(hpna_diag_perfmonitor_output_args));
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int Ghn_Diag_PHYThroughput_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_AsyncOperation("Device.Ghn.Diagnostics.PHYThroughput()",
+                                       async_operate_handler, NULL);
+    err |= USP_REGISTER_OperationArguments("Device.Ghn.Diagnostics.PHYThroughput()",
+                                           ghn_diag_phythroughput_input_args,
+                                           NUM_ELEM(ghn_diag_phythroughput_input_args),
+                                           ghn_diag_phythroughput_output_args,
+                                           NUM_ELEM(ghn_diag_phythroughput_output_args));
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int Ghn_Diag_PerformanceMonitor_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_AsyncOperation("Device.Ghn.Diagnostics.PerformanceMonitoring()",
+                                       async_operate_handler, NULL);
+    err |= USP_REGISTER_OperationArguments("Device.Ghn.Diagnostics.PerformanceMonitoring()",
+                                           ghn_diag_perfmonitor_input_args,
+                                           NUM_ELEM(ghn_diag_perfmonitor_input_args),
+                                           ghn_diag_perfmonitor_output_args,
+                                           NUM_ELEM(ghn_diag_perfmonitor_output_args));
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int UPA_Diag_InterfaceMeasurement_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_AsyncOperation("Device.UPA.Diagnostics.InterfaceMeasurement()",
+                                       async_operate_handler, NULL);
+    err |= USP_REGISTER_OperationArguments("Device.UPA.Diagnostics.InterfaceMeasurement()",
+                                           upa_diag_interfacemeasure_input_args,
+                                           NUM_ELEM(upa_diag_interfacemeasure_input_args),
+                                           upa_diag_interfacemeasure_output_args,
+                                           NUM_ELEM(upa_diag_interfacemeasure_output_args));
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
 int IP_Diag_IPPing_Init(void)
 {
     int err = USP_ERR_OK;
 
     err |= USP_REGISTER_AsyncOperation("Device.IP.Diagnostics.IPPing()",
-                       async_operate_handler, NULL);
+                                       async_operate_handler, NULL);
     err |= USP_REGISTER_OperationArguments("Device.IP.Diagnostics.IPPing()",
-                       ipping_diag_input_args,
-                       NUM_ELEM(ipping_diag_input_args),
-                       ipping_diag_output_args,
-                       NUM_ELEM(ipping_diag_output_args));
+                                           ipping_diag_input_args,
+                                           NUM_ELEM(ipping_diag_input_args),
+                                           ipping_diag_output_args,
+                                           NUM_ELEM(ipping_diag_output_args));
 
     if (err != USP_ERR_OK)
     {
@@ -512,12 +1229,12 @@ int IP_Diag_TraceRoute_Init(void)
     int err = USP_ERR_OK;
 
     err |= USP_REGISTER_AsyncOperation("Device.IP.Diagnostics.TraceRoute()",
-                       async_operate_handler, NULL);
+                                       async_operate_handler, NULL);
     err |= USP_REGISTER_OperationArguments("Device.IP.Diagnostics.TraceRoute()",
-                       traceroute_diag_input_args,
-                       NUM_ELEM(traceroute_diag_input_args),
-                       traceroute_diag_output_args,
-                       NUM_ELEM(traceroute_diag_output_args));
+                                           traceroute_diag_input_args,
+                                           NUM_ELEM(traceroute_diag_input_args),
+                                           traceroute_diag_output_args,
+                                           NUM_ELEM(traceroute_diag_output_args));
 
     if (err != USP_ERR_OK)
     {
@@ -534,13 +1251,13 @@ int IP_Diag_DownloadDiagnostics_Init(void)
 
     err |=
         USP_REGISTER_AsyncOperation("Device.IP.Diagnostics.DownloadDiagnostics()",
-                       async_operate_handler, NULL);
+                                    async_operate_handler, NULL);
     err |=
         USP_REGISTER_OperationArguments("Device.IP.Diagnostics.DownloadDiagnostics()",
-                       download_diag_input_args,
-                       NUM_ELEM(download_diag_input_args),
-                       download_diag_output_args,
-                       NUM_ELEM(download_diag_output_args));
+                                        download_diag_input_args,
+                                        NUM_ELEM(download_diag_input_args),
+                                        download_diag_output_args,
+                                        NUM_ELEM(download_diag_output_args));
 
     if (err != USP_ERR_OK)
     {
@@ -557,13 +1274,13 @@ int IP_Diag_UploadDiagnostics_Init(void)
 
     err |=
         USP_REGISTER_AsyncOperation("Device.IP.Diagnostics.UploadDiagnostics()",
-                       async_operate_handler, NULL);
+                                    async_operate_handler, NULL);
     err |=
         USP_REGISTER_OperationArguments("Device.IP.Diagnostics.UploadDiagnostics()",
-                       upload_diag_input_args,
-                       NUM_ELEM(upload_diag_input_args),
-                       upload_diag_output_args,
-                       NUM_ELEM(upload_diag_output_args));
+                                        upload_diag_input_args,
+                                        NUM_ELEM(upload_diag_input_args),
+                                        upload_diag_output_args,
+                                        NUM_ELEM(upload_diag_output_args));
 
     if (err != USP_ERR_OK)
     {
@@ -580,13 +1297,13 @@ int IP_Diag_UDPEchoDiagnostics_Init(void)
 
     err |=
         USP_REGISTER_AsyncOperation("Device.IP.Diagnostics.UDPEchoDiagnostics()",
-                       async_operate_handler, NULL);
+                                    async_operate_handler, NULL);
     err |=
         USP_REGISTER_OperationArguments("Device.IP.Diagnostics.UDPEchoDiagnostics()",
-                       udp_echo_diag_input_args,
-                       NUM_ELEM(udp_echo_diag_input_args),
-                       udp_echo_diag_output_args,
-                       NUM_ELEM(udp_echo_diag_output_args));
+                                        udp_echo_diag_input_args,
+                                        NUM_ELEM(udp_echo_diag_input_args),
+                                        udp_echo_diag_output_args,
+                                        NUM_ELEM(udp_echo_diag_output_args));
 
     if (err != USP_ERR_OK)
     {
@@ -603,13 +1320,13 @@ int IP_Diag_ServerSelectionDiagnostics_Init(void)
 
     err |=
         USP_REGISTER_AsyncOperation("Device.IP.Diagnostics.ServerSelectionDiagnostics()",
-                       async_operate_handler, NULL);
+                                    async_operate_handler, NULL);
     err |=
         USP_REGISTER_OperationArguments("Device.IP.Diagnostics.ServerSelectionDiagnostics()",
-                       server_selection_diag_input_args,
-                       NUM_ELEM(server_selection_diag_input_args),
-                       server_selection_diag_output_args,
-                       NUM_ELEM(server_selection_diag_output_args));
+                                        server_selection_diag_input_args,
+                                        NUM_ELEM(server_selection_diag_input_args),
+                                        server_selection_diag_output_args,
+                                        NUM_ELEM(server_selection_diag_output_args));
 
     if (err != USP_ERR_OK)
     {
@@ -626,13 +1343,92 @@ int DNS_Diag_NSLookupDiagnostics_Init(void)
 
     err |=
         USP_REGISTER_AsyncOperation("Device.DNS.Diagnostics.NSLookupDiagnostics()",
-                       async_operate_handler, NULL);
+                                    async_operate_handler, NULL);
     err |=
         USP_REGISTER_OperationArguments("Device.DNS.Diagnostics.NSLookupDiagnostics()",
-                       nslookup_diag_input_args,
-                       NUM_ELEM(nslookup_diag_input_args),
-                       nslookup_diag_output_args,
-                       NUM_ELEM(nslookup_diag_output_args));
+                                        nslookup_diag_input_args,
+                                        NUM_ELEM(nslookup_diag_input_args),
+                                        nslookup_diag_output_args,
+                                        NUM_ELEM(nslookup_diag_output_args));
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int Device_SoftwareModule_InstallDU_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_AsyncOperation("Device.SoftwareModules.InstallDu()",
+                                       async_operate_handler, NULL);
+    err |= USP_REGISTER_OperationArguments("Device.SoftwareModules.InstallDu()",
+                                           softwaremodule_installdu_input_args,
+                                           NUM_ELEM(softwaremodule_installdu_input_args),
+                                           NULL, 0);
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int Device_SoftwareModule_DeployUnit_Update_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_AsyncOperation("Device.SoftwareModules.DeploymentUnit.{i}.Update()",
+                                       async_operate_handler, NULL);
+    err |= USP_REGISTER_OperationArguments("Device.SoftwareModules.DeploymentUnit.{i}.Update()",
+                                           softwaremodule_deployunit_update_input_args,
+                                           NUM_ELEM(softwaremodule_deployunit_update_input_args),
+                                           NULL, 0);
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int IoTCapability_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_AsyncOperation("Device.IoTCapability.{i}.BinaryControl.Toggle()",
+                                       async_operate_handler, NULL);
+    err |= USP_REGISTER_OperationArguments("Device.IoTCapability.{i}.BinaryControl.Toggle()",
+                                           NULL, 0, NULL, 0);
+
+
+    err |= USP_REGISTER_AsyncOperation("Device.IoTCapability.{i}.LevelControl.StepUp()",
+                                       async_operate_handler, NULL);
+    err |= USP_REGISTER_OperationArguments("Device.IoTCapability.{i}.LevelControl.StepUp()",
+                                           NULL, 0, NULL, 0);
+
+    err |= USP_REGISTER_AsyncOperation("Device.IoTCapability.{i}.LevelControl.StepDown()",
+                                       async_operate_handler, NULL);
+    err |= USP_REGISTER_OperationArguments("Device.IoTCapability.{i}.LevelControl.StepDown()",
+                                           NULL, 0, NULL, 0);
+
+    err |= USP_REGISTER_AsyncOperation("Device.IoTCapability.{i}.EnumControl.StepUp()",
+                                       async_operate_handler, NULL);
+    err |= USP_REGISTER_OperationArguments("Device.IoTCapability.{i}.EnumControl.StepUp()",
+                                           NULL, 0, NULL, 0);
+
+    err |= USP_REGISTER_AsyncOperation("Device.IoTCapability.{i}.EnumControl.StepDown()",
+                                       async_operate_handler, NULL);
+    err |= USP_REGISTER_OperationArguments("Device.IoTCapability.{i}.EnumControl.StepDown()",
+                                           NULL, 0, NULL, 0);
 
     if (err != USP_ERR_OK)
     {
@@ -647,9 +1443,24 @@ int vendor_operate_async_init(void)
 {
     int err = USP_ERR_OK;
 
+    err |= Device_PacketCaptureDiagnostics_Init();
     err |= Wifi_NeighboringWiFiDiagnostics_Init();
     err |= VendorConfig_Backup_Init();
     err |= VendorConfig_Restore_Init();
+    err |= VendorLogFile_Upload_Init();
+    err |= Device_FirmwareImage_Download_Init();
+    err |= Device_FirmwareImage_Activate_Init();
+    err |= DSL_Ethernet_ADSLLineTest_Init();
+    err |= DSL_Ethernet_SELTUER_Init();
+    err |= DSL_Ethernet_SELTQLN_Init();
+    err |= DSL_Ethernet_SELTP_Init();
+    err |= ATM_Diagnostics_Init();
+    err |= Ethernet_WoL_SendMagicPacket_Init();
+    err |= HPNA_Diag_PHYThroughput_Init();
+    err |= HPNA_Diag_PerformanceMonitor_Init();
+    err |= Ghn_Diag_PHYThroughput_Init();
+    err |= Ghn_Diag_PerformanceMonitor_Init();
+    err |= UPA_Diag_InterfaceMeasurement_Init();
     err |= IP_Diag_IPPing_Init();
     err |= IP_Diag_TraceRoute_Init();
     err |= IP_Diag_DownloadDiagnostics_Init();
@@ -657,5 +1468,8 @@ int vendor_operate_async_init(void)
     err |= IP_Diag_UDPEchoDiagnostics_Init();
     err |= IP_Diag_ServerSelectionDiagnostics_Init();
     err |= DNS_Diag_NSLookupDiagnostics_Init();
+    err |= Device_SoftwareModule_InstallDU_Init();
+    err |= Device_SoftwareModule_DeployUnit_Update_Init();
+    err |= IoTCapability_Init();
     return err;
 }
