@@ -59,7 +59,6 @@
 #include "dm_access.h"
 #include "usp_api.h"
 #include "common_defs.h"
-#include "json.h"
 #include "vendor_iopsys.h"
 #include "path_resolver.h"
 #include "str_vector.h"
@@ -148,8 +147,18 @@ static void receive_data_print(struct ubus_request *req, int type, struct blob_a
 		return;
 
 	str = blobmsg_format_json_indent(msg, true, -1);
-	USP_LOG_Info("%s", str);
+	USP_LOG_Debug("|%s|", str);
+	JsonNode *json;
+	if((json = json_decode(str)) == NULL) {
+		USP_LOG_Error("Decoding of json failed");
+		USP_SAFE_FREE(str);
+		return;
+	}
+	if(json) {
+		save_output_args(json, req->priv, NULL);
+	}
 	USP_SAFE_FREE(str);
+	json_delete(json);
 }
 
 /*
@@ -437,7 +446,7 @@ int uspd_operate_sync(dm_req_t *req, char *command_key, kv_vector_t *input_args,
 	blobmsg_add_string(&b, "proto", USP_PROTO);
 
 	/* invoke a method on a specific object */
-	if (ubus_invoke(ctx, id, "operate", b.head, receive_data_print, NULL, USPD_TIMEOUT)) {
+	if (ubus_invoke(ctx, id, "operate", b.head, receive_data_print, output_args, USPD_TIMEOUT)) {
 		USP_LOG_Error("[%s:%d] ubus call failed for |%s|",__func__, __LINE__, path);
 		ubus_free(ctx);
 		blob_buf_free(&b);
@@ -2368,7 +2377,6 @@ int vendor_WiFi_init(void)
 {
 	int err = USP_ERR_OK;
 #define DEVICE_WIFI_ROOT "Device.WiFi"
-	err |= USP_REGISTER_SyncOperation(DEVICE_WIFI_ROOT ".Reset()", uspd_operate_sync);
 	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_WIFI_ROOT ".ResetCounter", uspd_get_value, DM_UINT);
 
 #define WIFI_RADIO_ROOT "Device.WiFi.Radio"
@@ -2533,7 +2541,6 @@ int vendor_WiFi_init(void)
 	err |= USP_REGISTER_VendorParam_ReadWrite(WIFI_AP_ROOT ".{i}.Accounting.Secret", uspd_get_value, uspd_set_value, NULL, DM_STRING);
 	err |= USP_REGISTER_VendorParam_ReadWrite(WIFI_AP_ROOT ".{i}.Accounting.SecondarySecret", uspd_get_value, uspd_set_value, NULL, DM_STRING);
 	err |= USP_REGISTER_VendorParam_ReadWrite(WIFI_AP_ROOT ".{i}.Accounting.InterimInterval", uspd_get_value, uspd_set_value, NULL, DM_UINT);
-	//err |= USP_REGISTER_SyncOperation(WIFI_AP_ROOT ".{i}.Security.Reset()", uspd_operate_sync);
 	char *unique_keys_ap[] = { "SSIDReference" };
 	err |= USP_REGISTER_Object_UniqueKey(WIFI_AP_ROOT ".{i}", unique_keys_ap, NUM_ELEM(unique_keys_ap));
 
@@ -3315,7 +3322,6 @@ int vendor_PPP_init(void)
 	err |= USP_REGISTER_VendorParam_ReadOnly(PPP_INT_ROOT ".{i}.Stats.UnknownProtoPacketsReceived", uspd_get_value, DM_UINT);
 	char *unique_keys_ppp_interface[] = { "Name" };
 	err |= USP_REGISTER_Object_UniqueKey(PPP_INT_ROOT ".{i}", unique_keys_ppp_interface, NUM_ELEM(unique_keys_ppp_interface));
-	err |= USP_REGISTER_SyncOperation(PPP_INT_ROOT ".{i}.Reset()", uspd_operate_sync);
 
 	// Exit if any errors occurred
 	if (err != USP_ERR_OK)
@@ -3357,7 +3363,6 @@ int vendor_IP_init(void)
 	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_IP_INT_ROOT ".{i}.Type", uspd_get_value, DM_STRING);
 	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_IP_INT_ROOT ".{i}.Loopback", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
 	err |= USP_REGISTER_VendorParam_ReadWrite(DEVICE_IP_INT_ROOT ".{i}.AutoIPEnable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
-	err |= USP_REGISTER_SyncOperation(DEVICE_IP_INT_ROOT ".{i}.Reset()", uspd_operate_sync);
 	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_IP_INT_ROOT ".{i}.Stats.BytesSent", uspd_get_value, DM_ULONG);
 	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_IP_INT_ROOT ".{i}.Stats.BytesReceived", uspd_get_value, DM_ULONG);
 	err |= USP_REGISTER_VendorParam_ReadOnly(DEVICE_IP_INT_ROOT ".{i}.Stats.PacketsSent", uspd_get_value, DM_ULONG);
@@ -4842,8 +4847,6 @@ int vendor_DHCPv4_init(void)
 	err |= USP_REGISTER_DBParam_Alias(DHCPv4_CLIENT_ROOT ".{i}.Alias", NULL);
 	err |= USP_REGISTER_Param_NumEntries(DEVICE_DHCPv4_ROOT ".ClientNumberOfEntries", DHCPv4_CLIENT_ROOT ".{i}");
 
-	err |= USP_REGISTER_SyncOperation(DHCPv4_CLIENT_ROOT ".{i}.Renew()", uspd_operate_sync);
-
 	err |= USP_REGISTER_VendorParam_ReadWrite(DHCPv4_CLIENT_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
 	err |= USP_REGISTER_VendorParam_ReadWrite(DHCPv4_CLIENT_ROOT ".{i}.Interface", uspd_get_value, uspd_set_value, NULL, DM_STRING);
 	err |= USP_REGISTER_VendorParam_ReadOnly(DHCPv4_CLIENT_ROOT ".{i}.Status", uspd_get_value, DM_STRING);
@@ -5014,7 +5017,6 @@ int vendor_DHCPv6_init(void)
 	err |= USP_REGISTER_Object(DHCPv6_CLIENT_ROOT ".{i}", NULL, uspd_add, uspd_add_notify, NULL, uspd_del, NULL);
 	err |= USP_REGISTER_DBParam_Alias(DHCPv6_CLIENT_ROOT ".{i}.Alias", NULL);
 	err |= USP_REGISTER_Param_NumEntries("Device.DHCPv6.ClientNumberOfEntries", DHCPv6_CLIENT_ROOT ".{i}");
-	err |= USP_REGISTER_SyncOperation(DHCPv6_CLIENT_ROOT ".{i}.Renew()", uspd_operate_sync);
 
 	err |= USP_REGISTER_VendorParam_ReadWrite(DHCPv6_CLIENT_ROOT ".{i}.Enable", uspd_get_value, uspd_set_value, NULL, DM_BOOL);
 	err |= USP_REGISTER_VendorParam_ReadWrite(DHCPv6_CLIENT_ROOT ".{i}.Interface", uspd_get_value, uspd_set_value, NULL, DM_STRING);
@@ -6835,6 +6837,7 @@ int iopsys_dm_Init(void)
 	err |= vendor_IoTCapability_init();
 
 	err |= vendor_operate_async_init();
+	err |= vendor_operate_sync_init();
 	// Seed data model with instance numbers from the uspd
 	if (is_running_cli_local_command == false)
 	{

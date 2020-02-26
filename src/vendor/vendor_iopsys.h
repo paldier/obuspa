@@ -43,16 +43,19 @@
 #ifndef VENDOR_IOPSYS_H
 #define VENDOR_IOPSYS_H
 #include "usp_log.h"
+#include "json.h"
 
 #define USP_UBUS "usp.raw"
 #define USP_PROTO "usp"
 int iopsys_dm_Init(void);
 int uspd_operate_sync(dm_req_t *req, char *command_key, kv_vector_t *input_args, kv_vector_t *output_args);
 int vendor_operate_async_init(void);
+int vendor_operate_sync_init(void);
 int init_uspd_database(char *path);
 void destroy_uspd_json();
 void destroy_instance_vector();
 void *monitor_instances(void *arg);
+void save_output_args(JsonNode *json, kv_vector_t *output_args, char *initial_path);
 
 #endif // VENDOR_IOPSYS_H
 

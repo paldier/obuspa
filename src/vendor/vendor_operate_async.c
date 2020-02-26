@@ -51,12 +51,9 @@
 #include "usp_api.h"
 #include "dm_access.h"
 #include "os_utils.h"
-#include "json.h"
 #include "vendor_iopsys.h"
 
 #define ASYNC_USPD_TIMEOUT 30000
-
-void save_output_args(char *res, kv_vector_t *output_args);
 
 typedef struct
 {
@@ -89,6 +86,7 @@ static char *packetcapture_diag_output_args[] =
 
 static char *wifi_diag_output_args[] =
 {
+    "Status",
     "Result.{i}.Radio",
     "Result.{i}.SSID",
     "Result.{i}.BSSID",
@@ -153,12 +151,13 @@ static char *device_firmwareimage_activate_input_args[] =
     "MaxRetries"
 };
 
-static char *dsl_ethernet_adslline_input_args[] =
+
+static char *dsl_adslline_input_args[] =
 {
     "Interface"
 };
 
-static char *dsl_ethernet_adslline_output_args[] =
+static char *dsl_adslline_output_args[] =
 {
     "Status",
     "ACTPSDds",
@@ -197,13 +196,13 @@ static char *dsl_ethernet_adslline_output_args[] =
     "BITSpsus"
 };
 
-static char *dsl_ethernet_seltuer_input_args[] =
+static char *dsl_seltuer_input_args[] =
 {
     "Interface",
     "UERMaxMeasurementDuration"
 };
 
-static char *dsl_ethernet_seltuer_output_args[] =
+static char *dsl_seltuer_output_args[] =
 {
     "Status",
     "ExtendedBandwidthOperation",
@@ -213,13 +212,13 @@ static char *dsl_ethernet_seltuer_output_args[] =
     "UERVar"
 };
 
-static char *dsl_ethernet_seltqln_input_args[] =
+static char *dsl_seltqln_input_args[] =
 {
     "Interface",
     "QLNMaxMeasurementDuration"
 };
 
-static char *dsl_ethernet_seltqln_output_args[] =
+static char *dsl_seltqln_output_args[] =
 {
     "Status",
     "ExtendedBandwidthOperation",
@@ -227,7 +226,7 @@ static char *dsl_ethernet_seltqln_output_args[] =
     "QLNGroupSize"
 };
 
-static char *dsl_ethernet_seltp_input_args[] =
+static char *dsl_seltp_input_args[] =
 {
     "Interface",
     "CapacityEstimateEnabling",
@@ -236,7 +235,7 @@ static char *dsl_ethernet_seltp_input_args[] =
     "CapacityTargetMargin"
 };
 
-static char *dsl_ethernet_seltp_output_args[] =
+static char *dsl_seltp_output_args[] =
 {
     "Status",
     "LoopTermination",
@@ -540,8 +539,8 @@ static char *upload_diag_output_args[] =
     "TotalBytesReceived",
     "TotalBytesSent",
     "TestBytesSentUnderFullLoading",
-    "TotalBytesReceivedUnderFullLoading"
-        "TotalBytesSentUnderFullLoading",
+    "TotalBytesReceivedUnderFullLoading",
+    "TotalBytesSentUnderFullLoading",
     "PeriodOfFullLoading",
     "TCPOpenRequestTime",
     "TCPOpenResponseTime",
@@ -643,11 +642,68 @@ static char *softwaremodule_installdu_input_args[] =
     "ExecutionEnvRef"
 };
 
-static char *softwaremodule_deployunit_update_input_args[]=
+static char *softwaremodule_deployunit_update_input_args[] =
 {
     "URL",
     "Username",
     "Password"
+};
+
+static char *localagent_addcerts_input_args[] =
+{
+    "Alias",
+    "Certificate"
+};
+
+static char *localagent_schtimer_input_args[] =
+{
+    "DelaySeconds"
+};
+
+static char *localagent_controller_addcerts_input_args[] =
+{
+    "Alias",
+    "Certificate"
+};
+
+static char *localagent_cert_getfingerprint_input_args[] =
+{
+    "FingerprintAlgorithm"
+};
+
+static char *localagent_cert_getfingerprint_output_args[] =
+{
+    "Fingerprint"
+};
+
+static char *localagent_reqchallenge_input_args[] =
+{
+    "ChallengeRef",
+    "RequestExpiration"
+};
+
+static char *localagent_reqchallenge_output_args[] =
+{
+    "Instruction",
+    "InstructionType",
+    "ValueType",
+    "ChallengeID"
+};
+
+static char *localagent_challengeresp_input_args[] =
+{
+    "ChallengeID",
+    "Value"
+};
+
+static char *swmodules_setrunlevel_input_args[] =
+{
+    "RequestedRunLevel"
+};
+
+static char *swmodules_setreqstate_input_args[] =
+{
+    "RequestedState"
 };
 
 static void receive_print(struct ubus_request *req, int type, struct blob_attr *msg)
@@ -657,9 +713,19 @@ static void receive_print(struct ubus_request *req, int type, struct blob_attr *
         return;
 
     str = blobmsg_format_json_indent(msg, true, -1);
-    USP_LOG_Debug("Output data:|%s|", str);
-    save_output_args(str, req->priv);
+    USP_LOG_Debug("|%s|", str);
+
+    JsonNode *json;
+    if((json = json_decode(str)) == NULL) {
+        USP_LOG_Error("Decoding of json failed");
+	free(str);
+        return;
+    }
+    if(json) {
+        save_output_args(json, req->priv, NULL);
+    }
     free(str);
+    json_delete(json);
 }
 
 int ExecuteTestDiagnostic(char *cpath, kv_vector_t *input_args, kv_vector_t *output_args)
@@ -707,65 +773,35 @@ int ExecuteTestDiagnostic(char *cpath, kv_vector_t *input_args, kv_vector_t *out
     return USP_ERR_OK;
 }
 
-void save_output_args(char *res, kv_vector_t *output_args)
+void save_output_args(JsonNode *json, kv_vector_t *output_args, char *initial_path)
 {
-    JsonNode *json;
-    if(res == NULL) {
-        USP_LOG_Error("Json data string with NULL value");
-        return;
-    }
-    if((json = json_decode(res)) == NULL) {
-        USP_LOG_Error("Decoding of json failed");
-        return;
-    }
-
     JsonNode *js_tmp;
-    json_foreach(js_tmp, json) {
-        char buf[64] = {0};
-        memset(buf, 0, sizeof(buf));
-        if(js_tmp->tag == JSON_ARRAY){
-            JsonNode *inner_json;
-            int inst_count = 0;
-            json_foreach(inner_json, js_tmp) {
-                inst_count++;
-                JsonNode *inner_json2;
-                json_foreach(inner_json2, inner_json) {
-                    sprintf(buf, "%s.%d.%s", js_tmp->key, inst_count, inner_json2->key);
-                    USP_LOG_Debug("|%s:%s|", buf, json_encode(inner_json2));
-                    USP_ARG_Add(output_args, buf, json_encode(inner_json2));
-                    memset(buf, 0, sizeof(buf));
-                }
-            }
-        } else if(js_tmp->tag == JSON_OBJECT) {
-            JsonNode *jnode;
-            json_foreach(jnode, js_tmp) {
-                if(jnode->tag == JSON_ARRAY) {
-                    JsonNode *inner_json;
-                    int inst_count = 0;
-                    json_foreach(inner_json, jnode) {
-                        inst_count++;
-                        JsonNode *inner_json2;
-                        json_foreach(inner_json2, inner_json) {
-                            sprintf(buf, "%s.%s.%d.%s", js_tmp->key, jnode->key, inst_count, inner_json2->key);
-                            USP_LOG_Debug("|%s:%s|", buf, json_encode(inner_json2));
-                            USP_ARG_Add(output_args, buf, json_encode(inner_json2));
-                            memset(buf, 0, sizeof(buf));
-                        }
-                    }
+    char buf[64] = {0};
+    char buf1[64] = {0};
+    if(initial_path) {
+        sprintf(buf, "%s.", initial_path);
+    }
 
-                } else {
-                    sprintf(buf, "%s.%s", js_tmp->key, jnode->key);
-                    USP_LOG_Debug("|%s:%s|", buf, json_encode(jnode));
-                    USP_ARG_Add(output_args, buf, json_encode(jnode));
-                    memset(buf, 0, sizeof(buf));
-                }
+    json_foreach(js_tmp, json) {
+	    memset(buf1, 0, sizeof(buf1));
+        if(js_tmp->tag == JSON_OBJECT) {
+            sprintf(buf1, "%s%s", buf, js_tmp->key);
+            save_output_args(js_tmp, output_args, buf1);
+        } else if(js_tmp->tag == JSON_ARRAY) {
+            int inst_count = 0;
+            JsonNode *inner_json;
+            json_foreach(inner_json, js_tmp) {
+                memset(buf1, 0, sizeof(buf1));
+                inst_count++;
+                sprintf(buf1, "%s%s.%d", buf, js_tmp->key, inst_count);
+                save_output_args(inner_json, output_args, buf1);
             }
         } else {
-            USP_LOG_Debug("|%s:%s|", js_tmp->key, json_encode(js_tmp));
-            USP_ARG_Add(output_args, js_tmp->key, json_encode(js_tmp));
+            sprintf(buf1, "%s%s", buf, js_tmp->key);
+            USP_LOG_Debug("|%s:%s|", buf1, json_encode(js_tmp));
+            USP_ARG_Add(output_args, buf1, json_encode(js_tmp));
         }
     }
-    json_delete(json);
 }
 
 void *OperationThreadMain(void *param)
@@ -973,17 +1009,18 @@ int Device_FirmwareImage_Activate_Init(void)
     return USP_ERR_OK;
 }
 
-int DSL_Ethernet_ADSLLineTest_Init(void)
+
+int Device_DSL_ADSLLinetest_Init(void)
 {
     int err = USP_ERR_OK;
 
-    err |= USP_REGISTER_AsyncOperation("Device.DSL.BondingGroup.{i}.Ethernet.Stats.ADSLLineTest()",
+    err |= USP_REGISTER_AsyncOperation("Device.DSL.Diagnostics.ADSLLineTest()",
                                        async_operate_handler, NULL);
-    err |= USP_REGISTER_OperationArguments("Device.DSL.BondingGroup.{i}.Ethernet.Stats.ADSLLineTest()",
-                                           dsl_ethernet_adslline_input_args,
-                                           NUM_ELEM(dsl_ethernet_adslline_input_args),
-                                           dsl_ethernet_adslline_output_args,
-                                           NUM_ELEM(dsl_ethernet_adslline_output_args));
+    err |= USP_REGISTER_OperationArguments("Device.DSL.Diagnostics.ADSLLineTest()",
+                                           dsl_adslline_input_args,
+                                           NUM_ELEM(dsl_adslline_input_args),
+                                           dsl_adslline_output_args,
+                                           NUM_ELEM(dsl_adslline_output_args));
 
     if (err != USP_ERR_OK)
     {
@@ -994,17 +1031,17 @@ int DSL_Ethernet_ADSLLineTest_Init(void)
     return USP_ERR_OK;
 }
 
-int DSL_Ethernet_SELTUER_Init(void)
+int Device_DSL_SELTUER_Init(void)
 {
     int err = USP_ERR_OK;
 
-    err |= USP_REGISTER_AsyncOperation("Device.DSL.BondingGroup.{i}.Ethernet.Stats.SELTUER()",
+    err |= USP_REGISTER_AsyncOperation("Device.DSL.Diagnostics.SELTUER()",
                                        async_operate_handler, NULL);
-    err |= USP_REGISTER_OperationArguments("Device.DSL.BondingGroup.{i}.Ethernet.Stats.SELTUER()",
-                                           dsl_ethernet_seltuer_input_args,
-                                           NUM_ELEM(dsl_ethernet_seltuer_input_args),
-                                           dsl_ethernet_seltuer_output_args,
-                                           NUM_ELEM(dsl_ethernet_seltuer_output_args));
+    err |= USP_REGISTER_OperationArguments("Device.DSL.Diagnostics.SELTUER()",
+                                           dsl_seltuer_input_args,
+                                           NUM_ELEM(dsl_seltuer_input_args),
+                                           dsl_seltuer_output_args,
+                                           NUM_ELEM(dsl_seltuer_output_args));
 
     if (err != USP_ERR_OK)
     {
@@ -1015,17 +1052,17 @@ int DSL_Ethernet_SELTUER_Init(void)
     return USP_ERR_OK;
 }
 
-int DSL_Ethernet_SELTQLN_Init(void)
+int Device_DSL_SELTQLN_Init(void)
 {
     int err = USP_ERR_OK;
 
-    err |= USP_REGISTER_AsyncOperation("Device.DSL.BondingGroup.{i}.Ethernet.Stats.SELTQLN()",
+    err |= USP_REGISTER_AsyncOperation("Device.DSL.Diagnostics.SELTQLN()",
                                        async_operate_handler, NULL);
-    err |= USP_REGISTER_OperationArguments("Device.DSL.BondingGroup.{i}.Ethernet.Stats.SELTQLN()",
-                                           dsl_ethernet_seltqln_input_args,
-                                           NUM_ELEM(dsl_ethernet_seltqln_input_args),
-                                           dsl_ethernet_seltqln_output_args,
-                                           NUM_ELEM(dsl_ethernet_seltqln_output_args));
+    err |= USP_REGISTER_OperationArguments("Device.DSL.Diagnostics.SELTQLN()",
+                                           dsl_seltqln_input_args,
+                                           NUM_ELEM(dsl_seltqln_input_args),
+                                           dsl_seltqln_output_args,
+                                           NUM_ELEM(dsl_seltqln_output_args));
 
     if (err != USP_ERR_OK)
     {
@@ -1036,17 +1073,17 @@ int DSL_Ethernet_SELTQLN_Init(void)
     return USP_ERR_OK;
 }
 
-int DSL_Ethernet_SELTP_Init(void)
+int Device_DSL_SELTP_Init(void)
 {
     int err = USP_ERR_OK;
 
-    err |= USP_REGISTER_AsyncOperation("Device.DSL.BondingGroup.{i}.Ethernet.Stats.SELTP()",
+    err |= USP_REGISTER_AsyncOperation("Device.DSL.Diagnostics.SELTP()",
                                        async_operate_handler, NULL);
-    err |= USP_REGISTER_OperationArguments("Device.DSL.BondingGroup.{i}.Ethernet.Stats.SELTP()",
-                                           dsl_ethernet_seltp_input_args,
-                                           NUM_ELEM(dsl_ethernet_seltp_input_args),
-                                           dsl_ethernet_seltp_output_args,
-                                           NUM_ELEM(dsl_ethernet_seltp_output_args));
+    err |= USP_REGISTER_OperationArguments("Device.DSL.Diagnostics.SELTP()",
+                                           dsl_seltp_input_args,
+                                           NUM_ELEM(dsl_seltp_input_args),
+                                           dsl_seltp_output_args,
+                                           NUM_ELEM(dsl_seltp_output_args));
 
     if (err != USP_ERR_OK)
     {
@@ -1439,6 +1476,536 @@ int IoTCapability_Init(void)
     return USP_ERR_OK;
 }
 
+int MTP_WebSocket_Reset_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_AsyncOperation("Device.LocalAgent.Controller.{i}.MTP.{i}.WebSocket.Reset()",
+                                       async_operate_handler, NULL);
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int E2ESession_Reset_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_AsyncOperation("Device.LocalAgent.Controller.{i}.E2ESession.Reset()",
+                                      async_operate_handler, NULL);
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int SWModules_DeployUnit_Uninstall_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_AsyncOperation("Device.SoftwareModules.DeploymentUnit.{i}.Uninstall()",
+                                      async_operate_handler, NULL);
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int Device_TempSensor_Reset_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_SyncOperation("Device.DeviceInfo.TemperatureStatus.TemperatureSensor.{i}.Reset()",
+                                      uspd_operate_sync);
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int Device_UserInterface_PasswdReset_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_SyncOperation("Device.UserInterface.PasswordReset()",
+                                      uspd_operate_sync);
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int Device_USBHost_Reset_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_SyncOperation("Device.USB.USBHosts.Host.{i}.Reset()",
+                                      uspd_operate_sync);
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int Device_WiFi_Reset_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_SyncOperation("Device.WiFi.Reset()",
+                                      uspd_operate_sync);
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int Device_AP_Security_Reset_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_SyncOperation("Device.WiFi.AccessPoint.{i}.Security.Reset()",
+                                      uspd_operate_sync);
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int Device_PPP_Reset_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_SyncOperation("Device.PPP.Interface.{i}.Reset()",
+                                      uspd_operate_sync);
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int Device_IPInterface_Reset_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_SyncOperation("Device.IP.Interface.{i}.Reset()",
+                                      uspd_operate_sync);
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int Device_DHCPv4_Renew_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_SyncOperation("Device.DHCPv4.Client.{i}.Renew()",
+                                      uspd_operate_sync);
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int Device_DHCPv6_Renew_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_SyncOperation("Device.DHCPv6.Client.{i}.Renew()",
+                                      uspd_operate_sync);
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int Device_IEEE8021x_Reset_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_SyncOperation("Device.IEEE8021x.Supplicant.{i}.Reset()",
+                                      uspd_operate_sync);
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int Device_IEEE8021x_Disconnect_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_SyncOperation("Device.IEEE8021x.Supplicant.{i}.Disconnect()",
+                                      uspd_operate_sync);
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int Device_SmartCardReader_Reset_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_SyncOperation("Device.SmartCardReaders.SmartCardReader.{i}.Reset()",
+                                      uspd_operate_sync);
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int Device_SampleSet_ForceSample_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_SyncOperation("Device.PeriodicStatistics.SampleSet.{i}.ForceSample()",
+                                      uspd_operate_sync);
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int Device_FAP_GPSReset_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_SyncOperation("Device.FAP.GPS.GPSReset()",
+                                      uspd_operate_sync);
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int Device_LocalAgent_AddCerts_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_SyncOperation("Device.LocalAgent.AddCertificate()",
+                                      uspd_operate_sync);
+    err |= USP_REGISTER_OperationArguments("Device.LocalAgent.AddCertificate()",
+					   localagent_addcerts_input_args,
+					   NUM_ELEM(localagent_addcerts_input_args),
+					   NULL, 0);
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int Device_Controller_SchTimer_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_SyncOperation("Device.LocalAgent.Controller.{i}.ScheduleTimer()",
+                                      uspd_operate_sync);
+    err |= USP_REGISTER_OperationArguments("Device.LocalAgent.Controller.{i}.ScheduleTimer()",
+                                        localagent_schtimer_input_args,
+                                        NUM_ELEM(localagent_schtimer_input_args),
+                                        NULL, 0);
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int Device_Controller_AddCerts_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_SyncOperation("Device.LocalAgent.Controller.{i}.AddMyCertificate()",
+                                      uspd_operate_sync);
+    err |= USP_REGISTER_OperationArguments("Device.LocalAgent.Controller.{i}.AddMyCertificate()",
+                                        localagent_controller_addcerts_input_args,
+                                        NUM_ELEM(localagent_controller_addcerts_input_args),
+                                        NULL, 0);
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int Device_Controller_SendOnBoardReq_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_SyncOperation("Device.LocalAgent.Controller.{i}.SendOnBoardRequest()",
+                                      uspd_operate_sync);
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int Device_LocalAgent_ReqCancel_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_SyncOperation("Device.LocalAgent.Request.{i}.Cancel()",
+                                      uspd_operate_sync);
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int Device_LocalAgent_CertsDelete_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_SyncOperation("Device.LocalAgent.Certificate.{i}.Delete()",
+                                      uspd_operate_sync);
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int Device_LocalAgent_GetFingerPrint_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_SyncOperation("Device.LocalAgent.Certificate.{i}.GetFingerprint()",
+                                      uspd_operate_sync);
+    err |= USP_REGISTER_OperationArguments("Device.LocalAgent.Certificate.{i}.GetFingerprint()",
+                                        localagent_cert_getfingerprint_input_args,
+                                        NUM_ELEM(localagent_cert_getfingerprint_input_args),
+                                        localagent_cert_getfingerprint_output_args,
+                                        NUM_ELEM(localagent_cert_getfingerprint_output_args));
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int Device_LocalAgent_ReqChallenge_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_SyncOperation("Device.LocalAgent.ControllerTrust.RequestChallenge()",
+                                      uspd_operate_sync);
+    err |= USP_REGISTER_OperationArguments("Device.LocalAgent.ControllerTrust.RequestChallenge()",
+                                        localagent_reqchallenge_input_args,
+                                        NUM_ELEM(localagent_reqchallenge_input_args),
+                                        localagent_reqchallenge_output_args,
+                                        NUM_ELEM(localagent_reqchallenge_output_args));
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int Device_LocalAgent_ChallengeResp_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_SyncOperation("Device.LocalAgent.ControllerTrust.ChallengeResponse()",
+                                      uspd_operate_sync);
+    err |= USP_REGISTER_OperationArguments("Device.LocalAgent.ControllerTrust.ChallengeResponse()",
+                                        localagent_challengeresp_input_args,
+                                        NUM_ELEM(localagent_challengeresp_input_args),
+                                        NULL, 0);
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int Device_MQTT_ForceReconnect_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_SyncOperation("Device.MQTT.Client.{i}.ForceReconnect()",
+                                      uspd_operate_sync);
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int Device_MQTT_Broker_ForceReconnect_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_SyncOperation("Device.MQTT.Broker.{i}.Bridge.{i}.ForceReconnect()",
+                                      uspd_operate_sync);
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int Device_SWModules_SetRunLevel_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_SyncOperation("Device.SoftwareModules.ExecEnv.{i}.SetRunLevel()",
+                                      uspd_operate_sync);
+    err |= USP_REGISTER_OperationArguments("Device.SoftwareModules.ExecEnv.{i}.SetRunLevel()",
+                                        swmodules_setrunlevel_input_args,
+                                        NUM_ELEM(swmodules_setrunlevel_input_args),
+                                        NULL, 0);
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int Device_SWModules_Reset_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_SyncOperation("Device.SoftwareModules.ExecEnv.{i}.Reset()",
+                                      uspd_operate_sync);
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
+int Device_SWModules_SetReqState_Init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= USP_REGISTER_SyncOperation("Device.SoftwareModules.ExecutionUnit.{i}.SetRequestedState()",
+                                      uspd_operate_sync);
+    err |= USP_REGISTER_OperationArguments("Device.SoftwareModules.ExecutionUnit.{i}.SetRequestedState()",
+                                        swmodules_setreqstate_input_args,
+                                        NUM_ELEM(swmodules_setreqstate_input_args),
+                                        NULL, 0);
+
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
+    return USP_ERR_OK;
+}
+
 int vendor_operate_async_init(void)
 {
     int err = USP_ERR_OK;
@@ -1450,10 +2017,10 @@ int vendor_operate_async_init(void)
     err |= VendorLogFile_Upload_Init();
     err |= Device_FirmwareImage_Download_Init();
     err |= Device_FirmwareImage_Activate_Init();
-    err |= DSL_Ethernet_ADSLLineTest_Init();
-    err |= DSL_Ethernet_SELTUER_Init();
-    err |= DSL_Ethernet_SELTQLN_Init();
-    err |= DSL_Ethernet_SELTP_Init();
+    err |= Device_DSL_ADSLLinetest_Init();
+    err |= Device_DSL_SELTUER_Init();
+    err |= Device_DSL_SELTQLN_Init();
+    err |= Device_DSL_SELTP_Init();
     err |= ATM_Diagnostics_Init();
     err |= Ethernet_WoL_SendMagicPacket_Init();
     err |= HPNA_Diag_PHYThroughput_Init();
@@ -1471,5 +2038,44 @@ int vendor_operate_async_init(void)
     err |= Device_SoftwareModule_InstallDU_Init();
     err |= Device_SoftwareModule_DeployUnit_Update_Init();
     err |= IoTCapability_Init();
+    err |= MTP_WebSocket_Reset_Init();
+    err |= E2ESession_Reset_Init();
+	err |= SWModules_DeployUnit_Uninstall_Init();
+    return err;
+}
+
+int vendor_operate_sync_init(void)
+{
+    int err = USP_ERR_OK;
+
+    err |= Device_TempSensor_Reset_Init();
+    err |= Device_UserInterface_PasswdReset_Init();
+    err |= Device_USBHost_Reset_Init();
+    err |= Device_WiFi_Reset_Init();
+    err |= Device_AP_Security_Reset_Init();
+    err |= Device_PPP_Reset_Init();
+    err |= Device_IPInterface_Reset_Init();
+    err |= Device_DHCPv4_Renew_Init();
+    err |= Device_DHCPv6_Renew_Init();
+    err |= Device_IEEE8021x_Reset_Init();
+    err |= Device_IEEE8021x_Disconnect_Init();
+    err |= Device_SmartCardReader_Reset_Init();
+    err |= Device_SampleSet_ForceSample_Init();
+    err |= Device_FAP_GPSReset_Init();
+    err |= Device_LocalAgent_AddCerts_Init();
+    err |= Device_Controller_SchTimer_Init();
+    err |= Device_Controller_AddCerts_Init();
+    err |= Device_Controller_SendOnBoardReq_Init();
+    err |= Device_LocalAgent_ReqCancel_Init();
+    err |= Device_LocalAgent_CertsDelete_Init();
+    err |= Device_LocalAgent_GetFingerPrint_Init();
+    err |= Device_LocalAgent_ReqChallenge_Init();
+    err |= Device_LocalAgent_ChallengeResp_Init();
+    err |= Device_MQTT_ForceReconnect_Init();
+    err |= Device_MQTT_Broker_ForceReconnect_Init();
+    err |= Device_SWModules_SetRunLevel_Init();
+    err |= Device_SWModules_Reset_Init();
+    err |= Device_SWModules_SetReqState_Init();
+
     return err;
 }
