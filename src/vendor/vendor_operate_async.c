@@ -777,15 +777,17 @@ void save_output_args(JsonNode *json, kv_vector_t *output_args, char *initial_pa
 {
     JsonNode *js_tmp;
     char buf[64] = {0};
-    char buf1[64] = {0};
+    char buf1[MAX_DM_PATH] = {0};
+    size_t initial_path_len = 64;
+
     if(initial_path) {
-        sprintf(buf, "%s.", initial_path);
+        snprintf(buf, initial_path_len, "%s.", initial_path);
     }
 
     json_foreach(js_tmp, json) {
 	    memset(buf1, 0, sizeof(buf1));
         if(js_tmp->tag == JSON_OBJECT) {
-            sprintf(buf1, "%s%s", buf, js_tmp->key);
+            snprintf(buf1, MAX_DM_PATH, "%s%s", buf, js_tmp->key);
             save_output_args(js_tmp, output_args, buf1);
         } else if(js_tmp->tag == JSON_ARRAY) {
             int inst_count = 0;
@@ -793,11 +795,11 @@ void save_output_args(JsonNode *json, kv_vector_t *output_args, char *initial_pa
             json_foreach(inner_json, js_tmp) {
                 memset(buf1, 0, sizeof(buf1));
                 inst_count++;
-                sprintf(buf1, "%s%s.%d", buf, js_tmp->key, inst_count);
+                snprintf(buf1, MAX_DM_PATH, "%s%s.%d", buf, js_tmp->key, inst_count);
                 save_output_args(inner_json, output_args, buf1);
             }
         } else {
-            sprintf(buf1, "%s%s", buf, js_tmp->key);
+            snprintf(buf1, MAX_DM_PATH, "%s%s", buf, js_tmp->key);
             USP_LOG_Debug("|%s:%s|", buf1, json_encode(js_tmp));
             USP_ARG_Add(output_args, buf1, json_encode(js_tmp));
         }

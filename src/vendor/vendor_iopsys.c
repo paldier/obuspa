@@ -75,7 +75,7 @@ static str_vector_t g_inst_vector;
 static bool uspd_set(char *path, char *value);
 static int iopsys_dm_instance_init(void);
 static int add_object_aliase(char *path);
-static bool json_get_param_value(char *path, char *buff);
+static bool json_get_param_value(char *path, char *buff, int buff_len);
 void (*call_result_func)(struct ubus_request *req, int type, struct blob_attr *msg);
 
 static void store_call_result_data(struct ubus_request *req, int type, struct blob_attr *msg)
@@ -306,7 +306,7 @@ int uspd_del(dm_req_t *req)
 	return USP_ERR_OK;
 }
 
-bool json_get_param_value(char *path, char *buff) {
+bool json_get_param_value(char *path, char *buff, int buff_len) {
 	bool status = false;
 	JsonNode *parameters, *member;
 
@@ -320,7 +320,7 @@ bool json_get_param_value(char *path, char *buff) {
 				if (!strcmp(parameter->string_, path)) {
 					JsonNode *value;
 					if ((value = json_find_member(member, "value")) != NULL) {
-						strcpy(buff, value->string_);
+						strncpy(buff, value->string_, buff_len);
 						status = true;
 					}
 					break;
@@ -391,13 +391,12 @@ int uspd_get_value(dm_req_t *req, char *buf, int len)
 	}
 
 	/* First lookup into local uspd_database */
-	if (false == json_get_param_value(req->path, buf)) {
+	if (false == json_get_param_value(req->path, buf, len)) {
 		USP_LOG_Debug("Not found in local database:|%s|", req->path);
 		if (USP_ERR_OK == uspd_get(req->path, json_buff))
 			json_get_value_index(json_buff, NULL, buf, 0);
 	}
 
-	len = strlen(buf);
 	return USP_ERR_OK;
 }
 

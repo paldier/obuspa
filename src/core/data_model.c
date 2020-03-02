@@ -60,6 +60,7 @@
 #include "usp_coap.h"
 #endif
 
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 
 //--------------------------------------------------------------------
 // Boolean that allows us to control which scope the USP_REGISTER_XXX() functions can be called in
