@@ -345,18 +345,22 @@ int json_get_value_index(char *json_buff,char *node, char *buff, uint8_t index)
 			if(node != NULL) {
 				JsonNode *parameter;
 				parameter = json_find_member(zeroth, "parameter");
-				if(parameter->tag == JSON_STRING) {
-					strcpy(node, parameter->string_);
+				if (parameter != NULL) {
+					if(parameter->tag == JSON_STRING) {
+						strcpy(node, parameter->string_);
+					}
+					json_delete(parameter);
 				}
-				json_delete(parameter);
 			}
 			if(buff != NULL) {
 				JsonNode *value;
 				value = json_find_member(zeroth, "value");
-				if(value->tag == JSON_STRING) {
-					strcpy(buff, value->string_);
+				if (value != NULL) {
+					if(value->tag == JSON_STRING) {
+						strcpy(buff, value->string_);
+					}
+					json_delete(value);
 				}
-				json_delete(value);
 			}
 			json_delete(zeroth);
 		}
