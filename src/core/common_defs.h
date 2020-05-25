@@ -123,6 +123,8 @@ extern int USP_SNPRINTF(char *dest, size_t size, const char *fmt, ...) __attribu
 #define MODIFY_BIT(m, x, v)     x = (x & (~ (1 << m))) | (((v) & 1) << m);
 #define MODIFY_BITS(n, m, x, v) x = (x & (~ (((1 <<  (n-m+1)) - 1) << m )) ) | (((v)  & ((1 <<  (n-m+1)) - 1)) << m); // NOTE: n must be greater than m
 
+#define __unused __attribute__((unused))
+
 //-----------------------------------------------------------------------------------------------
 // Global variables set by command line
 extern bool enable_callstack_debug;

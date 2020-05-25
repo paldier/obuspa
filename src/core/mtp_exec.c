@@ -189,7 +189,7 @@ void MTP_EXEC_ActivateScheduledActions(void)
 ** \return  None
 **
 **************************************************************************/
-void *MTP_EXEC_Main(void *args)
+void *MTP_EXEC_Main(__unused void *args)
 {
     int num_sockets;
     socket_set_t set;

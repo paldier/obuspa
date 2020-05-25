@@ -524,7 +524,7 @@ int USP_SIGNAL_ObjectDeleted(char *path)
 ** \return  None
 **
 **************************************************************************/
-void DM_EXEC_PostUspRecord(unsigned char *pbuf, int pbuf_len, ctrust_role_t role, char *allowed_controllers, mtp_reply_to_t *mrt)
+void DM_EXEC_PostUspRecord(unsigned char *pbuf, size_t pbuf_len, ctrust_role_t role, char *allowed_controllers, mtp_reply_to_t *mrt)
 {
     dm_exec_msg_t  msg;
     process_usp_record_msg_t *pur;
@@ -752,7 +752,7 @@ void DM_EXEC_EnableNotifications(void)
 ** \return  None
 **
 **************************************************************************/
-void *DM_EXEC_Main(void *args)
+void *DM_EXEC_Main(__unused void *args)
 {
     int err;
     int num_sockets;

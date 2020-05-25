@@ -189,7 +189,7 @@ nu_ipaddr_to_in6addr(const nu_ipaddr_t *addr, struct in6_addr *p)
 **
 **************************************************************************/
 int
-nu_ipaddr_to_sockaddr(const nu_ipaddr_t *addr, int port, struct sockaddr_storage *sa, socklen_t *len_p)
+nu_ipaddr_to_sockaddr(const nu_ipaddr_t *addr, uint16_t port, struct sockaddr_storage *sa, socklen_t *len_p)
 {
     sa_family_t family;
     int err;

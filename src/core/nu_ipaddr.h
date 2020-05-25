@@ -81,7 +81,7 @@ typedef struct in_addr nu_ipaddr_t;
 int nu_ipaddr_get_family(const nu_ipaddr_t *addr, sa_family_t *familyp);
 int nu_ipaddr_to_inaddr(const nu_ipaddr_t *addr, struct in_addr *p);
 int nu_ipaddr_to_in6addr(const nu_ipaddr_t *addr, struct in6_addr *p);
-int nu_ipaddr_to_sockaddr(const nu_ipaddr_t *addr, int port, struct sockaddr_storage *sa, socklen_t *len_p);
+int nu_ipaddr_to_sockaddr(const nu_ipaddr_t *addr, uint16_t port, struct sockaddr_storage *sa, socklen_t *len_p);
 
 int nu_ipaddr_to_str(const nu_ipaddr_t *addr, char *buf, int buflen);
 char *nu_ipaddr_str(const nu_ipaddr_t *addr, char *buf, int buflen);

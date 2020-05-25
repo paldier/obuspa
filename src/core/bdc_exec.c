@@ -135,7 +135,7 @@ CURLcode LoadBulkDataTrustStore(CURL *curl, void *curl_sslctx, void *parm);
 **************************************************************************/
 int BDC_EXEC_Init(void)
 {
-    int i;
+    unsigned i;
     int err;
     bdc_connection_t *bc;
 
@@ -229,7 +229,7 @@ int BDC_EXEC_PostReportToSend(int profile_id, char *full_url, char *query_string
 ** \return  None
 **
 **************************************************************************/
-void *BDC_EXEC_Main(void *args)
+void *BDC_EXEC_Main(__unused void *args)
 {
     int num_sockets;
     socket_set_t set;
@@ -408,7 +408,6 @@ int StartSendingReport(bdc_connection_t *bc)
     CURL *curl_ctx = NULL;
     CURLMcode res;
     char buf[48];
-    int date_len;
     bool use_authentication;
 
     // Exit if unable to create a curl context
@@ -481,8 +480,9 @@ int StartSendingReport(bdc_connection_t *bc)
     if (bc->flags & BDC_FLAG_DATE_HEADER)
     {
         #define RFC1123_DATE_STR "Date: "
+	const size_t date_len = sizeof(RFC1123_DATE_STR) - 1;
+
         strcpy(buf, RFC1123_DATE_STR);
-        date_len = sizeof(RFC1123_DATE_STR) - 1;
         RFC1123_GetCurTime(&buf[date_len], sizeof(buf)-date_len);
         bc->headers = curl_slist_append(bc->headers, buf);
     }
@@ -718,7 +718,7 @@ bdc_transfer_result_t CalcBdcTransferResult(CURL *curl_ctx, CURLcode curl_res, i
 ** \return  number of bytes processed by this function
 **
 **************************************************************************/
-size_t bulkdata_curl_null_sink(void *buffer, size_t size, size_t nmemb, void *userp)
+size_t bulkdata_curl_null_sink(__unused void *buffer, size_t size, size_t nmemb, __unused void *userp)
 {
     // Skip all bytes passed to this function
     return nmemb*size;
@@ -737,7 +737,7 @@ size_t bulkdata_curl_null_sink(void *buffer, size_t size, size_t nmemb, void *us
 **************************************************************************/
 bdc_connection_t *FindFreeBdcConnection(void)
 {
-    int i;
+    unsigned i;
     bdc_connection_t *bc;
 
     // Iterate over all connections
@@ -768,7 +768,7 @@ bdc_connection_t *FindFreeBdcConnection(void)
 **************************************************************************/
 bdc_connection_t *FindBdcConnectionByCurlCtx(CURL *curl_ctx)
 {
-    int i;
+    unsigned i;
     bdc_connection_t *bc;
 
     // Iterate over all connections
@@ -858,7 +858,7 @@ void FreeBdcExecMsgContents(bdc_exec_msg_t *msg)
 ** \return  CURLE_OK if successful
 **
 **************************************************************************/
-CURLcode LoadBulkDataTrustStore(CURL *curl, void *curl_sslctx, void *parm)
+CURLcode LoadBulkDataTrustStore(__unused CURL *curl, void *curl_sslctx, __unused void *parm)
 {
     SSL_CTX *curl_ssl_ctx;
     X509_STORE *curl_trust_store;
