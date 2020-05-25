@@ -90,7 +90,7 @@ int ExecuteCli_ProtoTrace(char *level, char *arg2, char *usage);
 int ExecuteCli_Stop(char *arg1, char *arg2, char *usage);
 char *SplitOffTrailingNumber(char *s);
 int SplitSetExpression(char *expr, char *search_path, int search_path_len, char *param_name, int param_name_len);
-void SendCliResponse(char *fmt, ...);
+int SendCliResponse(char *fmt, ...);
 
 //------------------------------------------------------------------------------
 // Socket listening for CLI connections
@@ -336,16 +336,18 @@ void CLI_SERVER_ProcessSocketActivity(socket_set_t *set)
 ** \return  None
 **
 **************************************************************************/
-void CLI_SERVER_SendResponse(char *s)
+int CLI_SERVER_SendResponse(char *s)
 {
+    int ret = 0;
     if (dump_to_cli)
     {
-        send(cli_server_sock, s, strlen(s), 0);
+        ret = send(cli_server_sock, s, strlen(s), 0);
     }
     else
     {
         printf("%s", s); // NOTE: Do not use USP_LOG_XXX(), as that would cause infinite recursion !
     }
+    return ret;
 }
 
 /*********************************************************************//**
@@ -695,7 +697,11 @@ int ExecuteCli_Get(char *arg1, char *arg2, char *usage)
         }
     
         // Since successful, send back the value of the parameter
-        SendCliResponse("%s => %s\n", param, value);
+        err = SendCliResponse("%s => %s\n", param, value);
+        if (err == -1) {
+            printf("Send failed!");
+            goto exit;
+        }
     }
 
     err = USP_ERR_OK;
@@ -1642,7 +1648,7 @@ int SplitSetExpression(char *expr, char *search_path, int search_path_len, char 
 ** \return  None
 **
 **************************************************************************/
-void SendCliResponse(char *fmt, ...)
+int SendCliResponse(char *fmt, ...)
 {
     va_list ap;
     char buf[USP_ERR_MAXLEN];
@@ -1653,7 +1659,7 @@ void SendCliResponse(char *fmt, ...)
     buf[sizeof(buf)-1] = '\0';
     va_end(ap);
 
-    CLI_SERVER_SendResponse(buf);
+    return CLI_SERVER_SendResponse(buf);
 }
 
 //------------------------------------------------------------------------------------------

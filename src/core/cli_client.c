@@ -50,6 +50,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <string.h>
+#include <signal.h>
 
 
 #include "common_defs.h"
@@ -66,6 +67,23 @@ bool is_running_cli_local_command = false;
 // Forward declarations. Note these are not static, because we need them in the symbol table for USP_LOG_Callstack() to show them
 int HandleCliCommandRemotely(char *cmd_buf);
 int HandleCliCommandLocally(char *cmd_buf, char *db_file);
+
+// socket descriptor for remote commands
+static int s_sock = -1;
+
+// Close the socket in case of SIGINT
+void sigIntHandler(int sig)
+{
+    if (s_sock != -1)
+    {
+        close(s_sock);
+    }
+}
+
+void client_signal_init(void)
+{
+    signal(SIGINT, sigIntHandler);
+}
 
 /*********************************************************************//**
 **
@@ -151,16 +169,17 @@ int CLI_CLIENT_ExecCommand(int argc, char *argv[], char *db_file)
 int HandleCliCommandRemotely(char *cmd_buf)
 {
     int err;
-    int sock;
+    //int sock;
     struct sockaddr_un sa;
     int bytes_sent;
     int bytes_received;
     int len;
     char buf[256];
 
+    client_signal_init();
     // Exit if unable to create a blocking socket to send the CLI command on
-    sock = socket(AF_UNIX, SOCK_STREAM, 0);
-    if (sock == -1)
+    s_sock = socket(AF_UNIX, SOCK_STREAM, 0);
+    if (s_sock == -1)
     {
         USP_ERR_ERRNO("socket", errno);
         return USP_ERR_INTERNAL_ERROR;
@@ -172,21 +191,21 @@ int HandleCliCommandRemotely(char *cmd_buf)
     USP_STRNCPY(sa.sun_path, CLI_UNIX_DOMAIN_FILE, sizeof(sa.sun_path));
 
     // Exit if unable to bind the socket to the unix domain file
-    err = connect(sock, (struct sockaddr *) &sa, sizeof(struct sockaddr_un));
+    err = connect(s_sock, (struct sockaddr *) &sa, sizeof(struct sockaddr_un));
     if (err == -1)
     {
         USP_ERR_ERRNO("connect", errno);
-        close(sock);
+        close(s_sock);
         return USP_ERR_INTERNAL_ERROR;
     }
 
     // Exit if unable to send the command
     len = strlen(cmd_buf);
-    bytes_sent = send(sock, cmd_buf, len, 0);
+    bytes_sent = send(s_sock, cmd_buf, len, 0);
     if (bytes_sent == -1)
     {
         USP_ERR_ERRNO("send", errno);
-        close(sock);
+        close(s_sock);
         return USP_ERR_INTERNAL_ERROR;
     }
 
@@ -195,7 +214,9 @@ int HandleCliCommandRemotely(char *cmd_buf)
     bytes_received = 1;
     while (bytes_received > 0)
     {
-        bytes_received = recv(sock, buf, sizeof(buf)-1, 0);
+        if (s_sock == -1)
+            break;
+        bytes_received = recv(s_sock, buf, sizeof(buf)-1, 0);
         if (bytes_received == -1)
         {
             // Exit loop if no more response to receive
@@ -216,7 +237,7 @@ int HandleCliCommandRemotely(char *cmd_buf)
         printf("%s", buf);
     }
 
-    close(sock);
+    close(s_sock);
     return err;
 }
 
