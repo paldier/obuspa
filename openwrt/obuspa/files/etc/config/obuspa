@@ -1,0 +1,15 @@
+config controller
+	option endpointid 'self::usp-controller.com'
+
+config mtp
+	option enable 'true'
+	option protocol 'STOMP'
+	option destination 'uspq'
+
+config connection
+	option host 'usp-controller.com'
+	option username 'username'
+	option password 'password'
+	option encryption 'false'
+	option interface 'wan'
+

@@ -1,0 +1,120 @@
+#!/bin/sh /etc/rc.common
+
+START=99
+USE_PROCD=1
+
+PROG=/usr/sbin/obuspa
+l3device=""
+
+CTRL_PATH="Device.LocalAgent.Controller.1."
+MTP_PATH="Device.LocalAgent.MTP.1."
+CONN_PATH="Device.STOMP.Connection.1."
+
+log() {
+	echo "${@}"|logger -t obuspa -p debug
+}
+
+db_set() {
+	log "DBSET param|${1}| value|${2}|"
+	${PROG} -c dbset ${1} ${2}
+}
+
+validate_controller_section()
+{
+	uci_validate_section obuspa controller "${1}" \
+		'endpointid:string:"self:usp-controller.com"'
+}
+
+validate_mtp_section()
+{
+	uci_validate_section obuspa mtp "${1}" \
+		'enable:bool:true' \
+		'protocol:string:"STOMP"' \
+		'destination:string:'
+}
+
+validate_connection_section()
+{
+	uci_validate_section obuspa connection "${1}" \
+		'host:string:"usp-controller.com"' \
+		'username:string:username' \
+		'password:string:password' \
+		'encryption:bool:true' \
+		'interface:string:wan'
+}
+
+configure_controller() {
+	local endpointid
+
+	validate_controller_section "${1}" || {
+		log "Validation of section failed"
+		return 1;
+	}
+	db_set "${CTRL_PATH}EndpointID" ${endpointid}
+}
+
+configure_mtp() {
+	local protocol enable destination
+
+	validate_mtp_section "${1}" || {
+		log "Validation of section failed"
+		return 1;
+	}
+	db_set "${MTP_PATH}Enable" ${enable}
+	db_set "${MTP_PATH}Protocol" ${protocol}
+	db_set "${MTP_PATH}STOMP.Destination" ${destination}
+}
+
+configure_connection() {
+	local host username password encryption interface
+
+	validate_connection_section "${1}" || {
+		log "Validation of section failed"
+		return 1;
+	}
+
+	# Get wan L3 interface
+	json_load "$(ubus call network.interface.${interface} status)"
+	json_get_var l3device l3_device
+	echo "l3device ${l3device}">/dev/console
+	export USP_BOARD_IFNAME=${l3device}
+
+	# Set this variable for root user
+	echo "export USP_BOARD_IFNAME=${l3device}">/root/.profile
+
+	db_set "${CONN_PATH}Host" ${host}
+	db_set "${CONN_PATH}Username" ${username}
+	db_set "${CONN_PATH}Password" ${password}
+	db_set "${CONN_PATH}X_ARRIS-COM_EnableEncryption" ${encryption}
+}
+
+db_init() {
+	[ -f /tmp/usp.db ] && rm -f /tmp/usp.db
+
+	config_load obuspa
+	config_foreach configure_connection connection
+	config_foreach configure_controller controller
+	config_foreach configure_mtp mtp
+}
+start_service() {
+	db_init
+	procd_open_instance
+	procd_set_param env USP_BOARD_IFNAME=${l3device}
+	# Forward stdout of the command to logd
+	# procd_set_param stdout 1
+	# Same for stderr
+	# procd_set_param stderr 1
+	procd_set_param command ${PROG}
+	procd_append_param command -p -v 4
+	procd_set_param respawn
+	procd_close_instance
+}
+
+reload_service() {
+	stop
+	start
+}
+
+service_triggers() {
+	procd_add_config_trigger "config.change" "obuspa"  /etc/init.d/obuspa restart
+}
