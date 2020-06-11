@@ -65,6 +65,8 @@
 #include "version.h"
 #include "stomp.h"
 
+#include "vendor_uspd.h"
+
 //------------------------------------------------------------------------------
 // Forward declarations. Note these are not static, because we need them in the symbol table for USP_LOG_Callstack() to show them
 void CloseCliServerSock(void);
@@ -677,16 +679,29 @@ int ExecuteCli_Get(char *arg1, char *arg2, char *usage)
     char *param;
 
     // Exit if unable to get a list of all parameters referenced by the expression
+    // Response form ubus uspd
+    struct vendor_get_param vget;
+
+    vendor_get_arg_init(&vget);
+    kv_vector_t *kv_vec = &vget.kv_vec;
+
+    uspd_get_path_value(arg1, &vget);
+
     STR_VECTOR_Init(&parameters);
     err = PATH_RESOLVER_ResolvePath(arg1, &parameters, kResolveOp_Get, NULL, INTERNAL_ROLE, 0);
-    if (err != USP_ERR_OK)
+    if (err != USP_ERR_OK && vget.fault != USP_ERR_OK)
     {
         goto exit;
     }
 
+    if (vget.fault == USP_ERR_OK) {
+	    err = USP_ERR_OK;
+	    USP_ERR_ClearMessage();
+    }
+
     // Iterate over all parameters to get
     // NOTE: If a parameter is secure, then this will retrieve an empty string
-    for (i=0; i < parameters.num_entries; i++)
+    for (i = 0; i < parameters.num_entries; i++)
     {
         // Get the value of the specified parameter
         param = parameters.vector[i];
@@ -695,18 +710,28 @@ int ExecuteCli_Get(char *arg1, char *arg2, char *usage)
         {
             goto exit;
         }
-    
+
+	if (NULL == USP_ARG_Get(kv_vec, param, NULL))
+		USP_ARG_Add(kv_vec, param, value);
+
+    }
+
+    for (i = 0; i < kv_vec->num_entries; ++i) {
         // Since successful, send back the value of the parameter
-        err = SendCliResponse("%s => %s\n", param, value);
+        err = SendCliResponse("%s => %s\n",
+			      kv_vec->vector[i].key, kv_vec->vector[i].value);
         if (err == -1) {
             printf("Send failed!");
             goto exit;
         }
     }
 
+    // Call for uspd paths
+    // Get_UbusParameters (char *path);
     err = USP_ERR_OK;
 
 exit:
+    USP_ARG_Destroy(kv_vec);
     STR_VECTOR_Destroy(&parameters);
     return err;
 }

@@ -55,6 +55,7 @@
 #include "uptime.h"
 
 
+
 //------------------------------------------------------------------------------
 // Cached version of the endpoint_id, which is populated at boot up by DEVICE_LOCAL_AGENT_SetDefaults()
 static char agent_endpoint_id[MAX_DM_SHORT_VALUE_LEN] = {0};

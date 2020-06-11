@@ -47,8 +47,7 @@
 #include "vendor_defs.h"
 #include "vendor_api.h"
 #include "usp_api.h"
-#include "vendor_iopsys.h"
-#include "os_utils.h"
+#include "vendor_uspd.h"
 
 /*********************************************************************//**
 **
@@ -63,18 +62,10 @@
 **************************************************************************/
 int VENDOR_Init(void)
 {
+    vendor_async_db_init();
+    vendor_factory_reset_init();
+    vendor_reset_init();
 
-    int err = USP_ERR_OK;
-
-    err = iopsys_dm_Init();
-    // Exit if any errors occurred
-    if (err != USP_ERR_OK)
-    {
-        USP_LOG_Error("[%s:%d] Internal Error",__func__, __LINE__);
-        return USP_ERR_INTERNAL_ERROR;
-    }
-
-    // If the code gets here, then registration was successful
     return USP_ERR_OK;
 }
 
@@ -94,8 +85,7 @@ int VENDOR_Init(void)
 **************************************************************************/
 int VENDOR_Start(void)
 {
-    // Start a thread to monitor datamodel instances
-    OS_UTILS_CreateThread(monitor_instances, NULL);
+    
     return USP_ERR_OK;
 }
 
@@ -113,8 +103,8 @@ int VENDOR_Start(void)
 **************************************************************************/
 int VENDOR_Stop(void)
 {
-    destroy_uspd_json();
-    destroy_instance_vector();
+    vendor_async_db_clean();
+
     return USP_ERR_OK;
 }
 

@@ -51,7 +51,7 @@
 #include "kv_vector.h"
 #include "expr_vector.h"
 #include "text_utils.h"
-#include "vendor_iopsys.h"
+#include "vendor_uspd.h"
 
 
 //-------------------------------------------------------------------------
@@ -181,8 +181,11 @@ int PATH_RESOLVER_ResolvePath(char *path, str_vector_t *sv, resolve_op_t op, int
     char resolved[MAX_DM_PATH];
     char unresolved[MAX_DM_PATH];
     int err;
+    int i;
     resolver_state_t state;
+    str_vector_t local_sv;
 
+    STR_VECTOR_Init(&local_sv);
     // Exit if path contains any path separators with no intervening objects 
     if (strstr(path, "..") != NULL)
     {
@@ -209,9 +212,34 @@ int PATH_RESOLVER_ResolvePath(char *path, str_vector_t *sv, resolve_op_t op, int
         *separator_split = state.separator_count;
     }
 
-    if ((err == USP_ERR_OK) && (op == kResolveOp_Get)) {
-	    err = init_uspd_database(path);
+    switch(op) {
+    case kResolveOp_Add:
+    case kResolveOp_Del:
+    case kResolveOp_Set:
+        uspd_resolve_path(path, &local_sv);
+        break;
+    case kResolveOp_SubsOper:
+    case kResolveOp_Oper:
+        uspd_resolve_operate_path(path, &local_sv);
+        break;
+    case kResolveOp_Instances:
+        uspd_get_instances(path, &local_sv);
+        break;
+    default:
+        break;
     }
+
+    if (local_sv.num_entries) {
+        if (sv != NULL) {
+            for (i=0;i<local_sv.num_entries;++i) {
+                STR_VECTOR_Add(sv, local_sv.vector[i]);
+            }
+        }
+        USP_ERR_ClearMessage();
+        err = USP_ERR_OK;
+    }
+
+    STR_VECTOR_Destroy(&local_sv);
     return err;
 }
 
@@ -1120,7 +1148,7 @@ int CheckPathProperties(char *path, resolver_state_t *state, bool *add_to_vector
     *path_properties = flags;
     if ((flags & PP_EXISTS_IN_SCHEMA)==0)
     {
-        USP_ERR_SetMessage("%s: Path (%s) does not exist in the schema", __FUNCTION__, path);
+        //USP_ERR_SetMessage("%s: Path (%s) does not exist in the schema", __FUNCTION__, path);
         return USP_ERR_INVALID_PATH;
     }
 

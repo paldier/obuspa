@@ -56,6 +56,8 @@
 #include "text_utils.h"
 #include "iso8601.h"
 
+#include "vendor_uspd.h"
+
 #ifdef ENABLE_COAP
 #include "usp_coap.h"
 #endif
@@ -561,7 +563,12 @@ int DATA_MODEL_SetParameterValue(char *path, char *new_value, unsigned flags)
     node = DM_PRIV_GetNodeFromPath(path, &inst, &is_qualified_instance);
     if (node == NULL)
     {
-        return USP_ERR_UNSUPPORTED_PARAM;
+	    int fault = 0;
+	    // try set on uspd instead
+	    uspd_set_path_value(path, new_value, &fault);
+
+	    return fault;
+        //return USP_ERR_UNSUPPORTED_PARAM;
     }
 
     // NOTE: We do not check 'is_qualified_instance' here, because the only time it would be unqualified, is if the
@@ -766,7 +773,18 @@ int DATA_MODEL_AddInstance(char *path, int *instance, unsigned flags)
     node = DM_PRIV_GetNodeFromPath(internal_path, &inst, &is_qualified_instance);
     if (node == NULL)
     {
-        return USP_ERR_OBJECT_DOES_NOT_EXIST;
+	struct vendor_add_arg vadd = {USP_ERR_OK, 0};
+        uspd_add_object(internal_path, &vadd);
+	if (vadd.fault != USP_ERR_OK)
+		return vadd.fault;
+
+	if (instance && vadd.instance != 0)
+		*instance = vadd.instance;
+
+	if (vadd.instance != 0)
+		err = USP_ERR_OK;
+
+        return err;
     }
 
     // Exit if we cannot add instances of this object
@@ -947,7 +965,8 @@ int DATA_MODEL_DeleteInstance(char *path, unsigned flags)
     node = DM_PRIV_GetNodeFromPath(path, &inst, &is_qualified_instance);
     if (node == NULL)
     {
-        return USP_ERR_OBJECT_DOES_NOT_EXIST;
+        err = uspd_del_object(path);
+        return err;
     }
 
     // Exit if this object is not a fully qualified instance
@@ -1247,6 +1266,13 @@ int DATA_MODEL_Operate(char *path, kv_vector_t *input_args, kv_vector_t *output_
     node = DM_PRIV_GetNodeFromPath(path, &inst, &is_qualified_instance);
     if (node == NULL)
     {
+	int fault = USP_ERR_OK;
+	fault = uspd_operate_exec(path, command_key, input_args, output_args, instance);
+	KV_VECTOR_Dump(output_args);
+
+	if (fault == USP_ERR_OK)
+		return USP_ERR_OK;
+
         return USP_ERR_OBJECT_DOES_NOT_EXIST;
     }
     info = &node->registered.oper_info;
@@ -1889,7 +1915,7 @@ int DATA_MODEL_GetUniqueKeyParams(char *obj_path, kv_vector_t *params, combined_
     node = DM_PRIV_GetNodeFromPath(obj_path, &inst, &is_qualified_instance);
     if (node == NULL)
     {
-        return USP_ERR_INTERNAL_ERROR;
+        return uspd_get_uniq_kv(obj_path, params);
     }
 
     // Exit if node is not a multi-instance object (only multi-instance objects have unique keys)
@@ -2465,7 +2491,7 @@ dm_node_t *DM_PRIV_GetNodeFromPath(char *path, dm_instances_t *inst, bool *is_qu
         child = DM_PRIV_FindMatchingChild(parent, segments[i]);
         if (child == NULL)
         {
-            USP_ERR_SetMessage("%s: Path is invalid: %s", __FUNCTION__, path);
+            //USP_ERR_SetMessage("%s: Path is invalid: %s", __FUNCTION__, path);
             return NULL;
         }
 

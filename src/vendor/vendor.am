@@ -1,8 +1,7 @@
 # Source files in vendor
 obuspa_SOURCES += src/vendor/vendor.c \
                   src/vendor/vendor_factory_reset_example.c \
-                  src/vendor/vendor_operate_async.c \
-                  src/vendor/vendor_iopsys.c
+                  src/vendor/vendor_uspd.c
 
 # Add extra vendor specific CPP or LD flags below
 obuspa_LDADD += -lubus -lubox -lblobmsg_json

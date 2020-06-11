@@ -51,6 +51,7 @@
 #include "path_resolver.h"
 #include "device.h"
 #include "text_utils.h"
+#include "vendor_uspd.h"
 
 //------------------------------------------------------------------------------
 // Forward declarations. Note these are not static, because we need them in the symbol table for USP_LOG_Callstack() to show them
@@ -143,12 +144,20 @@ void GetSinglePath(Usp__Msg *resp, char *path_expression)
     int separator_split;
     combined_role_t combined_role;
 
+    // Get the values from uspd directly
+    struct vendor_get_param vget;
+
+    vendor_get_arg_init(&vget);
+    kv_vector_t *kv_vec = &vget.kv_vec;
+
+    uspd_get_path_value(path_expression, &vget);
+
     // Exit if the search path is not in the schema or the search path was invalid or an error occured in evaluating the search path (eg a parameter get failed)
     // The get response will contain an error message in this case
     STR_VECTOR_Init(&params);
     MSG_HANDLER_GetMsgRole(&combined_role);
     err = PATH_RESOLVER_ResolveDevicePath(path_expression, &params, kResolveOp_Get, &separator_split, &combined_role, 0);
-    if (err != USP_ERR_OK)
+    if (err != USP_ERR_OK && vget.fault != USP_ERR_OK)
     {
         req_path_result = AddGetResp_ReqPathRes(resp, path_expression, err, USP_ERR_GetMessage());
         (void)req_path_result; // Keep Clang static analyser happy
@@ -159,7 +168,7 @@ void GetSinglePath(Usp__Msg *resp, char *path_expression)
     req_path_result = AddGetResp_ReqPathRes(resp, path_expression, USP_ERR_OK, "");
 
     // Exit if no matching parameters were found in the data model
-    if (params.num_entries==0)
+    if ((params.num_entries + kv_vec->num_entries) == 0)
     {
         // The get response should contain an empty results list in this case
         // So do not set the error message
@@ -181,12 +190,17 @@ void GetSinglePath(Usp__Msg *resp, char *path_expression)
             goto exit;
         }
 
-        // Add a param map entry to the requested path result
-        AddResolvedPathResult(req_path_result, params.vector[i], value, separator_split);
+	if (NULL == USP_ARG_Get(kv_vec, params.vector[i], NULL))
+		USP_ARG_Add(kv_vec, params.vector[i], value);
     }
 
+    for (i = 0; i < kv_vec->num_entries; ++i) {
+        // Add a param map entry to the requested path result
+        AddResolvedPathResult(req_path_result, kv_vec->vector[i].key, kv_vec->vector[i].value, separator_split);
+    }
 
 exit:
+    USP_ARG_Destroy(kv_vec);
     STR_VECTOR_Destroy(&params);
 }
 
