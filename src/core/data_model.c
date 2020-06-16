@@ -395,6 +395,25 @@ int DATA_MODEL_GetParameterValue(char *path, char *buf, int len, unsigned flags)
     char *default_value;
     unsigned db_flags = 0;          // Default to database not unobfuscating values. NOTE Only secure nodes are obfuscated
 
+    // Try to get the value from uspd first
+    struct vendor_get_param vget;
+    kv_vector_t *kv_vec;
+    char *val;
+
+    vendor_get_arg_init(&vget);
+    kv_vec = &vget.kv_vec;
+
+    uspd_get_path_value(path, &vget);
+
+    val = USP_ARG_Get(kv_vec, path, NULL);
+    if (val) {
+	    USP_STRNCPY(buf, val, len);
+	    USP_ARG_Destroy(kv_vec);
+	    return USP_ERR_OK;
+    }
+
+    USP_ARG_Destroy(kv_vec);
+
     // Exit if unable to get node associated with parameter
     // This could occur if the parameter is not present in the schema, or if the specified instance does not exist
     node = DM_PRIV_GetNodeFromPath(path, &inst, &is_qualified_instance);
