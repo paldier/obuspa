@@ -304,6 +304,12 @@ exit:
     return -1;
 }
 
+static void stop_handler(int sig)
+{
+    MTP_EXEC_ScheduleExit();
+    MTP_EXEC_ActivateScheduledActions();
+}
+
 /*********************************************************************//**
 **
 ** MAIN_Start
@@ -334,6 +340,7 @@ int MAIN_Start(char *db_file, bool enable_mem_info)
     // Turn off SIGPIPE, since we use non-blocking connections and would prefer to get the EPIPE error
     // NOTE: If running USP Agent in GDB: GDB ignores this code and will still generate SIGPIPE
     signal(SIGPIPE, SIG_IGN);    
+    signal(SIGTERM, stop_handler);
 
 #ifdef ENABLE_HIDL
     // Exit if unable to start the Android HIDL server
