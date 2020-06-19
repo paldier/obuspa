@@ -181,6 +181,18 @@ void GetSinglePath(Usp__Msg *resp, char *path_expression)
     {
         // Exit if unable to get the value of a parameter
         // The get response will contain only an error message in this case
+	// skip if vendor entry
+	    dm_node_t *node;
+	    dm_instances_t inst;
+	    bool is_qualified_instance;
+	    node = DM_PRIV_GetNodeFromPath(params.vector[i], &inst, &is_qualified_instance);
+	    if (node)
+	    {
+		    if (node->type == kDMNodeType_VendorParam_ReadOnly ||
+			node->type == kDMNodeType_VendorParam_ReadWrite) {
+			    continue;
+		    }
+	    }
 	    err = DATA_MODEL_GetParameterValue(params.vector[i], value, sizeof(value), 0);
 	    if (err != USP_ERR_OK)
 	    {

@@ -55,7 +55,7 @@
 
 // Timeout in milliseconds
 #define USP_PROTO "usp"
-#define USPD_TIMEOUT 5000
+#define USPD_TIMEOUT 10000
 #define ASYNC_USPD_TIMEOUT 30000
 #define INST_MONITOR_TIMER (60)
 
@@ -185,6 +185,7 @@ int uspd_operate_async(dm_req_t *req, kv_vector_t *input_args, int instance)
     return err;
 }
 
+#if 0
 static void vendor_uniq_key_init(kv_vector_t *kv)
 {
 	if (kv == NULL)
@@ -361,6 +362,7 @@ static void vendor_uniq_key_init(kv_vector_t *kv)
 	USP_ARG_Add(kv, "Device.DynamicDNS.Server.{i}", "Name");
 	USP_ARG_Add(kv, "Device.LEDs.LED.{i}", "Name");
 }
+#endif
 
 static void vendor_num_entries_init(kv_vector_t *kv)
 {
@@ -1257,6 +1259,7 @@ int uspd_get_object_paths(kv_vector_t *kv)
 
 bool is_alias(char *path)
 {
+#if 0
 	char *p;
 	if (path == NULL)
 		return false;
@@ -1268,7 +1271,7 @@ bool is_alias(char *path)
 	p = &path[slen - 6];
 	if (strncmp(p, ".Alias", 6) == 0)
 		return true;
-
+#endif
 	return false;
 }
 int uspd_set_value(dm_req_t *req, char *buf)
@@ -1329,6 +1332,7 @@ int uspd_del_dummy(dm_req_t *req)
 	return uspd_del_object(req->path);
 }
 
+#if 0
 static void uspd_register_uniq_param(char *spath, kv_vector_t *kv)
 {
 	int i;
@@ -1359,17 +1363,18 @@ static void uspd_register_uniq_param(char *spath, kv_vector_t *kv)
 	}
 	USP_SAFE_FREE(unique_keys);
 }
+#endif
 
 static void uspd_register_object(char *spath)
 {
-	char alias[MAX_DM_PATH] = {0};
-
 	USP_REGISTER_Object(spath, NULL, uspd_add_dummy, uspd_add_notify, NULL, uspd_del_dummy, NULL);
-
+#if 0
 	// register alias
+	char alias[MAX_DM_PATH] = {0};
 	strcpy(alias, spath);
 	strcat(alias, ".Alias");
 	USP_REGISTER_DBParam_Alias(alias, NULL);
+#endif
 }
 
 int get_dm_type(char *type)
@@ -1452,7 +1457,7 @@ bool register_uspd_schema(kv_vector_t *kv)
 
 		uspd_register_leaf(spath, write, type);
 	}
-
+#if 0
 	kv_vector_t uniq_kv;
 
 	USP_ARG_Init(&uniq_kv);
@@ -1467,6 +1472,7 @@ bool register_uspd_schema(kv_vector_t *kv)
 	}
 
 	USP_ARG_Destroy(&uniq_kv);
+#endif
 	USP_ARG_Destroy(&kv_num_entries);
 	return true;
 }

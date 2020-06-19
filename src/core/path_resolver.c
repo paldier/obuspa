@@ -927,15 +927,7 @@ int GetChildParams(char *path, int path_len, dm_node_t *node, dm_instances_t *in
         if ((add_to_vector) && (state->sv != NULL))
         {
             USP_SNPRINTF(&path[path_len], MAX_DM_PATH-path_len, ".%s", child->name);
-	    if (state->op == kResolveOp_Get) {
-		    if (!(child->type == kDMNodeType_VendorParam_ReadOnly ||
-			child->type == kDMNodeType_VendorParam_ReadWrite)) {
-			    STR_VECTOR_Add(state->sv, path);
-		    }
-
-	    } else {
-		    STR_VECTOR_Add(state->sv, path);
-	    }
+	    STR_VECTOR_Add(state->sv, path);
         }
 
         // Move to next sibling in the data model tree

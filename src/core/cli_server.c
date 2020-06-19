@@ -700,6 +700,20 @@ int ExecuteCli_Get(char *arg1, char *arg2, char *usage)
     {
         // Get the value of the specified parameter
         param = parameters.vector[i];
+
+	// skip if vendor entry
+        dm_node_t *node;
+	dm_instances_t inst;
+	bool is_qualified_instance;
+        node = DM_PRIV_GetNodeFromPath(param, &inst, &is_qualified_instance);
+        if (node)
+        {
+		if (node->type == kDMNodeType_VendorParam_ReadOnly ||
+		    node->type == kDMNodeType_VendorParam_ReadWrite) {
+			continue;
+		}
+        }
+
 	err = DATA_MODEL_GetParameterValue(param, value, sizeof(value), 0);
 	if (err != USP_ERR_OK)
 	{
