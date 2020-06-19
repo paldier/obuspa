@@ -48,6 +48,7 @@
 #include "vendor_api.h"
 #include "usp_api.h"
 #include "vendor_uspd.h"
+#include "os_utils.h"
 
 /*********************************************************************//**
 **
@@ -62,10 +63,17 @@
 **************************************************************************/
 int VENDOR_Init(void)
 {
-    vendor_async_db_init();
-    vendor_factory_reset_init();
-    vendor_reset_init();
 
+    int err = USP_ERR_OK;
+
+    err = vendor_uspd_init();
+    // Exit if any errors occurred
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // If the code gets here, then registration was successful
     return USP_ERR_OK;
 }
 
@@ -85,7 +93,7 @@ int VENDOR_Init(void)
 **************************************************************************/
 int VENDOR_Start(void)
 {
-    
+    vendor_uspd_start();
     return USP_ERR_OK;
 }
 
@@ -103,8 +111,7 @@ int VENDOR_Start(void)
 **************************************************************************/
 int VENDOR_Stop(void)
 {
-    vendor_async_db_clean();
-
+    vendor_uspd_stop();
     return USP_ERR_OK;
 }
 

@@ -157,7 +157,7 @@ void GetSinglePath(Usp__Msg *resp, char *path_expression)
     STR_VECTOR_Init(&params);
     MSG_HANDLER_GetMsgRole(&combined_role);
     err = PATH_RESOLVER_ResolveDevicePath(path_expression, &params, kResolveOp_Get, &separator_split, &combined_role, 0);
-    if (err != USP_ERR_OK && vget.fault != USP_ERR_OK)
+    if (err != USP_ERR_OK)
     {
         req_path_result = AddGetResp_ReqPathRes(resp, path_expression, err, USP_ERR_GetMessage());
         (void)req_path_result; // Keep Clang static analyser happy
@@ -181,17 +181,16 @@ void GetSinglePath(Usp__Msg *resp, char *path_expression)
     {
         // Exit if unable to get the value of a parameter
         // The get response will contain only an error message in this case
-        err = DATA_MODEL_GetParameterValue(params.vector[i], value, sizeof(value), 0);
-        if (err != USP_ERR_OK)
-        {
-            DestroyCurReqPathResult(resp, req_path_result);
-            req_path_result = AddGetResp_ReqPathRes(resp, path_expression, err, USP_ERR_GetMessage());
-            (void)req_path_result;  // Keep Clang static analyser happy
-            goto exit;
-        }
+	    err = DATA_MODEL_GetParameterValue(params.vector[i], value, sizeof(value), 0);
+	    if (err != USP_ERR_OK)
+	    {
+		    DestroyCurReqPathResult(resp, req_path_result);
+		    req_path_result = AddGetResp_ReqPathRes(resp, path_expression, err, USP_ERR_GetMessage());
+		    (void)req_path_result;  // Keep Clang static analyser happy
+		    goto exit;
+	    }
 
-	if (NULL == USP_ARG_Get(kv_vec, params.vector[i], NULL))
-		USP_ARG_Add(kv_vec, params.vector[i], value);
+	    USP_ARG_Add(kv_vec, params.vector[i], value);
     }
 
     for (i = 0; i < kv_vec->num_entries; ++i) {

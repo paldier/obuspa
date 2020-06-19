@@ -689,14 +689,9 @@ int ExecuteCli_Get(char *arg1, char *arg2, char *usage)
 
     STR_VECTOR_Init(&parameters);
     err = PATH_RESOLVER_ResolvePath(arg1, &parameters, kResolveOp_Get, NULL, INTERNAL_ROLE, 0);
-    if (err != USP_ERR_OK && vget.fault != USP_ERR_OK)
+    if (err != USP_ERR_OK)
     {
         goto exit;
-    }
-
-    if (vget.fault == USP_ERR_OK) {
-	    err = USP_ERR_OK;
-	    USP_ERR_ClearMessage();
     }
 
     // Iterate over all parameters to get
@@ -705,15 +700,12 @@ int ExecuteCli_Get(char *arg1, char *arg2, char *usage)
     {
         // Get the value of the specified parameter
         param = parameters.vector[i];
-        err = DATA_MODEL_GetParameterValue(param, value, sizeof(value), 0);
-        if (err != USP_ERR_OK)
-        {
-            goto exit;
-        }
-
-	if (NULL == USP_ARG_Get(kv_vec, param, NULL))
-		USP_ARG_Add(kv_vec, param, value);
-
+	err = DATA_MODEL_GetParameterValue(param, value, sizeof(value), 0);
+	if (err != USP_ERR_OK)
+	{
+		goto exit;
+	}
+	USP_ARG_Add(kv_vec, param, value);
     }
 
     for (i = 0; i < kv_vec->num_entries; ++i) {
@@ -726,8 +718,6 @@ int ExecuteCli_Get(char *arg1, char *arg2, char *usage)
         }
     }
 
-    // Call for uspd paths
-    // Get_UbusParameters (char *path);
     err = USP_ERR_OK;
 
 exit:

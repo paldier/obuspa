@@ -57,24 +57,21 @@ struct vendor_add_arg {
 	int instance;
 };
 
-int vendor_factory_reset_init();
-int vendor_reset_init();
-
-void vendor_async_db_init();
-void vendor_async_db_clean();
-int uspd_resolve_operate_path(char *path, str_vector_t *sv);
-int uspd_resolve_path(char *path, str_vector_t *sv);
-int uspd_operate_exec(char *path, char *command_key, kv_vector_t *input, kv_vector_t *output, int *instance);
-
 void vendor_get_arg_init(struct vendor_get_param *vget);
 int uspd_get_path_value(char *path, struct vendor_get_param *vget);
-int uspd_get_instances(char *path, str_vector_t *str_vec);
-
 int uspd_set_path_value(char *path, char *value, int *fault);
-
 int uspd_add_object(char *path, struct vendor_add_arg *vadd);
 int uspd_del_object(char *path);
 
-int uspd_get_uniq_kv(char *obj_path, kv_vector_t *params);
+int vendor_uspd_init();
+int vendor_uspd_stop();
+
+int vendor_operate_sync_init(void);
+int vendor_operate_async_init(void);
+int uspd_operate_async(dm_req_t *req, kv_vector_t *input_args, int instance);
+int uspd_operate_sync(dm_req_t *req, char *command_key,
+		      kv_vector_t *input_args, kv_vector_t *output_args);
+
+int vendor_uspd_start();
 #endif // VENDOR_USPD_H
 
