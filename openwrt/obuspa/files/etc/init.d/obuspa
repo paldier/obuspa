@@ -63,6 +63,7 @@ configure_mtp() {
 	db_set "${MTP_PATH}Enable" ${enable}
 	db_set "${MTP_PATH}Protocol" ${protocol}
 	db_set "${MTP_PATH}STOMP.Destination" ${destination}
+	db_set "${CTRL_PATH}MTP.1.STOMP.Destination" ${destination}
 }
 
 configure_connection() {
