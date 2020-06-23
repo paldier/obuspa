@@ -4,7 +4,7 @@ config controller
 config mtp
 	option enable 'true'
 	option protocol 'STOMP'
-	option destination 'uspq'
+	option destination '/controller-path'
 
 config connection
 	option host 'usp-controller.com'
