@@ -1171,87 +1171,93 @@ int uspd_get_uniq_kv(char *obj_path, kv_vector_t *params)
 	return vget.fault;
 }
 
+static struct blob_attr * get_parameters(struct blob_attr *msg)
+{
+	struct blob_attr *params = NULL;
+	struct blob_attr *cur;
+	int rem;
+
+	blobmsg_for_each_attr(cur, msg, rem) {
+		if (blobmsg_type(cur) == BLOBMSG_TYPE_ARRAY) {
+			params = cur;
+			break;
+		}
+	}
+	return params;
+}
+
 static void schema_get_cb(struct ubus_request *req, __unused int type, struct blob_attr *msg)
 {
-	JsonNode *json, *parameters, *member;
-	kv_vector_t *kv;
-	char *str;
+	kv_vector_t *kv = req->priv;
+	struct blob_attr *params;
+	struct blob_attr *cur;
+	size_t rem;
+	enum {
+		P_PARAM,
+		P_TYPE,
+		P_WRITEABLE,
+		__P_MAX
+	};
+	static const struct blobmsg_policy p[__P_MAX] = {
+		{ "parameter", BLOBMSG_TYPE_STRING },
+		{ "type", BLOBMSG_TYPE_STRING },
+		{ "value", BLOBMSG_TYPE_STRING },
+	};
 
 	if (!msg) {
 		USP_LOG_Error("[%s:%d] recieved msg is null",__func__, __LINE__);
 		return;
 	}
 
-	kv = (kv_vector_t *) req->priv;
-
-	str = (char *) blobmsg_format_json_indent(msg, true, -1);
-	if (str == NULL) {
+	params = get_parameters(msg);
+	if (params == NULL)
 		return;
-	}
 
-	json = json_decode(str);
-	if (json == NULL) {
-		USP_SAFE_FREE(str);
-		return;
-	}
+	blobmsg_for_each_attr(cur, params, rem) {
+		struct blob_attr *tb[__P_MAX];
+		char spath[MAX_DM_PATH];
+		size_t slen;
 
-	parameters = json_find_member(json, "parameters");
-	if (parameters == NULL) {
-		json_delete(json);
-		USP_SAFE_FREE(str);
-		return;
-	}
-
-	json_foreach(member, parameters){
-		JsonNode *parameter, *write, *type;
-
-		parameter = json_find_member(member, "parameter");
-		write = json_find_member(member, "writable");
-		type = json_find_member(member, "type");
-
-		if (parameter == NULL || write == NULL || type == NULL) {
+		blobmsg_parse(p, __P_MAX, tb, blobmsg_data(cur), blobmsg_len(cur));
+		if (!tb[P_PARAM] || !tb[P_TYPE] || !tb[P_WRITEABLE])
 			continue;
-		}
 
-		if (parameter->tag == JSON_STRING &&
-		    write->tag == JSON_STRING &&
-		    type->tag == JSON_STRING) {
-			size_t slen;
-			char spath[MAX_DM_PATH] = { 0 };
-			char val[MAX_DM_PATH] = { 0 };
-			get_schema_path(parameter->string_, spath);
-			slen = strlen(spath);
-			if (spath[slen - 1] == '.' && spath[slen - 2] != '}')
-				continue;
+		spath[0] = 0;
+		get_schema_path(blobmsg_get_string(tb[P_PARAM]), spath);
+		slen = strlen(spath);
+		if (spath[slen - 1] == '.' && spath[slen - 2] != '}')
+			continue;
 
-			if (spath[slen - 1] == '.')
-				spath[slen - 1] = '\0';
+		if (spath[slen - 1] == '.')
+			spath[slen - 1] = '\0';
 
-			if (USP_ARG_Get(kv, spath, NULL) == NULL) {
-				USP_SNPRINTF(val, MAX_DM_PATH, "%s %s", type->string_, write->string_);
-				USP_ARG_Add(kv, spath, val);
-			}
+		if (USP_ARG_Get(kv, spath, NULL) == NULL) {
+			char val[MAX_DM_PATH];
+
+			USP_SNPRINTF(val, MAX_DM_PATH, "%s %s",
+					blobmsg_get_string(tb[P_TYPE]),
+					blobmsg_get_string(tb[P_WRITEABLE]));
+			USP_ARG_Add(kv, spath, val);
 		}
 	}
-	json_delete(parameters);
-	json_delete(json);
-	USP_SAFE_FREE(str);
 }
 
 int uspd_get_object_paths(kv_vector_t *kv)
 {
+	struct blob_buf b = {};
 	int fault = USP_ERR_OK;
-	struct blob_buf b = { };
+	void *a;
 
-	memset(&b, 0, sizeof(struct blob_buf));
 	blob_buf_init(&b, 0);
 
-	blobmsg_add_string(&b, "path", "Device.");
+	a = blobmsg_open_array(&b, "paths");
+	blobmsg_add_string(&b, NULL, "Device.");
+	blobmsg_close_array(&b, a);
 	blobmsg_add_string(&b, "proto", "usp");
 	blobmsg_add_u8(&b, "next-level", false);
 
 	// Invoke Ubus to get data from uspd
-	fault = uspd_call("object_names", &b, schema_get_cb, kv);
+	fault = uspd_call("get_safe_names", &b, schema_get_cb, kv);
 
 	blob_buf_free(&b);
 	return fault;
