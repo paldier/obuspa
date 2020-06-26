@@ -89,6 +89,7 @@
 //-----------------------------------------------------------------------------------------
 // Uncomment the following to remove code and features from the standard build
 #define REMOVE_DEVICE_INFO               // Removes DeviceInfo from the core data model. It must instead be provided by the vendor.
+#define REMOVE_DEVICE_TIME               // Removes Device.Time. from the core data model. It must instead be provided by the vendor.
 //#define REMOVE_SELF_TEST_DIAG_EXAMPLE    // Removes Self Test diagnostics example code
 
 //#define DONT_SORT_GET_INSTANCES          // Disables the sorting of data model paths returned in a GetInstancesResponse. Useful for slow devices supporting large data models.

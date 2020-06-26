@@ -58,6 +58,7 @@
 #define USPD_TIMEOUT 10000
 #define ASYNC_USPD_TIMEOUT 30000
 #define INST_MONITOR_TIMER (60)
+#define DEVICE_ROOT "Device."
 
 extern bool is_running_cli_local_command;
 
@@ -185,7 +186,6 @@ int uspd_operate_async(dm_req_t *req, kv_vector_t *input_args, int instance)
     return err;
 }
 
-#if 0
 static void vendor_uniq_key_init(kv_vector_t *kv)
 {
 	if (kv == NULL)
@@ -362,7 +362,6 @@ static void vendor_uniq_key_init(kv_vector_t *kv)
 	USP_ARG_Add(kv, "Device.DynamicDNS.Server.{i}", "Name");
 	USP_ARG_Add(kv, "Device.LEDs.LED.{i}", "Name");
 }
-#endif
 
 static void vendor_num_entries_init(kv_vector_t *kv)
 {
@@ -706,7 +705,6 @@ static void uspd_operate_cb(struct ubus_request *req, __unused int type, struct 
 			USP_ARG_Add(kv_out, parameter->string_, value->string_);
 		}
 	}
-	json_delete(parameters);
 	json_delete(json);
 	USP_SAFE_FREE(str);
 }
@@ -753,7 +751,6 @@ static void del_data_cb(struct ubus_request *req, __unused int type, struct blob
 			break;
 		}
 	}
-	json_delete(parameters);
 	json_delete(json);
 
 	USP_SAFE_FREE(str);
@@ -789,7 +786,6 @@ static void add_data_cb(struct ubus_request *req, __unused int type, struct blob
 		if (fault->tag == JSON_NUMBER) {
 			vadd->fault = fault->number_;
 		}
-		json_delete(fault);
 	}
 
 	parameter = json_find_member(json, "instance");
@@ -800,7 +796,6 @@ static void add_data_cb(struct ubus_request *req, __unused int type, struct blob
 		if (parameter->tag == JSON_STRING) {
 			vadd->instance = atoi(parameter->string_);
 		}
-		json_delete(parameter);
 	}
 
 	json_delete(json);
@@ -845,7 +840,6 @@ static void uspd_set_cb(struct ubus_request *req, __unused int type, struct blob
 			}
 		}
 	}
-	json_delete(parameters);
 	json_delete(json);
 	USP_SAFE_FREE(str);
 }
@@ -1027,11 +1021,11 @@ static void receive_instance_cb(struct ubus_request *req, __unused int type, str
 		USP_SAFE_FREE(str);
 		return;
 	}
+	USP_SAFE_FREE(str);
 
 	parameters = json_find_member(json, "parameters");
 	if (parameters == NULL) {
 		json_delete(json);
-		USP_SAFE_FREE(str);
 		return;
 	}
 
@@ -1046,10 +1040,7 @@ static void receive_instance_cb(struct ubus_request *req, __unused int type, str
 			STR_VECTOR_Add(vec, parameter->string_);
 		}
 	}
-	json_delete(parameters);
 	json_delete(json);
-
-	USP_SAFE_FREE(str);
 }
 
 int uspd_get_instances(char *path, str_vector_t *str_vec)
@@ -1124,7 +1115,6 @@ static void receive_get_cb(struct ubus_request *req, __unused int type, struct b
 			USP_ARG_Add(kv, parameter->string_, value->string_);
 		}
 	}
-	json_delete(parameters);
 	json_delete(json);
 	USP_SAFE_FREE(str);
 }
@@ -1251,7 +1241,7 @@ int uspd_get_object_paths(kv_vector_t *kv)
 	blob_buf_init(&b, 0);
 
 	a = blobmsg_open_array(&b, "paths");
-	blobmsg_add_string(&b, NULL, "Device.");
+	blobmsg_add_string(&b, NULL, DEVICE_ROOT);
 	blobmsg_close_array(&b, a);
 	blobmsg_add_string(&b, "proto", "usp");
 	blobmsg_add_u8(&b, "next-level", false);
@@ -1263,27 +1253,9 @@ int uspd_get_object_paths(kv_vector_t *kv)
 	return fault;
 }
 
-bool is_alias(char *path)
-{
-#if 0
-	char *p;
-	if (path == NULL)
-		return false;
-
-	size_t slen = strlen(path);
-	if (slen < 7)
-		return false;
-
-	p = &path[slen - 6];
-	if (strncmp(p, ".Alias", 6) == 0)
-		return true;
-#endif
-	return false;
-}
 int uspd_set_value(dm_req_t *req, char *buf)
 {
 	int fault = 0;
-	USP_LOG_Error("set called path(%s), value(%s)", req->path, buf);
 	uspd_set_path_value(req->path, buf, &fault);
 
 	return fault;
@@ -1338,22 +1310,31 @@ int uspd_del_dummy(dm_req_t *req)
 	return uspd_del_object(req->path);
 }
 
-#if 0
 static void uspd_register_uniq_param(char *spath, kv_vector_t *kv)
 {
 	int i;
 	int key_count = 0;
-	char **unique_keys = NULL, *temp_val;
+	char **unique_keys = NULL, *temp_val, *t;
 	char *tok, *save;
 
-	temp_val = USP_STRDUP(USP_ARG_Get(kv, spath, "Alias"));
+	t = USP_ARG_Get(kv, spath, NULL);
+
+	if (t == NULL) {
+		return;
+	}
+
+	temp_val = USP_STRDUP(t);
 
 	tok = strtok_r(temp_val, ";", &save);
 	while (tok != NULL) {
 		if (key_count == 0) {
 			unique_keys = USP_MALLOC(sizeof(char *));
 		} else {
-			unique_keys = USP_REALLOC(unique_keys, sizeof(char *) * key_count);
+			unique_keys = USP_REALLOC(unique_keys, sizeof(char *) * (key_count + 1));
+		}
+		if (unique_keys == NULL) {
+			USP_LOG_Error("Out of memory!");
+			return;
 		}
 		unique_keys[key_count] = USP_STRDUP(tok);
 		key_count++;
@@ -1369,18 +1350,10 @@ static void uspd_register_uniq_param(char *spath, kv_vector_t *kv)
 	}
 	USP_SAFE_FREE(unique_keys);
 }
-#endif
 
 static void uspd_register_object(char *spath)
 {
-	USP_REGISTER_Object(spath, NULL, uspd_add_dummy, uspd_add_notify, NULL, uspd_del_dummy, NULL);
-#if 0
-	// register alias
-	char alias[MAX_DM_PATH] = {0};
-	strcpy(alias, spath);
-	strcat(alias, ".Alias");
-	USP_REGISTER_DBParam_Alias(alias, NULL);
-#endif
+	USP_REGISTER_Object(spath, NULL, uspd_add_dummy, NULL, NULL, uspd_del_dummy, NULL);
 }
 
 int get_dm_type(char *type)
@@ -1424,6 +1397,7 @@ void uspd_register_leaf(char *spath, char *permstr, char *dmtype)
 	int type = get_dm_type(dmtype);
 
 	if (TEXT_UTILS_StringToBool(permstr, &rw_perm) != USP_ERR_OK) {
+		USP_LOG_Error("#object spath(%s) permstr(%s) failed", spath, permstr);
 		return;
 	}
 
@@ -1455,15 +1429,15 @@ bool register_uspd_schema(kv_vector_t *kv)
 			uspd_register_object(spath);
 			continue;
 		}
-		if (is_alias(spath))
-			continue;
 
 		if (is_num_entries(&kv_num_entries, spath))
 			continue;
 
 		uspd_register_leaf(spath, write, type);
 	}
-#if 0
+
+	USP_ARG_Destroy(&kv_num_entries);
+
 	kv_vector_t uniq_kv;
 
 	USP_ARG_Init(&uniq_kv);
@@ -1478,8 +1452,6 @@ bool register_uspd_schema(kv_vector_t *kv)
 	}
 
 	USP_ARG_Destroy(&uniq_kv);
-#endif
-	USP_ARG_Destroy(&kv_num_entries);
 	return true;
 }
 
@@ -1497,19 +1469,14 @@ void uspd_register_schema()
 static int dm_instance_init(void)
 {
 	int i;
-	str_vector_t instance_vector;
-	STR_VECTOR_Init(&instance_vector);
+	STR_VECTOR_Init(&g_inst_vector);
 
-	uspd_get_instances("Device.", &instance_vector);
+	uspd_get_instances(DEVICE_ROOT, &g_inst_vector);
 
-	for(i=0; i< instance_vector.num_entries; ++i) {
-		USP_DM_InformInstance(instance_vector.vector[i]);
+	for(i=0; i< g_inst_vector.num_entries; ++i) {
+		USP_DM_InformInstance(g_inst_vector.vector[i]);
 	}
 
-	STR_VECTOR_Clone(&g_inst_vector, instance_vector.vector,
-			 instance_vector.num_entries);
-
-	STR_VECTOR_Destroy(&instance_vector);
 	return USP_ERR_OK;
 }
 
@@ -1543,44 +1510,36 @@ int uspd_call(char *method, struct blob_buf *data, UBUS_USP_CB callback, void *c
 void *monitor_instances(void *arg __unused) {
 	while(FOREVER) {
 		sleep(INST_MONITOR_TIMER);
-		int i = 0, j = 0;
+		int i = 0;
 		str_vector_t inst_vect;
 		STR_VECTOR_Init(&inst_vect);
 
-		uspd_get_instances("Device.", &inst_vect);
+		uspd_get_instances(DEVICE_ROOT, &inst_vect);
 
-		while((i < inst_vect.num_entries) && (j < g_inst_vector.num_entries)) {
-			if(!strcmp(inst_vect.vector[i], g_inst_vector.vector[j])) {
-				i++; j++;
-				continue;
-			} else if(strcmp(inst_vect.vector[i], g_inst_vector.vector[j]) < 0) {
-				// need to add current vector node
-				USP_LOG_Debug("Object Instance Added:|%s|", inst_vect.vector[i]);
-				USP_SIGNAL_ObjectAdded(inst_vect.vector[i]);
-				i++;
-			} else if(strcmp(inst_vect.vector[i], g_inst_vector.vector[j]) > 0) {
-				//need to delete previous vector node
-				USP_LOG_Debug("Object Instance Deleted:|%s|", g_inst_vector.vector[j]);
-				USP_SIGNAL_ObjectDeleted(g_inst_vector.vector[j]);
-				j++;
+		for (i = 0; i < g_inst_vector.num_entries; i++) {
+			int found = INVALID;
+			char *p = g_inst_vector.vector[i];
+
+			found = STR_VECTOR_Find(&inst_vect, p);
+			if (found == INVALID) {
+				USP_LOG_Debug("Object Instance (%s) deleted", p);
+				USP_SIGNAL_ObjectDeleted(p);
 			}
 		}
 
-		// Delete all the remaining nodes from old instance
-		while(j < g_inst_vector.num_entries) {
-			USP_LOG_Debug("Object Instance Deleted:|%s|", g_inst_vector.vector[j]);
-			USP_SIGNAL_ObjectDeleted(g_inst_vector.vector[j]);
-			j++;
-		}
+		for (i = 0; i < inst_vect.num_entries; i++) {
+			int found = INVALID;
+			char *p = inst_vect.vector[i];
 
-		// Add all the remaining nodes from current instances
-		while(i < inst_vect.num_entries) {
-			USP_LOG_Debug("Object Instance Added:|%s|", inst_vect.vector[i]);
-			USP_SIGNAL_ObjectAdded(inst_vect.vector[i]);
-			i++;
+			found = STR_VECTOR_Find(&g_inst_vector, p);
+			if (found == INVALID) {
+				USP_LOG_Debug("Object Instance (%s) added", p);
+				USP_SIGNAL_ObjectAdded(p);
+			}
 		}
 
 		STR_VECTOR_Destroy(&g_inst_vector);
+		STR_VECTOR_Init(&g_inst_vector);
 		STR_VECTOR_Clone(&g_inst_vector, inst_vect.vector, inst_vect.num_entries);
 		STR_VECTOR_Destroy(&inst_vect);
 	}

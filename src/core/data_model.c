@@ -175,7 +175,9 @@ int DATA_MODEL_Init(void)
     is_executing_within_dm_init = true;
     err = USP_ERR_OK;
     err |= DEVICE_LOCAL_AGENT_Init();
+#ifndef REMOVE_DEVICE_TIME
     err |= DEVICE_TIME_Init();
+#endif
     err |= DEVICE_CONTROLLER_Init();
     err |= DEVICE_MTP_Init();
     err |= DEVICE_STOMP_Init();
@@ -290,7 +292,9 @@ int DATA_MODEL_Start(void)
     // data model to be running to access database parameters (seeded from the database - above)
     err = USP_ERR_OK;
     err |= DEVICE_LOCAL_AGENT_Start();
+#ifndef REMOVE_DEVICE_TIME
     err |= DEVICE_TIME_Start();
+#endif
     err |= DEVICE_CONTROLLER_Start();
     err |= DEVICE_SECURITY_Start();
     err |= DEVICE_STOMP_Start();          // NOTE: This must come after DEVICE_SECURITY_Start(), as it assumes the trust store and client certs have been locally cached
