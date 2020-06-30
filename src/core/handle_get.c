@@ -159,9 +159,15 @@ void GetSinglePath(Usp__Msg *resp, char *path_expression)
     err = PATH_RESOLVER_ResolveDevicePath(path_expression, &params, kResolveOp_Get, &separator_split, &combined_role, 0);
     if (err != USP_ERR_OK)
     {
-        req_path_result = AddGetResp_ReqPathRes(resp, path_expression, err, USP_ERR_GetMessage());
-        (void)req_path_result; // Keep Clang static analyser happy
-        goto exit;
+        // hotfix: suppressing errors if schema not registered but present in uspd
+        if (err == USP_ERR_INVALID_PATH && kv_vec->num_entries > 0) {
+	    USP_ERR_ClearMessage();
+	    err = USP_ERR_OK;
+	} else {
+            req_path_result = AddGetResp_ReqPathRes(resp, path_expression, err, USP_ERR_GetMessage());
+            (void)req_path_result; // Keep Clang static analyser happy
+            goto exit;
+	}
     }
 
     // Add a requested path result to the Get Response message
@@ -172,7 +178,7 @@ void GetSinglePath(Usp__Msg *resp, char *path_expression)
     {
         // The get response should contain an empty results list in this case
         // So do not set the error message
-        //USP_ERR_SetMessage("%s: Invalid instance number or no instances found of '%s'", __FUNCTION__, path_expression);
+        USP_ERR_SetMessage("%s: Invalid instance number or no instances found of '%s'", __FUNCTION__, path_expression);
         goto exit;
     }
 

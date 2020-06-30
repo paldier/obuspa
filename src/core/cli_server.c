@@ -691,7 +691,13 @@ int ExecuteCli_Get(char *arg1, char *arg2, char *usage)
     err = PATH_RESOLVER_ResolvePath(arg1, &parameters, kResolveOp_Get, NULL, INTERNAL_ROLE, 0);
     if (err != USP_ERR_OK)
     {
-        goto exit;
+        // hotfix: suppressing errors if schema not registered but present in uspd
+        if (err == USP_ERR_INVALID_PATH && kv_vec->num_entries > 0) {
+	    USP_ERR_ClearMessage();
+	    err = USP_ERR_OK;
+	} else {
+            goto exit;
+	}
     }
 
     // Iterate over all parameters to get
